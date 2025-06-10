@@ -1,0 +1,34 @@
+{
+	useTabs: true,
+	singleQuote: true,
+	printWidth: 100,
+	arrowParens: 'always',
+	bracketSameLine: true,
+	bracketSpacing: true,
+	embeddedLanguageFormatting: 'auto',
+	endOfLine: 'lf',
+	htmlWhitespaceSensitivity: 'css',
+	jsxSingleQuote: false,
+	proseWrap: 'preserve',
+	quoteProps: 'as-needed',
+	singleAttributePerLine: false,
+	tabWidth: 2,
+	trailingComma: 'es5',
+	plugins: [
+		'prettier-plugin-astro',
+		'@ianvs/prettier-plugin-sort-imports',
+		'prettier-plugin-tailwindcss',
+	],
+	"plugins": [
+		"prettier-plugin-svelte",
+		"prettier-plugin-tailwindcss"
+	],
+	"overrides": [
+		{
+			"files": "*.svelte",
+			"options": {
+				"parser": "svelte"
+			}
+		}
+	]
+}
