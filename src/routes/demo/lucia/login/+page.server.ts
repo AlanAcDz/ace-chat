@@ -1,11 +1,12 @@
+import { fail, redirect } from '@sveltejs/kit';
 import { hash, verify } from '@node-rs/argon2';
 import { encodeBase32LowerCase } from '@oslojs/encoding';
-import { fail, redirect } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
+
+import type { Actions, PageServerLoad } from './$types';
 import * as auth from '$lib/server/auth';
 import { db } from '$lib/server/db';
 import * as table from '$lib/server/db/schema';
-import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async (event) => {
 	if (event.locals.user) {
@@ -22,7 +23,7 @@ export const actions: Actions = {
 
 		if (!validateUsername(username)) {
 			return fail(400, {
-				message: 'Invalid username (min 3, max 31 characters, alphanumeric only)'
+				message: 'Invalid username (min 3, max 31 characters, alphanumeric only)',
 			});
 		}
 		if (!validatePassword(password)) {
@@ -40,7 +41,7 @@ export const actions: Actions = {
 			memoryCost: 19456,
 			timeCost: 2,
 			outputLen: 32,
-			parallelism: 1
+			parallelism: 1,
 		});
 		if (!validPassword) {
 			return fail(400, { message: 'Incorrect username or password' });
@@ -70,7 +71,7 @@ export const actions: Actions = {
 			memoryCost: 19456,
 			timeCost: 2,
 			outputLen: 32,
-			parallelism: 1
+			parallelism: 1,
 		});
 
 		try {
@@ -83,7 +84,7 @@ export const actions: Actions = {
 			return fail(500, { message: 'An error has occurred' });
 		}
 		return redirect(302, '/demo/lucia');
-	}
+	},
 };
 
 function generateUserId() {

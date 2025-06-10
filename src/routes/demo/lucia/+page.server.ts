@@ -1,7 +1,8 @@
-import * as auth from '$lib/server/auth';
 import { fail, redirect } from '@sveltejs/kit';
-import { getRequestEvent } from '$app/server';
+
 import type { Actions, PageServerLoad } from './$types';
+import { getRequestEvent } from '$app/server';
+import * as auth from '$lib/server/auth';
 
 export const load: PageServerLoad = async () => {
 	const user = requireLogin();
@@ -17,7 +18,7 @@ export const actions: Actions = {
 		auth.deleteSessionTokenCookie(event);
 
 		return redirect(302, '/demo/lucia/login');
-	}
+	},
 };
 
 function requireLogin() {
