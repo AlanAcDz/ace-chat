@@ -1,0 +1,40 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Project Context: Self-Hosted AI Chat App
+
+## Project Context & Goal
+
+This project is an open-source chat application inspired by `t3chat`.
+
+The primary goal is to create a **fully self-hostable** version of the chat application, optimized for running on a low-power device like a Raspberry Pi. The core philosophy emphasizes data privacy, user ownership, and high performance in a resource-constrained environment.
+
+## Technology Stack
+
+-   **Framework:** SvelteKit
+    - Svelte 5 syntax
+    - TypeScript
+    - TailwindCSS v4
+    - shadcn-svelte for UI components
+-   **Database:** PostgreSQL with Drizzle ORM
+-   **Authentication:** Lucia Auth
+-   **AI Integration:** AI SDK (Vercel AI SDK)
+-   **Pub/Sub**: Redis
+-   **Deployment:** Docker & Docker Compose
+
+## Core Features
+
+- Chat with Various LLMs: Support for multiple language models and providers (OpenAI, Anthropic, Google, LM Studio)
+- Bring Your Own Key Support: Users should use their own API keys
+- Authentication & Sync: User authentication with chat history synchronization
+- Attachment Support: Allow users to upload files (images and pdfs)
+- Image Generation Support: AI-powered image generation capabilities
+- Syntax Highlighting: Beautiful code formatting and highlighting
+- Resumable Streams: Continue generation after page refresh
+- Chat Branching: Create alternative conversation paths
+- Chat Sharing: Share conversations with others (would apply for same network only)
+- Web Search: Integrate real-time web search
+- User management: The main user of the app should be able to create other users for same network use
+- i18n: Multi language support (at least english and spanish)
