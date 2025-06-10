@@ -1,12 +1,12 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { hash, verify } from '@node-rs/argon2';
-import { encodeBase32LowerCase } from '@oslojs/encoding';
 import { eq } from 'drizzle-orm';
 
 import type { Actions, PageServerLoad } from './$types';
 import * as auth from '$lib/server/auth';
 import { db } from '$lib/server/db';
 import * as table from '$lib/server/db/schema';
+import { createId } from '$lib/server/utils';
 
 export const load: PageServerLoad = async (event) => {
 	if (event.locals.user) {
@@ -65,7 +65,7 @@ export const actions: Actions = {
 			return fail(400, { message: 'Invalid password' });
 		}
 
-		const userId = generateUserId();
+		const userId = createId('usr');
 		const passwordHash = await hash(password, {
 			// recommended minimum parameters
 			memoryCost: 19456,
@@ -86,13 +86,6 @@ export const actions: Actions = {
 		return redirect(302, '/demo/lucia');
 	},
 };
-
-function generateUserId() {
-	// ID with 120 bits of entropy, or about the same as UUID v4.
-	const bytes = crypto.getRandomValues(new Uint8Array(15));
-	const id = encodeBase32LowerCase(bytes);
-	return id;
-}
 
 function validateUsername(username: unknown): username is string {
 	return (
