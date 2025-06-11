@@ -14,6 +14,7 @@ import { createId } from '../utils';
 
 // Enums
 export const messageRoleEnum = pgEnum('message_role', ['system', 'user', 'assistant']);
+export const apiKeyScopeEnum = pgEnum('api_key_scope', ['personal', 'shared']);
 
 // User and Session tables for Lucia Auth
 export const user = pgTable('user', {
@@ -27,6 +28,7 @@ export const user = pgTable('user', {
 		.default(sql`'{}'::text[]`)
 		.notNull(),
 	language: text('language').default('en').notNull(),
+	defaultSystemPrompt: text('default_system_prompt'),
 	createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
 	updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
 });
@@ -50,6 +52,7 @@ export const apiKey = pgTable('api_key', {
 	provider: text('provider').notNull(), // e.g., 'openai', 'anthropic', 'google', 'lmstudio', 'ollama'
 	encryptedKey: text('encrypted_key'), // Can be null for providers like LM Studio
 	url: text('url'), // For providers like LM Studio that require a URL
+	scope: apiKeyScopeEnum('scope').default('personal').notNull(),
 	createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
 });
 
