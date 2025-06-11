@@ -1,6 +1,8 @@
 <script lang="ts">
-	import { Toaster as Sonner, type ToasterProps as SonnerProps } from "svelte-sonner";
-	import { mode } from "mode-watcher";
+	import { mode } from 'mode-watcher';
+	import { Toaster as Sonner } from 'svelte-sonner';
+
+	import type { ToasterProps as SonnerProps } from 'svelte-sonner';
 
 	let { ...restProps }: SonnerProps = $props();
 </script>
@@ -9,5 +11,4 @@
 	theme={mode.current}
 	class="toaster group"
 	style="--normal-bg: var(--popover); --normal-text: var(--popover-foreground); --normal-border: var(--border);"
-	{...restProps}
-/>
+	{...restProps} />

@@ -7,4 +7,4 @@
 </script>
 
 {@render children()}
-<Toaster />
+<Toaster richColors />

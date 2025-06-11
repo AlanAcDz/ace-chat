@@ -1,3 +1,5 @@
+import type { AnyPgColumn } from 'drizzle-orm/pg-core';
+import { relations, sql } from 'drizzle-orm';
 import {
 	boolean,
 	integer,
@@ -6,9 +8,8 @@ import {
 	text,
 	timestamp,
 	uniqueIndex,
-	type AnyPgColumn
 } from 'drizzle-orm/pg-core';
-import { relations, sql } from 'drizzle-orm';
+
 import { createId } from '../utils';
 
 // Enums
@@ -21,10 +22,13 @@ export const user = pgTable('user', {
 	passwordHash: text('password_hash').notNull(),
 	name: text('name'),
 	avatarUrl: text('avatar_url'),
-	grants: text('grants').array().default(sql`'{}'::text[]`).notNull(),
+	grants: text('grants')
+		.array()
+		.default(sql`'{}'::text[]`)
+		.notNull(),
 	language: text('language').default('en').notNull(),
 	createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
-	updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull()
+	updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
 });
 
 export const session = pgTable('session', {
@@ -32,7 +36,7 @@ export const session = pgTable('session', {
 	userId: text('user_id')
 		.notNull()
 		.references(() => user.id, { onDelete: 'cascade' }),
-	expiresAt: timestamp('expires_at', { withTimezone: true, mode: 'date' }).notNull()
+	expiresAt: timestamp('expires_at', { withTimezone: true, mode: 'date' }).notNull(),
 });
 
 // API Keys table for "Bring Your Own Key"
@@ -46,7 +50,7 @@ export const apiKey = pgTable('api_key', {
 	provider: text('provider').notNull(), // e.g., 'openai', 'anthropic', 'google', 'lmstudio', 'ollama'
 	encryptedKey: text('encrypted_key'), // Can be null for providers like LM Studio
 	url: text('url'), // For providers like LM Studio that require a URL
-	createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull()
+	createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
 });
 
 // Chat, Message, Attachment tables
@@ -62,7 +66,7 @@ export const chat = pgTable(
 		title: text('title').notNull(),
 		createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
 		updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
-		sharePath: text('share_path')
+		sharePath: text('share_path'),
 	},
 	(table) => [uniqueIndex('share_path_index').on(table.sharePath)]
 );
@@ -87,7 +91,7 @@ export const message = pgTable('message', {
 	model: text('model'),
 	isStreaming: boolean('is_streaming').default(false),
 	hasWebSearch: boolean('has_web_search').default(false),
-	createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull()
+	createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
 });
 
 export const attachment = pgTable('attachment', {
@@ -104,61 +108,61 @@ export const attachment = pgTable('attachment', {
 	fileType: text('file_type').notNull(),
 	fileSize: integer('file_size').notNull(),
 	filePath: text('file_path').notNull(), // path on the storage
-	createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull()
+	createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
 });
 
 // RELATIONS
 export const userRelations = relations(user, ({ many }) => ({
 	sessions: many(session),
 	chats: many(chat),
-	apiKeys: many(apiKey)
+	apiKeys: many(apiKey),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
 	user: one(user, {
 		fields: [session.userId],
-		references: [user.id]
-	})
+		references: [user.id],
+	}),
 }));
 
 export const apiKeyRelations = relations(apiKey, ({ one }) => ({
 	user: one(user, {
 		fields: [apiKey.userId],
-		references: [user.id]
-	})
+		references: [user.id],
+	}),
 }));
 
 export const chatRelations = relations(chat, ({ one, many }) => ({
 	user: one(user, {
 		fields: [chat.userId],
-		references: [user.id]
+		references: [user.id],
 	}),
-	messages: many(message)
+	messages: many(message),
 }));
 
 export const attachmentRelations = relations(attachment, ({ one }) => ({
 	message: one(message, {
 		fields: [attachment.messageId],
-		references: [message.id]
+		references: [message.id],
 	}),
 	user: one(user, {
 		fields: [attachment.userId],
-		references: [user.id]
-	})
+		references: [user.id],
+	}),
 }));
 
 export const messageRelations = relations(message, ({ one, many }) => ({
 	chat: one(chat, {
 		fields: [message.chatId],
-		references: [chat.id]
+		references: [chat.id],
 	}),
 	parent: one(message, {
 		fields: [message.parentId],
 		references: [message.id],
-		relationName: 'parent_message'
+		relationName: 'parent_message',
 	}),
 	children: many(message, { relationName: 'parent_message' }),
-	attachments: many(attachment)
+	attachments: many(attachment),
 }));
 
 // Types
