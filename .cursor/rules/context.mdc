@@ -18,6 +18,7 @@ The primary goal is to create a **fully self-hostable** version of the chat appl
     - TypeScript
     - TailwindCSS v4
     - shadcn-svelte for UI components
+-   **Package Manager**: Bun
 -   **Database:** PostgreSQL with Drizzle ORM
 -   **Authentication:** Lucia Auth
 -   **AI Integration:** AI SDK (Vercel AI SDK)
