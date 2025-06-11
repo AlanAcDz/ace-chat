@@ -11,8 +11,12 @@
 
 <Sidebar.Provider>
 	<AppSidebar user={data.user} />
-	<main>
-		<Sidebar.Trigger />
-		{@render children?.()}
+	<main class="grid flex-1 grid-rows-[auto_1fr]">
+		<header class="flex items-center justify-between gap-2 px-4 py-2">
+			<Sidebar.Trigger class="size-8" />
+		</header>
+		<div class="mx-auto flex h-full max-w-4xl flex-col px-4 pt-6">
+			{@render children?.()}
+		</div>
 	</main>
 </Sidebar.Provider>
