@@ -17,7 +17,7 @@
         "@eslint/js": "^9.18.0",
         "@ianvs/prettier-plugin-sort-imports": "^4.4.2",
         "@internationalized/date": "^3.8.1",
-        "@lucide/svelte": "^0.514.0",
+        "@lucide/svelte": "^0.513.0",
         "@sveltejs/adapter-node": "^5.2.12",
         "@sveltejs/kit": "^2.16.0",
         "@sveltejs/vite-plugin-svelte": "^5.0.0",
@@ -194,7 +194,7 @@
 
     "@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.25", "", { "dependencies": { "@jridgewell/resolve-uri": "^3.1.0", "@jridgewell/sourcemap-codec": "^1.4.14" } }, "sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ=="],
 
-    "@lucide/svelte": ["@lucide/svelte@0.514.0", "", { "peerDependencies": { "svelte": "^5" } }, "sha512-vK6oevxN1CdIWiiCtHKUUlZE/wRVFCtxD+Lj14hbYb5lt+kmU4pBHWjcWhTJL5bJfE1JwCM/pWr+MVzew6JrVg=="],
+    "@lucide/svelte": ["@lucide/svelte@0.513.0", "", { "peerDependencies": { "svelte": "^5" } }, "sha512-XwBQMQkMlr9qp9yVg+epx5MzhBBrqul8atO00y/ZfhlKRJuQZVmq3ELibApqyBtj9ys0Ai4FH/SZcODTUFYXig=="],
 
     "@napi-rs/wasm-runtime": ["@napi-rs/wasm-runtime@0.2.11", "", { "dependencies": { "@emnapi/core": "^1.4.3", "@emnapi/runtime": "^1.4.3", "@tybys/wasm-util": "^0.9.0" } }, "sha512-9DPkXtvHydrcOsopiYpUgPHpmj0HWZKMUnL2dZqpvC42lsratuBG06V5ipyno0fUek5VlFsNQ+AcFATSrJXgMA=="],
 
