@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { AlertCircleIcon } from '@lucide/svelte';
 	import { createMutation } from '@tanstack/svelte-query';
 	import { toast } from 'svelte-sonner';
 
@@ -53,7 +54,8 @@
 	{/await}
 	<!-- Error State -->
 	{#if $createChatMutation.isError}
-		<Alert variant="destructive" class="mx-auto mb-4 max-w-3xl">
+		<Alert variant="destructive" class="mx-auto mb-4 max-w-3xl" role="alert" aria-live="assertive">
+			<AlertCircleIcon />
 			<AlertTitle>Error</AlertTitle>
 			<AlertDescription>
 				{$createChatMutation.error?.message || 'Error desconocido'}

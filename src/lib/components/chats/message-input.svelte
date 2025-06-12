@@ -8,7 +8,7 @@
 	import ModelPicker from './model-picker.svelte';
 
 	interface Props {
-		onSubmit: (formData: FormData) => Promise<void>;
+		onSubmit: (formData: FormData) => Promise<void> | void;
 		isSubmitting?: boolean;
 	}
 

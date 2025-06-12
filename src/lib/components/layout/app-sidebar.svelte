@@ -1,6 +1,5 @@
 <script lang="ts">
 	import MessageCirclePlus from '@lucide/svelte/icons/message-circle-plus';
-	import MessageSquare from '@lucide/svelte/icons/message-square';
 	import Search from '@lucide/svelte/icons/search';
 	import { createQuery } from '@tanstack/svelte-query';
 
@@ -120,23 +119,24 @@
 			{#each Object.entries(groups) as [groupKey, chats] (groupKey)}
 				{#if hasChats(chats)}
 					<Sidebar.Group>
-						<Sidebar.GroupLabel class="mb-2 text-xs text-muted-foreground">
+						<Sidebar.GroupLabel>
 							{getGroupLabel(groupKey as keyof ChatGroups)}
 						</Sidebar.GroupLabel>
-						<Sidebar.Menu>
-							{#each chats as chat (chat.id)}
-								<Sidebar.MenuItem>
-									<Sidebar.MenuButton>
-										{#snippet child({ props })}
-											<a href="/chats/{chat.id}" {...props} class="flex items-center gap-2">
-												<MessageSquare class="h-4 w-4" />
-												<span class="truncate">{chat.title}</span>
-											</a>
-										{/snippet}
-									</Sidebar.MenuButton>
-								</Sidebar.MenuItem>
-							{/each}
-						</Sidebar.Menu>
+						<Sidebar.GroupContent>
+							<Sidebar.Menu>
+								{#each chats as chat (chat.id)}
+									<Sidebar.MenuItem>
+										<Sidebar.MenuButton>
+											{#snippet child({ props })}
+												<a href="/chats/{chat.id}" {...props}>
+													<span class="truncate">{chat.title}</span>
+												</a>
+											{/snippet}
+										</Sidebar.MenuButton>
+									</Sidebar.MenuItem>
+								{/each}
+							</Sidebar.Menu>
+						</Sidebar.GroupContent>
 					</Sidebar.Group>
 				{/if}
 			{/each}

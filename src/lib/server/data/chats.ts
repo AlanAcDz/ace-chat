@@ -1,9 +1,10 @@
+import { error } from '@sveltejs/kit';
 import { isAfter, isToday, isYesterday, startOfDay, subDays } from 'date-fns';
-import { and, desc, eq, ilike } from 'drizzle-orm';
+import { and, asc, desc, eq, ilike, not } from 'drizzle-orm';
 
 import type { NewAttachment, NewMessage } from '$lib/server/db/schema';
 import { db } from '$lib/server/db';
-import { attachment, chat as chatTable, message, user } from '$lib/server/db/schema';
+import { attachment, chat, chat as chatTable, message, user } from '$lib/server/db/schema';
 import { saveFile } from '$lib/server/storage';
 
 /**
@@ -29,6 +30,30 @@ export async function getUserChats(userId: string, searchQuery?: string) {
 		.orderBy(desc(chatTable.updatedAt));
 
 	return chats;
+}
+
+/**
+ * Get a chat by id for a user
+ */
+export async function getUserChat(chatId: string, userId: string) {
+	const chatData = await db.query.chat.findFirst({
+		where: and(eq(chat.id, chatId), eq(chat.userId, userId)),
+		with: {
+			messages: {
+				with: {
+					attachments: true,
+				},
+				where: not(eq(message.role, 'system')),
+				orderBy: [asc(message.createdAt)],
+			},
+		},
+	});
+
+	if (!chatData) {
+		error(404, 'Chat no encontrado');
+	}
+
+	return chatData;
 }
 
 /**
@@ -188,4 +213,49 @@ export async function createChat({
 	}
 
 	return newChatId;
+}
+
+interface AddMessageToChatParams {
+	chatId: string;
+	userId: string;
+	messageContent: string;
+	model: string;
+	isSearchEnabled: boolean;
+	files: File[];
+}
+
+export async function addMessageToChat({
+	chatId,
+	userId,
+	messageContent,
+	model,
+	isSearchEnabled,
+	files,
+}: AddMessageToChatParams) {
+	// Insert the user message and update chat timestamp in a transaction
+	const newMessageId = await db.transaction(async (tx) => {
+		// Insert the user message
+		const [newMessage] = await tx
+			.insert(message)
+			.values({
+				chatId: chatId,
+				role: 'user',
+				content: messageContent,
+				model: model,
+				hasWebSearch: isSearchEnabled,
+			})
+			.returning({ id: message.id });
+
+		// Update chat's updatedAt timestamp
+		await tx.update(chatTable).set({ updatedAt: new Date() }).where(eq(chatTable.id, chatId));
+
+		return newMessage.id;
+	});
+
+	// If there are files, process them in the background (fire-and-forget)
+	if (files && files.length > 0) {
+		void _processAttachments(chatId, newMessageId, userId, files);
+	}
+
+	return newMessageId;
 }
