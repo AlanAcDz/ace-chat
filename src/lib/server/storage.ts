@@ -49,6 +49,36 @@ export async function saveFile(file: File, userId: string, chatId: string): Prom
 }
 
 /**
+ * Saves an avatar file for a user
+ * @param file - The avatar file to save
+ * @param userId - The user ID
+ * @returns The relative file path for the avatar
+ */
+export async function saveAvatar(file: File, userId: string): Promise<string> {
+	// Create the directory structure: uploads/avatars/userId/
+	const avatarDir = join(UPLOAD_DIR, 'avatars');
+	const userAvatarDir = join(avatarDir, userId);
+
+	await ensureDir(userAvatarDir);
+
+	// Generate filename with timestamp to allow updating
+	const timestamp = Date.now();
+	const fileExtension = file.name.split('.').pop() || 'jpg';
+	const fileName = `avatar_${timestamp}.${fileExtension}`;
+
+	const fullPath = join(userAvatarDir, fileName);
+
+	// Convert File to ArrayBuffer and save
+	const arrayBuffer = await file.arrayBuffer();
+	const buffer = Buffer.from(arrayBuffer);
+
+	await writeFile(fullPath, buffer);
+
+	// Return relative path for storage in database
+	return join('avatars', userId, fileName);
+}
+
+/**
  * Gets the full file path from a relative path
  * @param relativePath - The relative path stored in the database
  * @returns The full file path

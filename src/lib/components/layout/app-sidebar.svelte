@@ -10,6 +10,7 @@
 	import { Input } from '$lib/components/ui/input/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { Skeleton } from '$lib/components/ui/skeleton/index.js';
+	import { getUserInitials } from '$lib/utils';
 
 	interface Props {
 		user: Promise<Omit<User, 'passwordHash'>>;
@@ -39,19 +40,6 @@
 			},
 		})
 	);
-
-	// Get user initials for avatar fallback
-	function getUserInitials(name: string | null, username: string): string {
-		if (name) {
-			return name
-				.split(' ')
-				.map((n) => n[0])
-				.join('')
-				.toUpperCase()
-				.slice(0, 2);
-		}
-		return username.slice(0, 2).toUpperCase();
-	}
 
 	// Get group label in Spanish
 	function getGroupLabel(groupKey: keyof ChatGroups): string {

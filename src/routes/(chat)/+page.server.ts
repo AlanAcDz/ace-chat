@@ -1,8 +1,6 @@
 import type { PageServerLoad } from './$types';
 import { requireLogin } from '$lib/server/auth';
 
-export const load = (async ({ parent }) => {
+export const load = (() => {
 	requireLogin();
-	const { user } = await parent();
-	return { user };
 }) satisfies PageServerLoad;
