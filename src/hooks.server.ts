@@ -1,6 +1,10 @@
 import type { Handle } from '@sveltejs/kit';
 
 import * as auth from '$lib/server/auth';
+import { initializeStorage } from '$lib/server/storage';
+
+// Initialize storage on server startup
+initializeStorage().catch(console.error);
 
 const handleAuth: Handle = async ({ event, resolve }) => {
 	const sessionToken = event.cookies.get(auth.sessionCookieName);

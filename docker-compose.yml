@@ -10,5 +10,20 @@ services:
       POSTGRES_DB: local
     volumes:
       - pgdata:/var/lib/postgresql/data
+
+  app:
+    build: .
+    restart: always
+    ports:
+      - 3000:3000
+    environment:
+      DATABASE_URL: postgresql://root:mysecretpassword@db:5432/local
+      UPLOAD_DIR: /app/uploads
+    volumes:
+      - uploads:/app/uploads
+    depends_on:
+      - db
+
 volumes:
   pgdata:
+  uploads:
