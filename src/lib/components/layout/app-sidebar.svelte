@@ -128,7 +128,7 @@
 								<Sidebar.MenuItem>
 									<Sidebar.MenuButton>
 										{#snippet child({ props })}
-											<a href="/chat/{chat.id}" {...props} class="flex items-center gap-2">
+											<a href="/chats/{chat.id}" {...props} class="flex items-center gap-2">
 												<MessageSquare class="h-4 w-4" />
 												<span class="truncate">{chat.title}</span>
 											</a>
