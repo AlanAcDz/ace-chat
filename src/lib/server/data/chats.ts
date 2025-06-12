@@ -1,8 +1,10 @@
 import { isAfter, isToday, isYesterday, startOfDay, subDays } from 'date-fns';
 import { and, desc, eq, ilike } from 'drizzle-orm';
 
+import type { NewAttachment, NewMessage } from '$lib/server/db/schema';
 import { db } from '$lib/server/db';
-import { chat as chatTable } from '$lib/server/db/schema';
+import { attachment, chat as chatTable, message, user } from '$lib/server/db/schema';
+import { saveFile } from '$lib/server/storage';
 
 /**
  * Get all chat threads for a user (only id and title)
@@ -66,3 +68,101 @@ export function groupChatsByDate(chats: Awaited<ReturnType<typeof getUserChats>>
 }
 
 export type ChatGroups = Awaited<ReturnType<typeof groupChatsByDate>>;
+
+interface CreateChatParams {
+	userId: string;
+	messageContent: string;
+	model: string;
+	isSearchEnabled: boolean;
+	files: File[];
+}
+
+export async function createChat({
+	userId,
+	messageContent,
+	model,
+	isSearchEnabled,
+	files,
+}: CreateChatParams) {
+	// Get user's system prompt
+	const userData = await db.query.user.findFirst({
+		where: eq(user.id, userId),
+		columns: {
+			defaultSystemPrompt: true,
+		},
+	});
+
+	const newChatId = await db.transaction(async (tx) => {
+		// Create the new chat
+		const [newChat] = await tx
+			.insert(chatTable)
+			.values({
+				userId: userId,
+				title: 'Nuevo chat',
+			})
+			.returning({ id: chatTable.id });
+
+		const messagesToInsert: NewMessage[] = [];
+
+		// Add system prompt as first message if it exists
+		if (userData?.defaultSystemPrompt?.trim()) {
+			messagesToInsert.push({
+				chatId: newChat.id,
+				role: 'system',
+				content: userData.defaultSystemPrompt,
+				model: model,
+			});
+		}
+
+		// Add the user message
+		messagesToInsert.push({
+			chatId: newChat.id,
+			role: 'user',
+			content: messageContent,
+			model: model,
+			hasWebSearch: isSearchEnabled,
+		});
+
+		// Insert all messages
+		const insertedMessages = await tx
+			.insert(message)
+			.values(messagesToInsert)
+			.returning({ id: message.id, role: message.role });
+
+		// Handle file attachments if any
+		if (files && files.length > 0) {
+			// Find the user message ID (not the system message)
+			const userMessageId = insertedMessages.find((msg) => msg.role === 'user')?.id;
+
+			if (userMessageId) {
+				const attachmentsToInsert: NewAttachment[] = [];
+
+				// Save files and prepare attachment records
+				for (const file of files) {
+					try {
+						const relativePath = await saveFile(file, userId, newChat.id);
+						attachmentsToInsert.push({
+							messageId: userMessageId,
+							userId: userId,
+							fileName: file.name,
+							fileType: file.type,
+							fileSize: file.size,
+							filePath: relativePath,
+						});
+					} catch (fileError) {
+						console.error('Error saving file:', file.name, fileError);
+						// Continue with other files, don't fail the entire operation
+					}
+				}
+
+				if (attachmentsToInsert.length > 0) {
+					await tx.insert(attachment).values(attachmentsToInsert);
+				}
+			}
+		}
+
+		return newChat.id;
+	});
+
+	return newChatId;
+}

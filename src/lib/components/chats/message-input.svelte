@@ -7,17 +7,34 @@
 	import { createFileAttachmentsHandler } from './file-attachments.svelte';
 	import ModelPicker from './model-picker.svelte';
 
+	interface Props {
+		onSubmit: (formData: FormData) => Promise<void>;
+		isSubmitting?: boolean;
+	}
+
+	let { onSubmit, isSubmitting = false }: Props = $props();
+
 	let message = $state('');
 	let isSearchEnabled = $state(false);
 	let selectedModel = $state<AIModel['key']>(AI_MODELS[0].key);
 	let fileAttachmentsHandler = createFileAttachmentsHandler();
 
-	function handleSubmit() {
-		if (!message.trim()) return;
-		// TODO: Handle message submission with files
-		console.log('Submitting message:', message);
-		console.log('Selected model:', selectedModel);
-		console.log('Attached files:', fileAttachmentsHandler.attachedFiles);
+	async function handleSubmit() {
+		if (!message.trim() && fileAttachmentsHandler.attachedFiles.length === 0) return;
+
+		const formData = new FormData();
+		formData.append('message', message);
+		formData.append('model', selectedModel);
+		formData.append('isSearchEnabled', String(isSearchEnabled));
+
+		for (const file of fileAttachmentsHandler.attachedFiles) {
+			formData.append('files', file, file.name);
+		}
+		await onSubmit(formData);
+		// Clear the form after successful submission
+		message = '';
+		fileAttachmentsHandler.attachedFiles = [];
+		isSearchEnabled = false;
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
@@ -73,7 +90,8 @@
 				bind:value={message}
 				onkeydown={handleKeydown}
 				placeholder="Escribe tu mensaje aquí..."
-				class="field-sizing-content h-full max-h-[200px] min-h-[60px] w-full resize-none border-none bg-transparent text-gray-900 placeholder-gray-500 outline-none dark:text-gray-100 dark:placeholder-gray-400"
+				disabled={isSubmitting}
+				class="field-sizing-content h-full max-h-[200px] min-h-[60px] w-full resize-none border-none bg-transparent text-gray-900 placeholder-gray-500 outline-none disabled:opacity-50 dark:text-gray-100 dark:placeholder-gray-400"
 				rows="1"></textarea>
 		</div>
 
@@ -87,6 +105,7 @@
 				<Button
 					variant={isSearchEnabled ? 'default' : 'outline'}
 					size="sm"
+					disabled={isSubmitting}
 					onclick={() => (isSearchEnabled = !isSearchEnabled)}
 					class="text-xs"
 					aria-label="Toggle search">
@@ -98,6 +117,7 @@
 				<Button
 					variant="outline"
 					size="sm"
+					disabled={isSubmitting}
 					onclick={() => fileAttachmentsHandler.handleAttachClick()}
 					aria-label="Attach file"
 					class="text-xs">
@@ -109,7 +129,8 @@
 			<!-- Submit Button -->
 			<Button
 				onclick={handleSubmit}
-				disabled={!message.trim() && fileAttachmentsHandler.attachedFiles.length === 0}
+				disabled={(!message.trim() && fileAttachmentsHandler.attachedFiles.length === 0) ||
+					isSubmitting}
 				size="sm"
 				class="ml-2">
 				<ArrowUp class="h-3 w-3" />
