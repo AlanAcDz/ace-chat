@@ -3,6 +3,7 @@
 	import { toast } from 'svelte-sonner';
 
 	import type { PageData } from './$types';
+	import { goto } from '$app/navigation';
 	import MessageInput from '$lib/components/chats/message-input.svelte';
 	import { Alert, AlertDescription, AlertTitle } from '$lib/components/ui/alert';
 	import { Skeleton } from '$lib/components/ui/skeleton';
@@ -23,6 +24,9 @@
 			}
 
 			return response.json();
+		},
+		onSuccess: (data) => {
+			goto(`/chats/${data.newChatId}`);
 		},
 		onError: (error) => {
 			console.error('Error creating chat:', error);

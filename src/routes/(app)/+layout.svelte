@@ -15,7 +15,7 @@
 		<header class="flex items-center justify-between gap-2 px-4 py-2">
 			<Sidebar.Trigger class="size-8" />
 		</header>
-		<div class="mx-auto flex h-full max-w-4xl flex-col px-4 pt-6">
+		<div class="mx-auto flex h-full w-full max-w-4xl flex-col px-4 pt-6">
 			{@render children?.()}
 		</div>
 	</main>

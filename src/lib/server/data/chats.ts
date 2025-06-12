@@ -69,6 +69,45 @@ export function groupChatsByDate(chats: Awaited<ReturnType<typeof getUserChats>>
 
 export type ChatGroups = Awaited<ReturnType<typeof groupChatsByDate>>;
 
+/**
+ * Processes and saves chat message attachments in the background.
+ * This function is designed to be called without `await` (fire-and-forget).
+ * It handles its own errors to avoid crashing the main application thread.
+ */
+async function _processAttachments(
+	chatId: string,
+	userMessageId: string,
+	userId: string,
+	files: File[]
+) {
+	try {
+		const attachmentsToInsert: NewAttachment[] = [];
+
+		// Save files and prepare attachment records
+		for (const file of files) {
+			try {
+				const relativePath = await saveFile(file, userId, chatId);
+				attachmentsToInsert.push({
+					messageId: userMessageId,
+					userId: userId,
+					fileName: file.name,
+					fileType: file.type,
+					fileSize: file.size,
+					filePath: relativePath,
+				});
+			} catch (fileError) {
+				console.error(`Error saving file '${file.name}' for chat ${chatId}:`, fileError);
+			}
+		}
+
+		if (attachmentsToInsert.length > 0) {
+			await db.insert(attachment).values(attachmentsToInsert);
+		}
+	} catch (e) {
+		console.error(`Error processing attachments in background for chat ${chatId}:`, e);
+	}
+}
+
 interface CreateChatParams {
 	userId: string;
 	messageContent: string;
@@ -92,7 +131,9 @@ export async function createChat({
 		},
 	});
 
-	const newChatId = await db.transaction(async (tx) => {
+	// The transaction is now much faster as it only deals with creating
+	// the chat and message records in the database.
+	const { newChatId, userMessageId } = await db.transaction(async (tx) => {
 		// Create the new chat
 		const [newChat] = await tx
 			.insert(chatTable)
@@ -129,40 +170,22 @@ export async function createChat({
 			.values(messagesToInsert)
 			.returning({ id: message.id, role: message.role });
 
-		// Handle file attachments if any
-		if (files && files.length > 0) {
-			// Find the user message ID (not the system message)
-			const userMessageId = insertedMessages.find((msg) => msg.role === 'user')?.id;
+		// Find the user message ID (not the system message)
+		const userMessage = insertedMessages.find((msg) => msg.role === 'user');
 
-			if (userMessageId) {
-				const attachmentsToInsert: NewAttachment[] = [];
-
-				// Save files and prepare attachment records
-				for (const file of files) {
-					try {
-						const relativePath = await saveFile(file, userId, newChat.id);
-						attachmentsToInsert.push({
-							messageId: userMessageId,
-							userId: userId,
-							fileName: file.name,
-							fileType: file.type,
-							fileSize: file.size,
-							filePath: relativePath,
-						});
-					} catch (fileError) {
-						console.error('Error saving file:', file.name, fileError);
-						// Continue with other files, don't fail the entire operation
-					}
-				}
-
-				if (attachmentsToInsert.length > 0) {
-					await tx.insert(attachment).values(attachmentsToInsert);
-				}
-			}
+		if (!userMessage?.id) {
+			// This will cause the transaction to roll back.
+			throw new Error('Failed to create user message.');
 		}
 
-		return newChat.id;
+		return { newChatId: newChat.id, userMessageId: userMessage.id };
 	});
+
+	// If there are files, process them in the background.
+	// We do not `await` this call, allowing the request to complete immediately.
+	if (files && files.length > 0) {
+		void _processAttachments(newChatId, userMessageId, userId, files);
+	}
 
 	return newChatId;
 }

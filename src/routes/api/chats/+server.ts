@@ -1,4 +1,4 @@
-import { error, json, redirect } from '@sveltejs/kit';
+import { error, json } from '@sveltejs/kit';
 
 import type { RequestHandler } from './$types';
 import { requireLogin } from '$lib/server/auth';
@@ -39,11 +39,10 @@ export const POST: RequestHandler = async ({ request }) => {
 			isSearchEnabled,
 			files,
 		});
+
+		return json({ newChatId });
 	} catch (e) {
 		console.error('Error creating chat:', e);
 		return error(500, 'Error al crear el chat');
 	}
-
-	// Redirect to the new chat page
-	redirect(302, `/chats/${newChatId}`);
 };
