@@ -26,8 +26,9 @@
 
 			return response.json();
 		},
-		onSuccess: (data) => {
-			goto(`/chats/${data.newChatId}`);
+		onSuccess: ({ newChatId }) => {
+			data.queryClient.invalidateQueries({ queryKey: ['chats'] });
+			goto(`/chats/${newChatId}?new=true`);
 		},
 		onError: (error) => {
 			console.error('Error creating chat:', error);

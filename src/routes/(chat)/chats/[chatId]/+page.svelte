@@ -5,13 +5,24 @@
 	import { toast } from 'svelte-sonner';
 
 	import type { PageData } from './$types';
-	import { invalidate } from '$app/navigation';
+	import { invalidate, replaceState } from '$app/navigation';
+	import { page } from '$app/state';
 	import MessageInput from '$lib/components/chats/message-input.svelte';
 	import UserMessage from '$lib/components/chats/user-message.svelte';
 	import { Alert, AlertDescription, AlertTitle } from '$lib/components/ui/alert';
 
 	let { data }: { data: PageData } = $props();
 	let messagesContainer: HTMLElement;
+
+	// This function will be responsible for getting the AI response.
+	// You can call it on success of adding a message, or on mount for a new chat.
+	function getAIResponse() {
+		// Here you would typically use another mutation or the Vercel AI SDK's useChat hook
+		// to stream a response from your API.
+		console.log('Fetching AI response for chat:', data.chat.id);
+		// For example: $getAIResponseMutation.mutate({ chatId: data.chat.id });
+		toast.info('Generando respuesta de la IA...');
+	}
 
 	// Create mutation for adding messages to existing chat
 	const addMessageMutation = createMutation({
@@ -31,6 +42,7 @@
 		onSuccess: () => {
 			data.queryClient.invalidateQueries({ queryKey: ['chats', ''] });
 			invalidate('app:chat');
+			getAIResponse();
 		},
 		onError: (error) => {
 			console.error('Error sending message:', error);
@@ -46,6 +58,13 @@
 
 	onMount(() => {
 		scrollToBottom();
+		if (data.isNewChat) {
+			getAIResponse();
+			// Clean up the URL, so it doesn't trigger again on refresh
+			const url = new URL(page.url);
+			url.searchParams.delete('new');
+			replaceState(url, '');
+		}
 	});
 </script>
 
