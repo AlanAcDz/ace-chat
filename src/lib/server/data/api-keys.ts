@@ -8,12 +8,20 @@ export interface SaveApiKeyData {
 	userId: string;
 	provider: string;
 	apiKey: string;
+	scope?: 'personal' | 'shared';
 }
 
 export interface SaveApiUrlData {
 	userId: string;
 	provider: string;
 	apiUrl: string;
+	scope?: 'personal' | 'shared';
+}
+
+export interface UpdateApiKeyScopeData {
+	userId: string;
+	provider: string;
+	scope: 'personal' | 'shared';
 }
 
 export interface ApiKeyResult {
@@ -68,7 +76,7 @@ export async function getApiKeyByProvider(userId: string, provider: string) {
  * Save or update API key for a provider
  */
 export async function saveApiKey(data: SaveApiKeyData) {
-	const { userId, provider, apiKey: apiKeyValue } = data;
+	const { userId, provider, apiKey: apiKeyValue, scope = 'personal' } = data;
 
 	// Validate provider
 	const validProviders = ['openai', 'anthropic', 'google'];
@@ -93,6 +101,7 @@ export async function saveApiKey(data: SaveApiKeyData) {
 			.update(apiKey)
 			.set({
 				encryptedKey: encryptedKey,
+				scope: scope,
 			})
 			.where(eq(apiKey.id, existingKey.id))
 			.returning();
@@ -107,7 +116,7 @@ export async function saveApiKey(data: SaveApiKeyData) {
 				userId,
 				provider,
 				encryptedKey: encryptedKey,
-				scope: 'personal',
+				scope: data.scope || 'personal',
 			})
 			.returning();
 
@@ -119,7 +128,7 @@ export async function saveApiKey(data: SaveApiKeyData) {
  * Save or update API URL for a provider
  */
 export async function saveApiUrl(data: SaveApiUrlData) {
-	const { userId, provider, apiUrl } = data;
+	const { userId, provider, apiUrl, scope = 'personal' } = data;
 
 	// Validate provider
 	const validProviders = ['lmstudio', 'ollama'];
@@ -143,6 +152,7 @@ export async function saveApiUrl(data: SaveApiUrlData) {
 			.update(apiKey)
 			.set({
 				url: apiUrl,
+				scope: scope,
 			})
 			.where(eq(apiKey.id, existingKey.id))
 			.returning();
@@ -157,7 +167,7 @@ export async function saveApiUrl(data: SaveApiUrlData) {
 				userId,
 				provider,
 				url: apiUrl,
-				scope: 'personal',
+				scope: data.scope || 'personal',
 			})
 			.returning();
 
@@ -179,4 +189,29 @@ export async function deleteApiKey(userId: string, provider: string) {
 	}
 
 	return deletedKey;
+}
+
+/**
+ * Update only the scope of an existing API key
+ */
+export async function updateApiKeyScope(data: UpdateApiKeyScopeData) {
+	const { userId, provider, scope } = data;
+
+	// Check if user has an API key for this provider
+	const existingKey = await getApiKeyByProvider(userId, provider);
+
+	if (!existingKey) {
+		throw new Error('No se encontró una clave API para este proveedor');
+	}
+
+	// Update only the scope
+	const [updatedKey] = await db
+		.update(apiKey)
+		.set({
+			scope: scope,
+		})
+		.where(eq(apiKey.id, existingKey.id))
+		.returning();
+
+	return updatedKey;
 }
