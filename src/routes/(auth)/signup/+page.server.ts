@@ -7,16 +7,34 @@ import { zod } from 'sveltekit-superforms/adapters';
 import type { Actions, PageServerLoad } from './$types';
 import { getGrantKeys } from '$lib/grants';
 import * as auth from '$lib/server/auth';
+import { deleteInviteByUsername, getInviteByUsername } from '$lib/server/data/invites';
+import { getUserCount } from '$lib/server/data/users';
 import { db } from '$lib/server/db';
 import * as table from '$lib/server/db/schema';
 import { createId } from '$lib/server/utils';
 import { registerSchema } from './schema';
 
-export const load = (async () => {
+export const load = (async ({ url }) => {
 	auth.requirePublic();
+
+	// Check if there's a username parameter (from invite link)
+	const invitedUsername = url.searchParams.get('username');
+	let invite = null;
+
+	if (invitedUsername) {
+		// Check if there's a valid invite for this username
+		invite = await getInviteByUsername(invitedUsername);
+	}
+
+	// Check if this is the first user (no users exist)
+	const userCount = await getUserCount();
+	const isFirstUser = userCount === 0;
 
 	return {
 		form: await superValidate(zod(registerSchema)),
+		invite,
+		isFirstUser,
+		requiresInvite: !isFirstUser && !invite,
 	};
 }) satisfies PageServerLoad;
 
@@ -44,6 +62,23 @@ export const actions: Actions = {
 			});
 		}
 
+		// Check if there's an invite for this username
+		const invite = await getInviteByUsername(username);
+
+		// Check if this is the first user (no users exist)
+		const userCount = await getUserCount();
+		const isFirstUser = userCount === 0;
+
+		// Only allow signup without invite if this is the first user
+		if (!invite && !isFirstUser) {
+			return fail(400, {
+				form: {
+					...form,
+					message: 'Solo se puede registrar con una invitación válida',
+				},
+			});
+		}
+
 		const userId = createId('usr');
 		const passwordHash = await hash(password, {
 			memoryCost: 19456,
@@ -53,13 +88,29 @@ export const actions: Actions = {
 		});
 
 		try {
-			// todo: only first user gets all grants
+			// Create user with grants from invite or default grants for first user
+			let userGrants: string[] = [];
+
+			if (invite) {
+				// Use grants from the invite
+				userGrants = invite.grants;
+			} else if (isFirstUser) {
+				// First user gets all grants
+				userGrants = getGrantKeys();
+			}
+			// Note: This else case should never happen due to the check above
+
 			await db.insert(table.user).values({
 				id: userId,
 				username,
 				passwordHash,
-				grants: getGrantKeys(),
+				grants: userGrants,
 			});
+
+			// If user was created from an invite, delete the invite
+			if (invite) {
+				await deleteInviteByUsername(username);
+			}
 
 			const sessionToken = auth.generateSessionToken();
 			const session = await auth.createSession(sessionToken, userId);

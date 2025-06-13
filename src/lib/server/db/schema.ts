@@ -41,6 +41,23 @@ export const session = pgTable('session', {
 	expiresAt: timestamp('expires_at', { withTimezone: true, mode: 'date' }).notNull(),
 });
 
+// User Invites table for invitation-based user creation
+export const userInvite = pgTable('user_invite', {
+	id: text('id')
+		.primaryKey()
+		.$defaultFn(() => createId('inv')),
+	invitedBy: text('invited_by')
+		.notNull()
+		.references(() => user.id, { onDelete: 'cascade' }),
+	username: text('username').notNull().unique(),
+	grants: text('grants')
+		.array()
+		.default(sql`'{}'::text[]`)
+		.notNull(),
+	createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
+	expiresAt: timestamp('expires_at', { withTimezone: true, mode: 'date' }), // Optional expiration
+});
+
 // API Keys table for "Bring Your Own Key"
 export const apiKey = pgTable('api_key', {
 	id: text('id')
@@ -119,12 +136,21 @@ export const userRelations = relations(user, ({ many }) => ({
 	sessions: many(session),
 	chats: many(chat),
 	apiKeys: many(apiKey),
+	sentInvites: many(userInvite, { relationName: 'invitedBy' }),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
 	user: one(user, {
 		fields: [session.userId],
 		references: [user.id],
+	}),
+}));
+
+export const userInviteRelations = relations(userInvite, ({ one }) => ({
+	invitedBy: one(user, {
+		fields: [userInvite.invitedBy],
+		references: [user.id],
+		relationName: 'invitedBy',
 	}),
 }));
 
@@ -173,6 +199,8 @@ export type User = typeof user.$inferSelect;
 export type NewUser = typeof user.$inferInsert;
 export type Session = typeof session.$inferSelect;
 export type NewSession = typeof session.$inferInsert;
+export type UserInvite = typeof userInvite.$inferSelect;
+export type NewUserInvite = typeof userInvite.$inferInsert;
 export type ApiKey = typeof apiKey.$inferSelect;
 export type NewApiKey = typeof apiKey.$inferInsert;
 export type Chat = typeof chat.$inferSelect;

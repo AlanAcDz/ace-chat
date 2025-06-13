@@ -15,6 +15,13 @@
       "when": 1749606989798,
       "tag": "0001_true_madrox",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1749776599667,
+      "tag": "0002_tiny_maddog",
+      "breakpoints": true
     }
   ]
 }

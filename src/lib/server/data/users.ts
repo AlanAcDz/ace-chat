@@ -7,6 +7,49 @@ import { user as userTable } from '$lib/server/db/schema';
 import { saveAvatar } from '$lib/server/storage';
 
 /**
+ * Get all users (excluding sensitive fields like password hash)
+ */
+export async function getAllUsers() {
+	return await db.query.user.findMany({
+		columns: {
+			id: true,
+			username: true,
+			name: true,
+			avatarUrl: true,
+			grants: true,
+			language: true,
+			createdAt: true,
+			updatedAt: true,
+		},
+		orderBy: (users, { desc }) => [desc(users.createdAt)],
+	});
+}
+
+/**
+ * Get user count (for checking if first user)
+ */
+export async function getUserCount(): Promise<number> {
+	const users = await db.select().from(userTable);
+	return users.length;
+}
+
+/**
+ * Delete a user by ID
+ */
+export async function deleteUser(userId: string) {
+	const [deletedUser] = await db.delete(userTable).where(eq(userTable.id, userId)).returning({
+		id: userTable.id,
+		username: userTable.username,
+	});
+
+	if (!deletedUser) {
+		throw new Error('User not found');
+	}
+
+	return deletedUser;
+}
+
+/**
  * Get a complete user object by ID (excluding sensitive fields like password hash)
  * Throws an error if user is not found
  */
@@ -171,4 +214,28 @@ export async function updateUserProfile(
 
 	// Return updated user data
 	return await getFullUser(userId);
+}
+
+/**
+ * Update user grants
+ */
+export async function updateUserGrants(userId: string, grants: string[]) {
+	const [updatedUser] = await db
+		.update(userTable)
+		.set({
+			grants,
+			updatedAt: new Date(),
+		})
+		.where(eq(userTable.id, userId))
+		.returning({
+			id: userTable.id,
+			username: userTable.username,
+			grants: userTable.grants,
+		});
+
+	if (!updatedUser) {
+		throw new Error('User not found');
+	}
+
+	return updatedUser;
 }
