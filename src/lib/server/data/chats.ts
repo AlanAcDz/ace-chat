@@ -2,10 +2,10 @@ import { error } from '@sveltejs/kit';
 import { isAfter, isToday, isYesterday, startOfDay, subDays } from 'date-fns';
 import { and, asc, desc, eq, ilike, not } from 'drizzle-orm';
 
-import type { NewAttachment, NewMessage } from '$lib/server/db/schema';
+import type { NewMessage } from '$lib/server/db/schema';
 import { db } from '$lib/server/db';
-import { attachment, chat, chat as chatTable, message, user } from '$lib/server/db/schema';
-import { saveFile } from '$lib/server/storage';
+import { chat, chat as chatTable, message, user } from '$lib/server/db/schema';
+import { processAttachments } from './attachments';
 
 /**
  * Get all chat threads for a user (only id and title)
@@ -94,45 +94,6 @@ export function groupChatsByDate(chats: Awaited<ReturnType<typeof getUserChats>>
 
 export type ChatGroups = Awaited<ReturnType<typeof groupChatsByDate>>;
 
-/**
- * Processes and saves chat message attachments in the background.
- * This function is designed to be called without `await` (fire-and-forget).
- * It handles its own errors to avoid crashing the main application thread.
- */
-async function _processAttachments(
-	chatId: string,
-	userMessageId: string,
-	userId: string,
-	files: File[]
-) {
-	try {
-		const attachmentsToInsert: NewAttachment[] = [];
-
-		// Save files and prepare attachment records
-		for (const file of files) {
-			try {
-				const relativePath = await saveFile(file, userId, chatId);
-				attachmentsToInsert.push({
-					messageId: userMessageId,
-					userId: userId,
-					fileName: file.name,
-					fileType: file.type,
-					fileSize: file.size,
-					filePath: relativePath,
-				});
-			} catch (fileError) {
-				console.error(`Error saving file '${file.name}' for chat ${chatId}:`, fileError);
-			}
-		}
-
-		if (attachmentsToInsert.length > 0) {
-			await db.insert(attachment).values(attachmentsToInsert);
-		}
-	} catch (e) {
-		console.error(`Error processing attachments in background for chat ${chatId}:`, e);
-	}
-}
-
 interface CreateChatParams {
 	userId: string;
 	messageContent: string;
@@ -209,7 +170,7 @@ export async function createChat({
 	// If there are files, process them in the background.
 	// We do not `await` this call, allowing the request to complete immediately.
 	if (files && files.length > 0) {
-		void _processAttachments(newChatId, userMessageId, userId, files);
+		void processAttachments(newChatId, userMessageId, userId, files);
 	}
 
 	return newChatId;
@@ -254,7 +215,7 @@ export async function addMessageToChat({
 
 	// If there are files, process them in the background (fire-and-forget)
 	if (files && files.length > 0) {
-		void _processAttachments(chatId, newMessageId, userId, files);
+		void processAttachments(chatId, newMessageId, userId, files);
 	}
 
 	return newMessageId;

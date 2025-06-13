@@ -1,4 +1,4 @@
-import { FileIcon, FileText, Image } from '@lucide/svelte';
+import { formatFileSize, getFileIcon } from '$lib/utils';
 
 class FileAttachments {
 	attachedFiles = $state<File[]>([]);
@@ -40,18 +40,11 @@ class FileAttachments {
 	}
 
 	getFileIcon(file: File) {
-		const type = file.type;
-		if (type.startsWith('image/')) return Image;
-		if (type === 'application/pdf') return FileIcon;
-		return FileText;
+		return getFileIcon(file.type);
 	}
 
 	formatFileSize(bytes: number) {
-		if (bytes === 0) return '0 Bytes';
-		const k = 1024;
-		const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-		const i = Math.floor(Math.log(bytes) / Math.log(k));
-		return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+		return formatFileSize(bytes);
 	}
 }
 

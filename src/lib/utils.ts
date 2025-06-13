@@ -1,4 +1,5 @@
 import type { ClassValue } from 'clsx';
+import { FileIcon, FileText, Image } from '@lucide/svelte';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -24,4 +25,18 @@ export function getUserInitials(name: string | null, username: string): string {
 			.slice(0, 2);
 	}
 	return username.slice(0, 2).toUpperCase();
+}
+
+export function getFileIcon(fileType: string) {
+	if (fileType.startsWith('image/')) return Image;
+	if (fileType === 'application/pdf') return FileIcon;
+	return FileText;
+}
+
+export function formatFileSize(bytes: number) {
+	if (bytes === 0) return '0 Bytes';
+	const k = 1024;
+	const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+	const i = Math.floor(Math.log(bytes) / Math.log(k));
+	return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }

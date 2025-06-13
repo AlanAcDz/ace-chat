@@ -1,5 +1,5 @@
 import { existsSync } from 'fs';
-import { mkdir, writeFile } from 'fs/promises';
+import { mkdir, unlink, writeFile } from 'fs/promises';
 import { join } from 'path';
 
 import { env } from '$env/dynamic/private';
@@ -92,4 +92,21 @@ export function getFullFilePath(relativePath: string): string {
  */
 export async function initializeStorage(): Promise<void> {
 	await ensureDir(UPLOAD_DIR);
+}
+
+/**
+ * Deletes a file from the file system
+ * @param relativePath - The relative file path stored in the database
+ */
+export async function deleteFile(relativePath: string): Promise<void> {
+	try {
+		const fullPath = getFullFilePath(relativePath);
+		if (existsSync(fullPath)) {
+			await unlink(fullPath);
+			console.log(`File deleted: ${fullPath}`);
+		}
+	} catch (error) {
+		console.error(`Failed to delete file ${relativePath}:`, error);
+		// Don't throw the error - we don't want file deletion failures to prevent database cleanup
+	}
 }
