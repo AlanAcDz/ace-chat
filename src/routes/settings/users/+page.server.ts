@@ -5,6 +5,7 @@ import type { Actions, PageServerLoad } from './$types';
 import type { UserGrant } from '$lib/grants';
 import { hasGrant } from '$lib/grants';
 import { requireLogin } from '$lib/server/auth';
+import { validateApiKeyAccess } from '$lib/server/data/api-keys';
 import { createInvite, deleteInvite, getAllInvites } from '$lib/server/data/invites';
 import { deleteUser, getAllUsers, updateUserGrants } from '$lib/server/data/users';
 
@@ -24,6 +25,7 @@ const deleteInviteSchema = z.object({
 const updateUserSchema = z.object({
 	id: z.string(),
 	grants: z.array(z.string()).default([]),
+	systemPrompt: z.string().optional(),
 });
 
 export const load: PageServerLoad = async ({ depends }) => {
@@ -71,6 +73,9 @@ export const actions: Actions = {
 		}
 
 		try {
+			// Validate API key access for the invited user
+			await validateApiKeyAccess(validation.data.grants);
+
 			await createInvite({
 				invitedBy: sessionUser.id,
 				username: validation.data.username,
@@ -83,7 +88,7 @@ export const actions: Actions = {
 		} catch (err) {
 			console.error('Error creating invite:', err);
 			return fail(500, {
-				errors: { _form: ['Failed to create invite'] },
+				errors: { _form: [err instanceof Error ? err.message : 'Failed to create invite'] },
 			});
 		}
 	},
@@ -99,6 +104,7 @@ export const actions: Actions = {
 		const data = {
 			id: formData.get('id'),
 			grants: formData.getAll('grants') as string[],
+			systemPrompt: formData.get('systemPrompt') as string | null,
 		};
 
 		const validation = updateUserSchema.safeParse(data);
@@ -116,7 +122,14 @@ export const actions: Actions = {
 		}
 
 		try {
-			await updateUserGrants(validation.data.id, validation.data.grants);
+			// Validate API key access for the updated user
+			await validateApiKeyAccess(validation.data.grants);
+
+			await updateUserGrants(
+				validation.data.id,
+				validation.data.grants,
+				validation.data.systemPrompt
+			);
 
 			return {
 				success: true,
@@ -124,7 +137,7 @@ export const actions: Actions = {
 		} catch (err) {
 			console.error('Error updating user:', err);
 			return fail(500, {
-				errors: { _form: ['Failed to update user'] },
+				errors: { _form: [err instanceof Error ? err.message : 'Failed to update user'] },
 			});
 		}
 	},

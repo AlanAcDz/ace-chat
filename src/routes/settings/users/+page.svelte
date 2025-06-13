@@ -28,7 +28,7 @@
 	import UserSkeleton from '$lib/components/users/user-skeleton.svelte';
 
 	// Create types that match the data returned from the server
-	type UserDisplay = Omit<UserType, 'passwordHash' | 'defaultSystemPrompt'>;
+	type UserDisplay = Omit<UserType, 'passwordHash'>;
 	type InviteDisplay = UserInviteType & {
 		invitedBy: {
 			username: string;

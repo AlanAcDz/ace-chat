@@ -8,12 +8,12 @@
 	import { getUserInitials } from '$lib/utils';
 
 	interface Props {
-		user: Omit<User, 'passwordHash' | 'defaultSystemPrompt'>;
+		user: Omit<User, 'passwordHash'>;
 		currentUserId: string;
 		canUpdate: boolean;
 		canDelete: boolean;
-		onEdit: (user: Omit<User, 'passwordHash' | 'defaultSystemPrompt'>) => void;
-		onDelete: (user: Omit<User, 'passwordHash' | 'defaultSystemPrompt'>) => void;
+		onEdit: (user: Omit<User, 'passwordHash'>) => void;
+		onDelete: (user: Omit<User, 'passwordHash'>) => void;
 	}
 
 	let { user, currentUserId, canUpdate, canDelete, onEdit, onDelete }: Props = $props();

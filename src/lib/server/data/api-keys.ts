@@ -1,5 +1,7 @@
 import { and, eq } from 'drizzle-orm';
 
+import type { UserGrant } from '$lib/grants';
+import { hasGrant } from '$lib/grants';
 import { db } from '$lib/server/db';
 import { apiKey } from '$lib/server/db/schema';
 import { createId } from '$lib/server/utils';
@@ -214,4 +216,40 @@ export async function updateApiKeyScope(data: UpdateApiKeyScopeData) {
 		.returning();
 
 	return updatedKey;
+}
+
+/**
+ * Check if there are any shared API keys in the system
+ */
+export async function hasSharedApiKeys(): Promise<boolean> {
+	const sharedKeys = await db
+		.select({ id: apiKey.id })
+		.from(apiKey)
+		.where(eq(apiKey.scope, 'shared'))
+		.limit(1);
+
+	return sharedKeys.length > 0;
+}
+
+/**
+ * Validate that a user with given grants can access API keys
+ * If user has no API key creation grants, check that shared API keys exist
+ */
+export async function validateApiKeyAccess(grants: string[]): Promise<void> {
+	// Check if user has any API key creation grants
+	const hasPersonalKeyGrant = hasGrant(grants as UserGrant[], 'api-keys:create:personal');
+	const hasSharedKeyGrant = hasGrant(grants as UserGrant[], 'api-keys:create:shared');
+
+	// If user has API key creation grants, they're good
+	if (hasPersonalKeyGrant || hasSharedKeyGrant) {
+		return;
+	}
+
+	// If user doesn't have API key creation grants, check for shared keys
+	const sharedKeysExist = await hasSharedApiKeys();
+	if (!sharedKeysExist) {
+		throw new Error(
+			'No se pueden crear usuarios sin permisos de API keys cuando no existen claves compartidas en el sistema'
+		);
+	}
 }

@@ -16,11 +16,12 @@
 		DialogTitle,
 	} from '$lib/components/ui/dialog';
 	import { Label } from '$lib/components/ui/label';
+	import { Textarea } from '$lib/components/ui/textarea';
 	import { USER_GRANTS } from '$lib/grants';
 
 	interface Props {
 		open: boolean;
-		user: Omit<User, 'passwordHash' | 'defaultSystemPrompt'> | null;
+		user: Omit<User, 'passwordHash'> | null;
 		onOpenChange: (open: boolean) => void;
 	}
 
@@ -35,13 +36,21 @@
 
 	let isSubmitting = $state(false);
 	let selectedGrants = $state<string[]>([]);
+	let systemPrompt = $state('');
 
-	// Update selected grants when user changes
+	// Check if system prompt grant is selected
+	const showSystemPromptTextarea = $derived(
+		!selectedGrants.includes('settings:update:system-prompt')
+	);
+
+	// Update selected grants and system prompt when user changes
 	$effect(() => {
 		if (user) {
 			selectedGrants = [...user.grants];
+			systemPrompt = user.defaultSystemPrompt || '';
 		} else {
 			selectedGrants = [];
+			systemPrompt = '';
 		}
 	});
 
@@ -58,6 +67,11 @@
 			form.append('grants', grant);
 		});
 
+		// Only include system prompt if the grant is not selected
+		if (!selectedGrants.includes('settings:update:system-prompt')) {
+			form.append('systemPrompt', systemPrompt);
+		}
+
 		const response = await fetch('?/updateUser', {
 			method: 'POST',
 			body: form,
@@ -66,7 +80,7 @@
 		const result: ActionResult = deserialize(await response.text());
 
 		if (result.type === 'success') {
-			toast.success('Permisos actualizados correctamente');
+			toast.success('Usuario actualizado correctamente');
 			await invalidate('app:users');
 			onOpenChange(false);
 		} else if (result.type === 'failure') {
@@ -74,7 +88,7 @@
 				toast.error(result.data.errors._form[0]);
 			}
 		} else {
-			toast.error('Error al actualizar los permisos');
+			toast.error('Error al actualizar el usuario');
 		}
 
 		applyAction(result);
@@ -99,12 +113,12 @@
 </script>
 
 <Dialog {open} onOpenChange={handleClose}>
-	<DialogContent class="max-w-md">
+	<DialogContent class="max-h-[80vh] max-w-md overflow-y-auto">
 		<DialogHeader>
-			<DialogTitle>Editar Permisos</DialogTitle>
+			<DialogTitle>Editar Usuario</DialogTitle>
 			<DialogDescription>
 				{#if user}
-					Modifica los permisos para {user.name || user.username} (@{user.username}).
+					Modifica los permisos y configuración para {user.name || user.username} (@{user.username}).
 				{/if}
 			</DialogDescription>
 		</DialogHeader>
@@ -114,7 +128,7 @@
 				<!-- Grants Selection -->
 				<div class="space-y-3">
 					<Label>Permisos</Label>
-					<div class="max-h-48 space-y-2 overflow-y-auto">
+					<div class="space-y-2">
 						{#each availableGrants as grant (grant.key)}
 							<div class="flex items-center space-x-2">
 								<Checkbox
@@ -122,7 +136,9 @@
 									checked={selectedGrants.includes(grant.key)}
 									onCheckedChange={(checked) => handleGrantChange(grant.key, checked)}
 									disabled={isSubmitting} />
-								<Label for={grant.key} class="text-sm font-normal">
+								<Label
+									for={grant.key}
+									class="flex flex-col items-start gap-0.5 text-left text-sm font-normal">
 									<span class="font-medium">{grant.name}</span>
 									<span class="block text-xs text-gray-500">{grant.description}</span>
 								</Label>
@@ -133,6 +149,23 @@
 						<p class="text-sm text-gray-500">El usuario no tendrá permisos asignados.</p>
 					{/if}
 				</div>
+
+				<!-- System Prompt Section -->
+				{#if showSystemPromptTextarea}
+					<div class="space-y-2">
+						<Label for="systemPrompt">Prompt del Sistema</Label>
+						<Textarea
+							id="systemPrompt"
+							bind:value={systemPrompt}
+							placeholder="Ingrese el prompt del sistema personalizado para este usuario..."
+							rows={4}
+							disabled={isSubmitting}
+							class="resize-none" />
+						<p class="text-xs text-gray-500">
+							Este prompt se aplicará como predeterminado para este usuario.
+						</p>
+					</div>
+				{/if}
 
 				<DialogFooter>
 					<Button type="button" variant="outline" onclick={handleClose} disabled={isSubmitting}>

@@ -148,7 +148,7 @@
 			<!-- Grants Selection -->
 			<div class="space-y-3">
 				<Label>Permisos</Label>
-				<div class="max-h-48 space-y-2 overflow-y-auto">
+				<div class="space-y-2">
 					{#each availableGrants as grant (grant.key)}
 						<div class="flex items-center space-x-2">
 							<Checkbox

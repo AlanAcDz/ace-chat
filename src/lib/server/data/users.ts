@@ -18,6 +18,7 @@ export async function getAllUsers() {
 			avatarUrl: true,
 			grants: true,
 			language: true,
+			defaultSystemPrompt: true,
 			createdAt: true,
 			updatedAt: true,
 		},
@@ -217,20 +218,32 @@ export async function updateUserProfile(
 }
 
 /**
- * Update user grants
+ * Update user grants and optionally system prompt
  */
-export async function updateUserGrants(userId: string, grants: string[]) {
+export async function updateUserGrants(
+	userId: string,
+	grants: string[],
+	systemPrompt?: string | null
+) {
+	const updateData: Partial<typeof userTable.$inferInsert> = {
+		grants,
+		updatedAt: new Date(),
+	};
+
+	// Only update system prompt if provided
+	if (systemPrompt !== undefined) {
+		updateData.defaultSystemPrompt = systemPrompt || null;
+	}
+
 	const [updatedUser] = await db
 		.update(userTable)
-		.set({
-			grants,
-			updatedAt: new Date(),
-		})
+		.set(updateData)
 		.where(eq(userTable.id, userId))
 		.returning({
 			id: userTable.id,
 			username: userTable.username,
 			grants: userTable.grants,
+			defaultSystemPrompt: userTable.defaultSystemPrompt,
 		});
 
 	if (!updatedUser) {
