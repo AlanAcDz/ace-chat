@@ -1,15 +1,19 @@
 <script lang="ts">
-	import { File, FileText, Image } from '@lucide/svelte';
+	import { Check, Copy, File, FileText, Image, RefreshCcw } from '@lucide/svelte';
 
 	import type { Attachment, Message } from '$lib/server/db/schema';
+	import { Button } from '../ui/button';
 
 	interface Props {
 		msg: Message & {
 			attachments: Attachment[];
 		};
+		onRetry?: () => void;
 	}
 
-	let { msg }: Props = $props();
+	let { msg, onRetry }: Props = $props();
+
+	let isCopied = $state(false);
 
 	function getFileIcon(fileType: string) {
 		if (fileType.startsWith('image/')) {
@@ -27,9 +31,21 @@
 		const i = Math.floor(Math.log(bytes) / Math.log(k));
 		return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 	}
+
+	async function copyMessage() {
+		try {
+			await navigator.clipboard.writeText(msg.content);
+			isCopied = true;
+			setTimeout(() => {
+				isCopied = false;
+			}, 2000);
+		} catch (error) {
+			console.error('Failed to copy message:', error);
+		}
+	}
 </script>
 
-<div class="flex justify-end">
+<div class="group flex flex-col items-end justify-end gap-2">
 	<!-- Message Content -->
 	<div class="w-full max-w-lg min-w-0 flex-1 rounded-lg bg-gray-100 p-4 dark:bg-gray-800">
 		<!-- Message Text -->
@@ -58,5 +74,19 @@
 				{/each}
 			</div>
 		{/if}
+	</div>
+	<div class="flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">
+		{#if onRetry}
+			<Button size="icon" variant="ghost" onclick={onRetry}>
+				<RefreshCcw />
+			</Button>
+		{/if}
+		<Button size="icon" variant="ghost" onclick={copyMessage}>
+			{#if isCopied}
+				<Check class="text-green-600 dark:text-green-400" />
+			{:else}
+				<Copy />
+			{/if}
+		</Button>
 	</div>
 </div>

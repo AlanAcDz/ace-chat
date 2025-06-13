@@ -1,16 +1,20 @@
 <script lang="ts">
+	import { X } from '@lucide/svelte';
 	import MessageCirclePlus from '@lucide/svelte/icons/message-circle-plus';
 	import Search from '@lucide/svelte/icons/search';
-	import { createQuery } from '@tanstack/svelte-query';
+	import { createMutation, createQuery } from '@tanstack/svelte-query';
 
 	import type { ChatGroups } from '$lib/server/data/chats';
 	import type { User } from '$lib/server/db/schema';
+	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
+	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
 	import { Avatar, AvatarFallback, AvatarImage } from '$lib/components/ui/avatar/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { Skeleton } from '$lib/components/ui/skeleton/index.js';
-	import { getUserInitials } from '$lib/utils';
+	import { cn, getUserInitials } from '$lib/utils';
 
 	interface Props {
 		user: Promise<Omit<User, 'passwordHash'>>;
@@ -20,6 +24,10 @@
 
 	// Search state
 	let searchQuery = $state('');
+
+	// Delete dialog state
+	let showDeleteDialog = $state(false);
+	let chatToDelete = $state<{ id: string; title: string } | null>(null);
 
 	// Query to fetch chats
 	const chatsQuery = $derived(
@@ -41,6 +49,38 @@
 		})
 	);
 
+	// Delete chat mutation
+	const deleteChatMutation = createMutation({
+		mutationFn: async (chatId: string) => {
+			const response = await fetch(`/api/chats/${chatId}`, {
+				method: 'DELETE',
+			});
+
+			if (!response.ok) {
+				throw new Error('Error al eliminar el chat');
+			}
+
+			return response.json();
+		},
+		onSuccess: (_, chatId) => {
+			// Refetch chats to update the UI
+			$chatsQuery.refetch();
+
+			// If we're currently viewing the deleted chat, redirect to home
+			if ($page.params.chatId === chatId) {
+				goto('/');
+			}
+
+			// Close dialog and reset state
+			showDeleteDialog = false;
+			chatToDelete = null;
+		},
+		onError: (error) => {
+			console.error('Error deleting chat:', error);
+			// You could add a toast notification here
+		},
+	});
+
 	// Get group label in Spanish
 	function getGroupLabel(groupKey: keyof ChatGroups): string {
 		const labels = {
@@ -56,6 +96,27 @@
 	// Check if a group has chats
 	function hasChats(chats: Array<{ id: string; title: string }>): boolean {
 		return chats && chats.length > 0;
+	}
+
+	// Handle showing delete confirmation
+	function handleShowDeleteDialog(chat: { id: string; title: string }, event: Event) {
+		event.preventDefault();
+		event.stopPropagation();
+		chatToDelete = chat;
+		showDeleteDialog = true;
+	}
+
+	// Handle confirmed deletion
+	function handleConfirmDelete() {
+		if (chatToDelete) {
+			$deleteChatMutation.mutate(chatToDelete.id);
+		}
+	}
+
+	// Handle cancel deletion
+	function handleCancelDelete() {
+		showDeleteDialog = false;
+		chatToDelete = null;
 	}
 </script>
 
@@ -116,8 +177,27 @@
 									<Sidebar.MenuItem>
 										<Sidebar.MenuButton>
 											{#snippet child({ props })}
-												<a href="/chats/{chat.id}" {...props}>
+												<a
+													{...props}
+													href="/chats/{chat.id}"
+													class={cn(props.class as string, 'group/link relative truncate')}>
 													<span class="truncate">{chat.title}</span>
+													<div
+														class="absolute inset-y-0 right-0 flex translate-x-full items-center justify-end transition-transform group-hover/link:translate-x-0">
+														<span
+															class="h-full w-8 bg-linear-to-l from-sidebar-accent to-transparent"
+														></span>
+														<div class="flex items-center justify-center bg-sidebar-accent">
+															<Button
+																size="icon"
+																variant="ghost"
+																class="hover:bg-gray-200"
+																onclick={(e) => handleShowDeleteDialog(chat, e)}
+																disabled={$deleteChatMutation.isPending}>
+																<X />
+															</Button>
+														</div>
+													</div>
 												</a>
 											{/snippet}
 										</Sidebar.MenuButton>
@@ -173,3 +253,22 @@
 		{/await}
 	</Sidebar.Footer>
 </Sidebar.Root>
+
+<!-- Delete Confirmation Dialog -->
+<AlertDialog.Root bind:open={showDeleteDialog}>
+	<AlertDialog.Content>
+		<AlertDialog.Header>
+			<AlertDialog.Title>Eliminar chat</AlertDialog.Title>
+			<AlertDialog.Description>
+				¿Estás seguro de que quieres eliminar el chat "{chatToDelete?.title}"? Esta acción no se
+				puede deshacer.
+			</AlertDialog.Description>
+		</AlertDialog.Header>
+		<AlertDialog.Footer>
+			<AlertDialog.Cancel onclick={handleCancelDelete}>Cancelar</AlertDialog.Cancel>
+			<AlertDialog.Action onclick={handleConfirmDelete} disabled={$deleteChatMutation.isPending}>
+				{$deleteChatMutation.isPending ? 'Eliminando...' : 'Eliminar'}
+			</AlertDialog.Action>
+		</AlertDialog.Footer>
+	</AlertDialog.Content>
+</AlertDialog.Root>

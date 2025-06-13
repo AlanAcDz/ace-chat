@@ -220,3 +220,23 @@ export async function addMessageToChat({
 
 	return newMessageId;
 }
+
+/**
+ * Delete a chat by id for a user
+ */
+export async function deleteChat(chatId: string, userId: string) {
+	// Verify the chat exists and belongs to the user
+	const chatExists = await db.query.chat.findFirst({
+		where: and(eq(chatTable.id, chatId), eq(chatTable.userId, userId)),
+		columns: { id: true },
+	});
+
+	if (!chatExists) {
+		error(404, 'Chat no encontrado');
+	}
+
+	// Delete the chat (cascade will handle messages and attachments)
+	await db.delete(chatTable).where(and(eq(chatTable.id, chatId), eq(chatTable.userId, userId)));
+
+	return { success: true };
+}
