@@ -21,9 +21,10 @@
 		};
 		chatId: string;
 		onRetry?: () => void;
+		isSharedView?: boolean;
 	}
 
-	let { msg, chatId, onRetry }: Props = $props();
+	let { msg, chatId, onRetry, isSharedView = false }: Props = $props();
 
 	let isCopied = $state(false);
 
@@ -140,14 +141,16 @@
 				<RefreshCcw />
 			</Button>
 		{/if}
-		<Button
-			size="icon"
-			variant="ghost"
-			onclick={handleBranch}
-			disabled={$branchMutation.isPending}
-			title="Ramificar chat desde este mensaje">
-			<GitBranch />
-		</Button>
+		{#if !isSharedView}
+			<Button
+				size="icon"
+				variant="ghost"
+				onclick={handleBranch}
+				disabled={$branchMutation.isPending}
+				title="Ramificar chat desde este mensaje">
+				<GitBranch />
+			</Button>
+		{/if}
 		<Button size="icon" variant="ghost" onclick={copyMessage}>
 			{#if isCopied}
 				<Check class="text-green-600 dark:text-green-400" />

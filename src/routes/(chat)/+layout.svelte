@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { page } from '$app/stores';
+	import ShareButton from '$lib/components/chats/share-button.svelte';
 	import AppSidebar from '$lib/components/layout/app-sidebar.svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { setChatSettingsContext } from '$lib/contexts/chat-settings.svelte';
@@ -7,6 +9,10 @@
 
 	// Initialize chat settings context
 	setChatSettingsContext();
+
+	// Extract chatId from URL for share functionality
+	const chatId = $derived($page.params.chatId);
+	const isInChatPage = $derived(!!chatId);
 </script>
 
 <svelte:head>
@@ -18,6 +24,9 @@
 	<main class="relative grid flex-1 grid-rows-[auto_1fr]">
 		<header class="sticky top-0 z-10 flex items-center justify-between gap-2 px-4 py-2">
 			<Sidebar.Trigger class="size-8" />
+			{#if isInChatPage && chatId}
+				<ShareButton {chatId} />
+			{/if}
 		</header>
 		<div class="mx-auto flex h-full w-full max-w-4xl flex-col px-4 pt-6">
 			{@render children?.()}

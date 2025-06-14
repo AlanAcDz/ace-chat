@@ -11,17 +11,10 @@ import { getFullFilePath } from '$lib/server/storage';
 
 export const GET: RequestHandler = async ({ params }) => {
 	try {
-		const sessionUser = requireLogin();
 		const filePath = params.path;
 
 		if (!filePath) {
 			return error(400, 'Ruta de archivo requerida');
-		}
-
-		// Security check: ensure the file belongs to the user
-		const userId = filePath.split('/')[0];
-		if (userId !== sessionUser.id) {
-			return error(403, 'Acceso denegado');
 		}
 
 		// Get the full file path
@@ -32,7 +25,7 @@ export const GET: RequestHandler = async ({ params }) => {
 			return error(404, 'Archivo no encontrado');
 		}
 
-		// Verify the file exists in the database and belongs to the user
+		// First, check if the attachment exists and get its associated chat info
 		const attachment = await db.query.attachment.findFirst({
 			where: eq(schema.attachment.filePath, filePath),
 			with: {
@@ -41,12 +34,38 @@ export const GET: RequestHandler = async ({ params }) => {
 						id: true,
 					},
 				},
+				message: {
+					with: {
+						chat: {
+							columns: {
+								id: true,
+								sharePath: true,
+								userId: true,
+							},
+						},
+					},
+				},
 			},
 		});
 
-		if (!attachment || attachment.user.id !== sessionUser.id) {
-			return error(403, 'Acceso denegado');
+		if (!attachment) {
+			return error(404, 'Archivo no encontrado');
 		}
+
+		// Check if the attachment belongs to a shared chat (public access)
+		const isSharedChat = !!attachment.message.chat.sharePath;
+
+		if (!isSharedChat) {
+			// Not a shared chat, require authentication and ownership
+			const sessionUser = requireLogin();
+
+			// Security check: ensure the file belongs to the authenticated user
+			const userId = filePath.split('/')[0];
+			if (userId !== sessionUser.id || attachment.user.id !== sessionUser.id) {
+				return error(403, 'Acceso denegado');
+			}
+		}
+		// If it's a shared chat, allow public access without authentication
 
 		// Read the file
 		const fileBuffer = await readFile(fullPath);

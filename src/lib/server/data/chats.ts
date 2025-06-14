@@ -58,6 +58,36 @@ export async function getUserChat(chatId: string, userId: string) {
 }
 
 /**
+ * Get a shared chat by sharePath (no authentication required)
+ */
+export async function getSharedChat(sharePath: string) {
+	const chatData = await db.query.chat.findFirst({
+		where: eq(chat.sharePath, sharePath),
+		with: {
+			user: {
+				columns: {
+					name: true,
+					username: true,
+				},
+			},
+			messages: {
+				with: {
+					attachments: true,
+				},
+				where: not(eq(message.role, 'system')),
+				orderBy: [asc(message.createdAt)],
+			},
+		},
+	});
+
+	if (!chatData) {
+		error(404, 'Chat compartido no encontrado');
+	}
+
+	return chatData;
+}
+
+/**
  * Group chats by date ranges using date-fns
  */
 export function groupChatsByDate(chats: Awaited<ReturnType<typeof getUserChats>>) {
@@ -275,4 +305,24 @@ export async function deleteChat(chatId: string, userId: string) {
 	await db.delete(chatTable).where(and(eq(chatTable.id, chatId), eq(chatTable.userId, userId)));
 
 	return { success: true };
+}
+
+/**
+ * Get the share status of a chat by id for a user
+ */
+export async function getChatShareStatus(chatId: string, userId: string) {
+	const chatData = await db.query.chat.findFirst({
+		where: and(eq(chatTable.id, chatId), eq(chatTable.userId, userId)),
+		columns: { id: true, sharePath: true },
+	});
+
+	if (!chatData) {
+		error(404, 'Chat no encontrado');
+	}
+
+	return {
+		isShared: !!chatData.sharePath,
+		sharePath: chatData.sharePath,
+		shareUrl: chatData.sharePath ? `/share/${chatData.sharePath}` : null,
+	};
 }
