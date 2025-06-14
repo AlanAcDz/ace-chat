@@ -72,11 +72,11 @@
 		},
 	});
 
-	function scrollToBottom() {
+	function scrollToBottom(behavior: 'auto' | 'smooth' = 'auto') {
 		if (messagesContainer) {
 			window.scrollTo({
 				top: messagesContainer.scrollHeight,
-				behavior: 'auto',
+				behavior,
 			});
 		}
 	}
@@ -87,15 +87,12 @@
 		isAutoScrolling = true;
 
 		// Scroll immediately
-		scrollToBottom();
+		scrollToBottom('smooth');
 
 		// Set up continuous scrolling during streaming
 		scrollInterval = setInterval(() => {
-			if (messagesContainer && isAutoScrolling) {
-				window.scrollTo({
-					top: messagesContainer.scrollHeight,
-					behavior: 'smooth',
-				});
+			if (isAutoScrolling) {
+				scrollToBottom('smooth');
 			}
 		}, 100); // Scroll every 100ms during streaming
 	}
@@ -136,7 +133,7 @@
 		});
 
 		// Scroll down after user submits message
-		setTimeout(() => scrollToBottom(), 100);
+		setTimeout(() => scrollToBottom('auto'), 100);
 	}
 
 	onMount(() => {
@@ -155,7 +152,7 @@
 	});
 
 	afterNavigate(() => {
-		scrollToBottom();
+		scrollToBottom('auto');
 	});
 </script>
 
