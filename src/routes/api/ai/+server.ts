@@ -1,8 +1,10 @@
 import { json } from '@sveltejs/kit';
+import { createOpenAI } from '@ai-sdk/openai';
 import { createIdGenerator, streamText } from 'ai';
 import { z } from 'zod';
 
 import type { RequestHandler } from './$types';
+import { AI_MODELS } from '$lib/ai/models';
 import {
 	createAIModelInstance,
 	saveUserMessageIfNeeded,
@@ -69,9 +71,30 @@ export const POST: RequestHandler = async ({ request }) => {
 		await saveUserMessageIfNeeded(messages, id, sessionUser.id, modelKey, isSearchEnabled);
 
 		// Create the appropriate AI model instance
-		const aiModel = await createAIModelInstance(modelKey, sessionUser.id);
+		const aiModel = await createAIModelInstance(modelKey, sessionUser.id, isSearchEnabled);
 
 		const transformedMessages = await transformMessagesWithAttachments(messages);
+
+		// Get OpenAI tools if search is enabled for OpenAI models
+		const modelConfig = AI_MODELS.find((m) => m.key === modelKey);
+		const needsOpenAISearch = isSearchEnabled && modelConfig?.provider === 'openai';
+
+		let openAISearchTools = null;
+		if (needsOpenAISearch) {
+			const { getUserApiKey } = await import('$lib/server/data/api-keys');
+			const userApiKey = await getUserApiKey(sessionUser.id, 'openai');
+
+			if (userApiKey?.encryptedKey) {
+				const openai = createOpenAI({
+					apiKey: userApiKey.encryptedKey,
+				});
+				openAISearchTools = {
+					web_search_preview: openai.tools.webSearchPreview({
+						searchContextSize: 'high',
+					}),
+				};
+			}
+		}
 
 		const result = streamText({
 			model: aiModel,
@@ -79,6 +102,10 @@ export const POST: RequestHandler = async ({ request }) => {
 			experimental_generateMessageId: createIdGenerator({
 				prefix: 'msg',
 				size: 16,
+			}),
+			...(openAISearchTools && {
+				tools: openAISearchTools,
+				toolChoice: { type: 'tool', toolName: 'web_search_preview' },
 			}),
 			async onFinish({ text }) {
 				await saveMessage({

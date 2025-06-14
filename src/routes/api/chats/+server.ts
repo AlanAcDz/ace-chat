@@ -40,7 +40,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			files,
 		});
 
-		return json({ newChatId });
+		return json({ newChatId, isSearchEnabled });
 	} catch (e) {
 		console.error('Error creating chat:', e);
 		return error(500, 'Error al crear el chat');

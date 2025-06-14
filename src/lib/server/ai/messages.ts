@@ -193,7 +193,7 @@ export async function saveUserMessageIfNeeded(
 	userId: string,
 	modelKey: string,
 	isSearchEnabled: boolean
-): Promise<void> {
+) {
 	const lastMessage = messages[messages.length - 1];
 	if (lastMessage && lastMessage.role === 'user' && !lastMessage.chatId) {
 		// Extract files from experimental_attachments if they exist
@@ -238,13 +238,16 @@ export async function saveUserMessageIfNeeded(
  */
 export async function createAIModelInstance(
 	modelKey: string,
-	userId: string
+	userId: string,
+	isSearchEnabled: boolean = false
 ): Promise<LanguageModel> {
 	// Find the model configuration
 	const modelConfig = AI_MODELS.find((m) => m.key === modelKey);
 	if (!modelConfig) {
 		throw new Error('Invalid model');
 	}
+
+	console.log('search enabled', isSearchEnabled);
 
 	// Get the provider from the model config
 	const provider = modelConfig.provider;
@@ -263,6 +266,9 @@ export async function createAIModelInstance(
 		const openai = createOpenAI({
 			apiKey: userApiKey.encryptedKey,
 		});
+
+		// For OpenAI models, web search is handled via tools in the streamText call
+		// rather than model configuration, so we return the basic model
 		return openai(modelConfig.key);
 	} else if (provider === 'anthropic') {
 		if (!userApiKey.encryptedKey) {
@@ -279,6 +285,15 @@ export async function createAIModelInstance(
 		const google = createGoogleGenerativeAI({
 			apiKey: userApiKey.encryptedKey,
 		});
+
+		// Configure Google models with search grounding when enabled
+		if (isSearchEnabled) {
+			console.log('Using search grounding');
+			return google(modelConfig.key, {
+				useSearchGrounding: true,
+			});
+		}
+
 		return google(modelConfig.key);
 	} else {
 		throw new Error(`Unsupported provider: ${provider}`);

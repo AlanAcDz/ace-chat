@@ -33,9 +33,9 @@
 
 			return response.json();
 		},
-		onSuccess: ({ newChatId }) => {
+		onSuccess: ({ newChatId, isSearchEnabled }) => {
 			data.queryClient.invalidateQueries({ queryKey: ['chats'] });
-			goto(`/chats/${newChatId}?new=true`);
+			goto(`/chats/${newChatId}?new=true&search=${isSearchEnabled}`);
 		},
 		onError: (error) => {
 			console.error('Error creating chat:', error);

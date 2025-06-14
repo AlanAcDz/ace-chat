@@ -2,12 +2,11 @@
 	import { onMount } from 'svelte';
 	import { Chat } from '@ai-sdk/svelte';
 	import { AlertCircleIcon } from '@lucide/svelte';
-	import { createMutation } from '@tanstack/svelte-query';
 	import { createIdGenerator } from 'ai';
 	import { toast } from 'svelte-sonner';
 
 	import type { PageData } from './$types';
-	import { afterNavigate, invalidate, replaceState } from '$app/navigation';
+	import { afterNavigate, replaceState } from '$app/navigation';
 	import { page } from '$app/state';
 	import { AI_MODELS } from '$lib/ai/models';
 	import AssistantMessage from '$lib/components/chats/assistant-message.svelte';
@@ -18,7 +17,7 @@
 	let { data }: { data: PageData } = $props();
 	let messagesContainer: HTMLElement;
 
-	let isSearchEnabled = $state(false);
+	let isSearchEnabled = $state(page.url.searchParams.get('search') === 'true');
 	let selectedModel = $state(AI_MODELS[0].key);
 
 	const chat = $derived(
@@ -37,32 +36,6 @@
 			},
 		})
 	);
-
-	// Create mutation for adding messages to existing chat
-	const addMessageMutation = createMutation({
-		mutationFn: async (formData: FormData) => {
-			const response = await fetch(`/api/chats/${data.chat.id}`, {
-				method: 'POST',
-				body: formData,
-			});
-
-			if (!response.ok) {
-				const errorText = await response.text();
-				throw new Error(errorText || 'Error al enviar el mensaje');
-			}
-
-			return response.json();
-		},
-		onSuccess: () => {
-			data.queryClient.invalidateQueries({ queryKey: ['chats', ''] });
-			invalidate('app:chat');
-			getAIResponse();
-		},
-		onError: (error) => {
-			console.error('Error sending message:', error);
-			toast.error('Error al enviar el mensaje');
-		},
-	});
 
 	function scrollToBottom() {
 		if (messagesContainer) {
@@ -115,18 +88,18 @@
 </main>
 
 <!-- Error State -->
-{#if $addMessageMutation.isError}
+{#if chat.error}
 	<Alert variant="destructive" class="mx-auto mb-4 max-w-3xl" role="alert" aria-live="assertive">
 		<AlertCircleIcon />
 		<AlertTitle>Error</AlertTitle>
 		<AlertDescription>
-			{$addMessageMutation.error?.message || 'Error desconocido'}
+			{chat.error.message || 'Error desconocido'}
 		</AlertDescription>
 	</Alert>
 {/if}
 
 <MessageInput
-	isSubmitting={$addMessageMutation.isPending}
+	isSubmitting={chat.status === 'streaming'}
 	bind:message={chat.input}
 	bind:isSearchEnabled
 	bind:selectedModel
