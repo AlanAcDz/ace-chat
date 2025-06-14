@@ -53,12 +53,12 @@ export const AI_MODELS = [
 		key: 'gpt-4o-mini',
 		capabilities: ['text', 'tools'],
 	},
-	{
-		label: 'GPT Image 1',
-		provider: 'openai',
-		key: 'gpt-image-1',
-		capabilities: ['image'],
-	},
+	// {
+	// 	label: 'GPT Image 1',
+	// 	provider: 'openai',
+	// 	key: 'gpt-image-1',
+	// 	capabilities: ['image'],
+	// },
 ] as const;
 
 export type AIModel = (typeof AI_MODELS)[number];

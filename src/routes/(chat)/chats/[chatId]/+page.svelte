@@ -25,7 +25,7 @@
 			id: data.chat.id,
 			initialMessages: data.chat.messages,
 			sendExtraMessageFields: true,
-			api: '/api/ai',
+			api: `/api/chats/${data.chat.id}`,
 			generateId: createIdGenerator({
 				prefix: 'msg',
 				size: 16,

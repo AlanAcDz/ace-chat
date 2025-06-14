@@ -2,12 +2,40 @@ import { readFile } from 'fs/promises';
 import { createAnthropic } from '@ai-sdk/anthropic';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { createOpenAI } from '@ai-sdk/openai';
+import { z } from 'zod';
 
 import type { CoreMessage, LanguageModel } from 'ai';
 import { AI_MODELS } from '$lib/ai/models';
 import { getUserApiKey } from '$lib/server/data/api-keys';
 import { addMessageToChat } from '$lib/server/data/chats';
 import { getFullFilePath } from '$lib/server/storage';
+
+// Zod schema for request validation
+export const aiRequestSchema = z.object({
+	id: z.string().min(1, 'Chat ID is required'),
+	messages: z
+		.array(
+			z.object({
+				id: z.string().optional(),
+				chatId: z.string().optional(),
+				parentId: z.string().nullable().optional(),
+				role: z.enum(['system', 'user', 'assistant']),
+				content: z.string(),
+				model: z.string().optional(),
+				isStreaming: z.boolean().optional(),
+				hasWebSearch: z.boolean().optional(),
+				createdAt: z.string().optional(),
+				attachments: z.array(z.any()).optional(),
+				experimental_attachments: z.array(z.any()).optional(),
+				parts: z.array(z.any()).optional(),
+			})
+		)
+		.min(1, 'At least one message is required'),
+	model: z.string().min(1, 'Model is required'),
+	isSearchEnabled: z.boolean().default(false),
+});
+
+export type AiRequest = z.infer<typeof aiRequestSchema>;
 
 // Type for message with attachments (matches the Zod schema)
 interface MessageWithAttachments {
