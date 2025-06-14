@@ -1,12 +1,16 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { Chat } from '@ai-sdk/svelte';
 	import { AlertCircleIcon } from '@lucide/svelte';
 	import { createMutation } from '@tanstack/svelte-query';
+	import { createIdGenerator } from 'ai';
 	import { toast } from 'svelte-sonner';
 
 	import type { PageData } from './$types';
-	import { invalidate, replaceState } from '$app/navigation';
+	import { afterNavigate, invalidate, replaceState } from '$app/navigation';
 	import { page } from '$app/state';
+	import { AI_MODELS } from '$lib/ai/models';
+	import AssistantMessage from '$lib/components/chats/assistant-message.svelte';
 	import MessageInput from '$lib/components/chats/message-input.svelte';
 	import UserMessage from '$lib/components/chats/user-message.svelte';
 	import { Alert, AlertDescription, AlertTitle } from '$lib/components/ui/alert';
@@ -14,15 +18,25 @@
 	let { data }: { data: PageData } = $props();
 	let messagesContainer: HTMLElement;
 
-	// This function will be responsible for getting the AI response.
-	// You can call it on success of adding a message, or on mount for a new chat.
-	function getAIResponse() {
-		// Here you would typically use another mutation or the Vercel AI SDK's useChat hook
-		// to stream a response from your API.
-		console.log('Fetching AI response for chat:', data.chat.id);
-		// For example: $getAIResponseMutation.mutate({ chatId: data.chat.id });
-		toast.info('Generando respuesta de la IA...');
-	}
+	let isSearchEnabled = $state(false);
+	let selectedModel = $state(AI_MODELS[0].key);
+
+	const chat = $derived(
+		new Chat({
+			id: data.chat.id,
+			initialMessages: data.chat.messages,
+			sendExtraMessageFields: true,
+			api: '/api/ai',
+			generateId: createIdGenerator({
+				prefix: 'msg',
+				size: 16,
+			}),
+			onError: (error) => {
+				console.error('Error sending message:', error);
+				toast.error('Error al enviar el mensaje');
+			},
+		})
+	);
 
 	// Create mutation for adding messages to existing chat
 	const addMessageMutation = createMutation({
@@ -52,12 +66,23 @@
 
 	function scrollToBottom() {
 		if (messagesContainer) {
-			messagesContainer.scrollTop = messagesContainer.scrollHeight;
+			window.scrollTo({
+				top: messagesContainer.scrollHeight,
+				behavior: 'auto',
+			});
 		}
 	}
 
+	function getAIResponse() {
+		chat.reload({
+			body: {
+				model: selectedModel,
+				isSearchEnabled: isSearchEnabled,
+			},
+		});
+	}
+
 	onMount(() => {
-		scrollToBottom();
 		if (data.isNewChat) {
 			getAIResponse();
 			// Clean up the URL, so it doesn't trigger again on refresh
@@ -65,6 +90,10 @@
 			url.searchParams.delete('new');
 			replaceState(url, '');
 		}
+	});
+
+	afterNavigate(() => {
+		scrollToBottom();
 	});
 </script>
 
@@ -75,10 +104,12 @@
 <!-- Messages Container -->
 <main
 	bind:this={messagesContainer}
-	class="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 overflow-y-auto">
-	{#each data.chat.messages as msg (msg.id)}
+	class="mx-auto mb-8 flex w-full max-w-3xl flex-1 flex-col gap-6 overflow-y-auto">
+	{#each chat.messages as msg (msg.id)}
 		{#if msg.role === 'user'}
 			<UserMessage {msg} />
+		{:else if msg.role === 'assistant'}
+			<AssistantMessage msg={{ model: selectedModel, ...msg }} />
 		{/if}
 	{/each}
 </main>
@@ -96,4 +127,17 @@
 
 <MessageInput
 	isSubmitting={$addMessageMutation.isPending}
-	onSubmit={(formData) => $addMessageMutation.mutate(formData)} />
+	bind:message={chat.input}
+	bind:isSearchEnabled
+	bind:selectedModel
+	onSubmit={(data) =>
+		chat.handleSubmit(undefined, {
+			headers: {
+				'Content-Type': 'multipart/form-data',
+			},
+			experimental_attachments: data.files,
+			body: {
+				model: data.model,
+				isSearchEnabled: data.isSearchEnabled,
+			},
+		})} />

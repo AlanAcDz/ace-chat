@@ -46,6 +46,14 @@ class FileAttachments {
 	formatFileSize(bytes: number) {
 		return formatFileSize(bytes);
 	}
+
+	createFileLikeFileList() {
+		const dataTransfer = new DataTransfer();
+		this.attachedFiles.forEach((file) => {
+			dataTransfer.items.add(file);
+		});
+		return dataTransfer.files;
+	}
 }
 
 export const createFileAttachmentsHandler = () => new FileAttachments();

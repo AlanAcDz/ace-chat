@@ -253,3 +253,25 @@ export async function validateApiKeyAccess(grants: string[]): Promise<void> {
 		);
 	}
 }
+
+/**
+ * Get the API key for a user for a specific provider.
+ * If the user does not have a personal key, it will try to find a shared key.
+ */
+export async function getUserApiKey(userId: string, provider: string) {
+	// First, try to find a key specific to the user
+	const userKey = await db.query.apiKey.findFirst({
+		where: and(eq(apiKey.userId, userId), eq(apiKey.provider, provider)),
+	});
+
+	if (userKey) {
+		return userKey;
+	}
+
+	// If no user-specific key is found, look for a shared key for the provider
+	// TODO: If multiple shared keys exist for the same provider, we just take the first one.
+	// We might want a more sophisticated selection mechanism later.
+	return db.query.apiKey.findFirst({
+		where: and(eq(apiKey.scope, 'shared'), eq(apiKey.provider, provider)),
+	});
+}

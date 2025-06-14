@@ -8,31 +8,40 @@
 	import ModelPicker from './model-picker.svelte';
 
 	interface Props {
-		onSubmit: (formData: FormData) => Promise<void> | void;
 		isSubmitting?: boolean;
+		message?: string;
+		isSearchEnabled?: boolean;
+		selectedModel?: AIModel['key'];
+		onSubmit: (data: {
+			message: string;
+			model: string;
+			isSearchEnabled: boolean;
+			files: FileList;
+		}) => Promise<void> | void;
 	}
 
-	let { onSubmit, isSubmitting = false }: Props = $props();
+	let {
+		onSubmit,
+		isSubmitting = false,
+		message = $bindable(''),
+		isSearchEnabled = $bindable(false),
+		selectedModel = $bindable(AI_MODELS[0].key),
+	}: Props = $props();
 
-	let message = $state('');
-	let isSearchEnabled = $state(false);
-	let selectedModel = $state<AIModel['key']>(AI_MODELS[0].key);
 	let fileAttachmentsHandler = createFileAttachmentsHandler();
 
 	async function handleSubmit() {
 		if (!message.trim() && fileAttachmentsHandler.attachedFiles.length === 0) return;
 
-		const formData = new FormData();
-		formData.append('message', message);
-		formData.append('model', selectedModel);
-		formData.append('isSearchEnabled', String(isSearchEnabled));
+		const data = {
+			message,
+			model: selectedModel,
+			isSearchEnabled,
+			files: fileAttachmentsHandler.createFileLikeFileList(),
+		};
 
-		for (const file of fileAttachmentsHandler.attachedFiles) {
-			formData.append('files', file, file.name);
-		}
-		await onSubmit(formData);
+		await onSubmit(data);
 		// Clear the form after successful submission
-		message = '';
 		fileAttachmentsHandler.attachedFiles = [];
 		isSearchEnabled = false;
 	}
@@ -50,7 +59,7 @@
 </script>
 
 <!-- Message Input Section -->
-<div class="mx-auto w-full max-w-3xl">
+<div class="sticky bottom-0 z-10 mx-auto w-full max-w-3xl">
 	<div
 		class="relative rounded-t-lg border border-gray-300 bg-white shadow-sm dark:border-gray-600 dark:bg-gray-900">
 		<!-- Attached Files Display -->

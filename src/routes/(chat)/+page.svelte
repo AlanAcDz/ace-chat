@@ -9,6 +9,13 @@
 	import { Alert, AlertDescription, AlertTitle } from '$lib/components/ui/alert';
 	import { Skeleton } from '$lib/components/ui/skeleton';
 
+	interface MessageData {
+		message: string;
+		model: string;
+		isSearchEnabled: boolean;
+		files: FileList;
+	}
+
 	let { data }: { data: PageData } = $props();
 
 	// Create mutation for creating new chats
@@ -36,7 +43,16 @@
 		},
 	});
 
-	async function handleSubmit(formData: FormData) {
+	async function handleSubmit(data: MessageData) {
+		const formData = new FormData();
+		formData.append('message', data.message);
+		formData.append('model', data.model);
+		formData.append('isSearchEnabled', String(data.isSearchEnabled));
+
+		for (const file of data.files) {
+			formData.append('files', file, file.name);
+		}
+
 		$createChatMutation.mutate(formData);
 	}
 </script>

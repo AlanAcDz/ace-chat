@@ -7,7 +7,7 @@
 	import type { ChatGroups } from '$lib/server/data/chats';
 	import type { User } from '$lib/server/db/schema';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
 	import { Avatar, AvatarFallback, AvatarImage } from '$lib/components/ui/avatar/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
@@ -67,7 +67,7 @@
 			$chatsQuery.refetch();
 
 			// If we're currently viewing the deleted chat, redirect to home
-			if ($page.params.chatId === chatId) {
+			if (page.params.chatId === chatId) {
 				goto('/');
 			}
 
@@ -175,7 +175,7 @@
 							<Sidebar.Menu>
 								{#each chats as chat (chat.id)}
 									<Sidebar.MenuItem>
-										<Sidebar.MenuButton>
+										<Sidebar.MenuButton isActive={page.params.chatId === chat.id}>
 											{#snippet child({ props })}
 												<a
 													{...props}
