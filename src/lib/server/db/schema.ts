@@ -1,4 +1,3 @@
-import type { AnyPgColumn } from 'drizzle-orm/pg-core';
 import { relations, sql } from 'drizzle-orm';
 import {
 	boolean,
@@ -84,6 +83,7 @@ export const chat = pgTable(
 			.notNull()
 			.references(() => user.id, { onDelete: 'cascade' }),
 		title: text('title').notNull(),
+		isBranched: boolean('is_branched').default(false).notNull(),
 		createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
 		updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
 		sharePath: text('share_path'),
@@ -93,10 +93,6 @@ export const chat = pgTable(
 
 /**
  * The message table stores individual messages within a chat.
- * Chat branching is enabled by the self-referencing `parentId`.
- * A message with a `parentId` is a reply to a previous message.
- * If multiple messages share the same `parentId`, they represent different branches
- * of the conversation stemming from that common parent message.
  */
 export const message = pgTable('message', {
 	id: text('id')
@@ -106,7 +102,6 @@ export const message = pgTable('message', {
 	chatId: text('chat_id')
 		.notNull()
 		.references(() => chat.id, { onDelete: 'cascade' }),
-	parentId: text('parent_id').references((): AnyPgColumn => message.id, { onDelete: 'set null' }), // For chat branching
 	role: messageRoleEnum('role').notNull(),
 	content: text('content').notNull(),
 	model: text('model'),
@@ -187,12 +182,6 @@ export const messageRelations = relations(message, ({ one, many }) => ({
 		fields: [message.chatId],
 		references: [chat.id],
 	}),
-	parent: one(message, {
-		fields: [message.parentId],
-		references: [message.id],
-		relationName: 'parent_message',
-	}),
-	children: many(message, { relationName: 'parent_message' }),
 	attachments: many(attachment),
 }));
 

@@ -23,6 +23,7 @@ export async function getUserChats(userId: string, searchQuery?: string) {
 		.select({
 			id: chatTable.id,
 			title: chatTable.title,
+			isBranched: chatTable.isBranched,
 			updatedAt: chatTable.updatedAt,
 		})
 		.from(chatTable)
@@ -65,16 +66,16 @@ export function groupChatsByDate(chats: Awaited<ReturnType<typeof getUserChats>>
 	const thirtyDaysAgo = startOfDay(subDays(now, 30));
 
 	const groups = {
-		today: [] as Array<{ id: string; title: string }>,
-		yesterday: [] as Array<{ id: string; title: string }>,
-		last7Days: [] as Array<{ id: string; title: string }>,
-		last30Days: [] as Array<{ id: string; title: string }>,
-		older: [] as Array<{ id: string; title: string }>,
+		today: [] as Array<{ id: string; title: string; isBranched: boolean }>,
+		yesterday: [] as Array<{ id: string; title: string; isBranched: boolean }>,
+		last7Days: [] as Array<{ id: string; title: string; isBranched: boolean }>,
+		last30Days: [] as Array<{ id: string; title: string; isBranched: boolean }>,
+		older: [] as Array<{ id: string; title: string; isBranched: boolean }>,
 	};
 
 	for (const chat of chats) {
 		const chatDate = new Date(chat.updatedAt);
-		const chatOnly = { id: chat.id, title: chat.title };
+		const chatOnly = { id: chat.id, title: chat.title, isBranched: chat.isBranched };
 
 		if (isToday(chatDate)) {
 			groups.today.push(chatOnly);

@@ -179,7 +179,7 @@
 						(msg.experimental_attachments && msg.experimental_attachments.length > 0),
 				}} />
 		{:else if msg.role === 'assistant'}
-			<AssistantMessage msg={{ model: chatSettings.selectedModel, ...msg }} />
+			<AssistantMessage msg={{ model: chatSettings.selectedModel, ...msg }} chatId={data.chat.id} />
 		{/if}
 	{/each}
 </main>

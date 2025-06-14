@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { X } from '@lucide/svelte';
+	import { GitBranch, X } from '@lucide/svelte';
 	import MessageCirclePlus from '@lucide/svelte/icons/message-circle-plus';
 	import Search from '@lucide/svelte/icons/search';
 	import { createMutation, createQuery } from '@tanstack/svelte-query';
@@ -27,7 +27,7 @@
 
 	// Delete dialog state
 	let showDeleteDialog = $state(false);
-	let chatToDelete = $state<{ id: string; title: string } | null>(null);
+	let chatToDelete = $state<{ id: string; title: string; isBranched?: boolean } | null>(null);
 
 	// Query to fetch chats
 	const chatsQuery = $derived(
@@ -94,12 +94,15 @@
 	}
 
 	// Check if a group has chats
-	function hasChats(chats: Array<{ id: string; title: string }>): boolean {
+	function hasChats(chats: Array<{ id: string; title: string; isBranched: boolean }>): boolean {
 		return chats && chats.length > 0;
 	}
 
 	// Handle showing delete confirmation
-	function handleShowDeleteDialog(chat: { id: string; title: string }, event: Event) {
+	function handleShowDeleteDialog(
+		chat: { id: string; title: string; isBranched?: boolean },
+		event: Event
+	) {
 		event.preventDefault();
 		event.stopPropagation();
 		chatToDelete = chat;
@@ -181,6 +184,11 @@
 													{...props}
 													href="/chats/{chat.id}"
 													class={cn(props.class as string, 'group/link relative truncate')}>
+													{#if chat.isBranched}
+														<div title="Chat ramificado">
+															<GitBranch class="h-3 w-3 shrink-0 text-current" />
+														</div>
+													{/if}
 													<span class="truncate text-sm">{chat.title}</span>
 													<div
 														class="absolute inset-y-0 right-0 flex translate-x-full items-center justify-end transition-transform group-hover/link:translate-x-0">

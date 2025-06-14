@@ -1,11 +1,14 @@
 <script lang="ts">
 	import { code } from '@cartamd/plugin-code';
-	import { Check, Copy, RefreshCcw } from '@lucide/svelte';
+	import { Check, Copy, GitBranch, RefreshCcw } from '@lucide/svelte';
+	import { createMutation, useQueryClient } from '@tanstack/svelte-query';
 	import { Carta, Markdown } from 'carta-md';
 	import DOMPurify from 'isomorphic-dompurify';
+	import { toast } from 'svelte-sonner';
 
 	import type { Attachment } from '$lib/server/db/schema';
 	import type { Message } from 'ai';
+	import { goto } from '$app/navigation';
 	import { Button } from '../ui/button';
 
 	import 'carta-md/default.css'; /* Default theme */
@@ -16,12 +19,48 @@
 			attachments?: Attachment[];
 			model: string;
 		};
+		chatId: string;
 		onRetry?: () => void;
 	}
 
-	let { msg, onRetry }: Props = $props();
+	let { msg, chatId, onRetry }: Props = $props();
 
 	let isCopied = $state(false);
+
+	const queryClient = useQueryClient();
+
+	// Branch chat mutation
+	const branchMutation = createMutation({
+		mutationFn: async (messageId: string) => {
+			const response = await fetch(`/api/chats/${chatId}/branch`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ messageId }),
+			});
+
+			if (!response.ok) {
+				const errorText = await response.text();
+				throw new Error(errorText || 'Error al ramificar el chat');
+			}
+
+			return response.json();
+		},
+		onSuccess: ({ newChatId }) => {
+			toast.success('Chat ramificado exitosamente');
+			queryClient.invalidateQueries({ queryKey: ['chats'] });
+			goto(`/chats/${newChatId}`);
+		},
+		onError: (error) => {
+			console.error('Error branching chat:', error);
+			toast.error('Error al ramificar el chat');
+		},
+	});
+
+	function handleBranch() {
+		$branchMutation.mutate(msg.id);
+	}
 
 	// Get image attachments from database
 	let imageAttachments = $derived(
@@ -101,6 +140,14 @@
 				<RefreshCcw />
 			</Button>
 		{/if}
+		<Button
+			size="icon"
+			variant="ghost"
+			onclick={handleBranch}
+			disabled={$branchMutation.isPending}
+			title="Ramificar chat desde este mensaje">
+			<GitBranch />
+		</Button>
 		<Button size="icon" variant="ghost" onclick={copyMessage}>
 			{#if isCopied}
 				<Check class="text-green-600 dark:text-green-400" />
