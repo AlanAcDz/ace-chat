@@ -107,6 +107,9 @@ export const POST: RequestHandler = async ({ request }) => {
 				tools: openAISearchTools,
 				toolChoice: { type: 'tool', toolName: 'web_search_preview' },
 			}),
+			onError: (error) => {
+				console.error('AI request error:', error);
+			},
 			async onFinish({ text, files }) {
 				const savedMessage = await saveMessage({
 					chatId: id,

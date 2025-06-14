@@ -3,19 +3,19 @@ export const AI_MODELS = [
 		label: 'Gemini 2.0 Flash',
 		provider: 'google',
 		key: 'gemini-2.0-flash-exp',
-		capabilities: ['text', 'image'],
+		capabilities: ['text', 'tools', 'image'],
 	},
 	{
 		label: 'Gemini 2.5 Flash',
 		provider: 'google',
 		key: 'gemini-2.5-flash-preview-04-17',
-		capabilities: ['text', 'thinking', 'tools'],
+		capabilities: ['text', 'tools', 'thinking'],
 	},
 	{
 		label: 'Gemini 2.5 Pro',
 		provider: 'google',
 		key: 'gemini-2.5-pro-preview-05-06',
-		capabilities: ['text', 'thinking', 'tools'],
+		capabilities: ['text', 'tools', 'thinking'],
 	},
 	{
 		label: 'Claude 3.5 Sonnet',
@@ -39,13 +39,13 @@ export const AI_MODELS = [
 		label: 'O3 Mini',
 		provider: 'openai',
 		key: 'o3-mini',
-		capabilities: ['text', 'thinking', 'tools'],
+		capabilities: ['text', 'tools', 'thinking'],
 	},
 	{
 		label: 'O4 Mini',
 		provider: 'openai',
 		key: 'o4-mini',
-		capabilities: ['text', 'thinking', 'tools'],
+		capabilities: ['text', 'tools', 'thinking'],
 	},
 	{
 		label: 'GPT-4o Mini',
