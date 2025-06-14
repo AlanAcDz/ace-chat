@@ -77,7 +77,7 @@
 <!-- Messages Container -->
 <main
 	bind:this={messagesContainer}
-	class="mx-auto mb-8 flex w-full max-w-3xl flex-1 flex-col gap-6 overflow-y-auto">
+	class="mx-auto mb-8 flex w-full max-w-3xl flex-1 flex-col gap-4 overflow-y-auto">
 	{#each chat.messages as msg (msg.id)}
 		{#if msg.role === 'user'}
 			<UserMessage {msg} />

@@ -1,9 +1,15 @@
 <script lang="ts">
+	import { code } from '@cartamd/plugin-code';
 	import { Check, Copy, RefreshCcw } from '@lucide/svelte';
+	import { Carta, Markdown } from 'carta-md';
+	import DOMPurify from 'isomorphic-dompurify';
 
 	import type { Attachment } from '$lib/server/db/schema';
 	import type { Message } from 'ai';
 	import { Button } from '../ui/button';
+
+	import 'carta-md/default.css'; /* Default theme */
+	import '@cartamd/plugin-code/default.css';
 
 	interface Props {
 		msg: Message & {
@@ -28,6 +34,11 @@
 			.map((part: any) => part.data) || []
 	);
 
+	const carta = new Carta({
+		sanitizer: DOMPurify.sanitize,
+		extensions: [code()],
+	});
+
 	async function copyMessage() {
 		try {
 			await navigator.clipboard.writeText(msg.content);
@@ -41,8 +52,12 @@
 	}
 </script>
 
-<div class="group/assistant-message flex flex-col items-start justify-start gap-4">
-	<p class="prose prose-sm whitespace-pre-wrap dark:prose-invert">{msg.content}</p>
+<div class="group/assistant-message flex flex-col items-start justify-start px-2">
+	{#key msg.content}
+		<div class="prose prose-sm dark:prose-invert">
+			<Markdown {carta} value={msg.content} />
+		</div>
+	{/key}
 	{#if msg.role === 'assistant' && msg.content === ''}
 		<span class="animate-pulse">▍</span>
 	{/if}

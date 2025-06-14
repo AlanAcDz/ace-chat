@@ -126,3 +126,11 @@
 	-ms-overflow-style: none;
 	scrollbar-width: none;
 }
+
+pre.shiki {
+	@apply !bg-gray-50;
+	border-radius: var(--radius-md);
+	overflow-x: auto;
+	word-break: break-word;
+	white-space: pre-wrap;
+}
