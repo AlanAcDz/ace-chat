@@ -20,6 +20,8 @@
 
 	let isSearchEnabled = $state(page.url.searchParams.get('search') === 'true');
 	let selectedModel = $state(AI_MODELS[0].key);
+	let isAutoScrolling = $state(false);
+	let scrollInterval: ReturnType<typeof setInterval> | null = $state(null);
 
 	const chat = $derived(
 		new Chat({
@@ -31,9 +33,18 @@
 				prefix: 'msg',
 				size: 16,
 			}),
+			onResponse: () => {
+				startAutoScrolling();
+			},
+			onFinish: () => {
+				stopAutoScrolling();
+				// Final scroll to ensure we're at the bottom
+				scrollToBottom();
+			},
 			onError: (error) => {
 				console.error('Error sending message:', error);
 				toast.error('Error al enviar el mensaje');
+				stopAutoScrolling();
 			},
 		})
 	);
@@ -70,6 +81,34 @@
 		}
 	}
 
+	function startAutoScrolling() {
+		if (isAutoScrolling) return; // Prevent multiple intervals
+
+		isAutoScrolling = true;
+
+		// Scroll immediately
+		scrollToBottom();
+
+		// Set up continuous scrolling during streaming
+		scrollInterval = setInterval(() => {
+			if (messagesContainer && isAutoScrolling) {
+				window.scrollTo({
+					top: messagesContainer.scrollHeight,
+					behavior: 'smooth',
+				});
+			}
+		}, 100); // Scroll every 100ms during streaming
+	}
+
+	function stopAutoScrolling() {
+		isAutoScrolling = false;
+
+		if (scrollInterval) {
+			clearInterval(scrollInterval);
+			scrollInterval = null;
+		}
+	}
+
 	function getAIResponse() {
 		chat.reload({
 			body: {
@@ -84,6 +123,22 @@
 		}
 	}
 
+	function handleSubmit(data: { model: string; isSearchEnabled: boolean; files: FileList }) {
+		chat.handleSubmit(undefined, {
+			headers: {
+				'Content-Type': 'multipart/form-data',
+			},
+			experimental_attachments: data.files,
+			body: {
+				model: data.model,
+				isSearchEnabled: data.isSearchEnabled,
+			},
+		});
+
+		// Scroll down after user submits message
+		setTimeout(() => scrollToBottom(), 100);
+	}
+
 	onMount(() => {
 		if (data.isNewChat) {
 			getAIResponse();
@@ -92,6 +147,11 @@
 			url.searchParams.delete('new');
 			replaceState(url, '');
 		}
+
+		// Cleanup interval on component unmount
+		return () => {
+			stopAutoScrolling();
+		};
 	});
 
 	afterNavigate(() => {
@@ -132,14 +192,4 @@
 	bind:message={chat.input}
 	bind:isSearchEnabled
 	bind:selectedModel
-	onSubmit={(data) =>
-		chat.handleSubmit(undefined, {
-			headers: {
-				'Content-Type': 'multipart/form-data',
-			},
-			experimental_attachments: data.files,
-			body: {
-				model: data.model,
-				isSearchEnabled: data.isSearchEnabled,
-			},
-		})} />
+	onSubmit={handleSubmit} />
