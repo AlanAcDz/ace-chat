@@ -8,6 +8,7 @@
 	import MessageInput from '$lib/components/chats/message-input.svelte';
 	import { Alert, AlertDescription, AlertTitle } from '$lib/components/ui/alert';
 	import { Skeleton } from '$lib/components/ui/skeleton';
+	import { getChatSettingsContext } from '$lib/contexts/chat-settings.svelte';
 
 	interface MessageData {
 		message: string;
@@ -17,6 +18,9 @@
 	}
 
 	let { data }: { data: PageData } = $props();
+
+	// Get chat settings from context
+	const chatSettings = getChatSettingsContext();
 
 	// Create mutation for creating new chats
 	const createChatMutation = createMutation({
@@ -33,9 +37,9 @@
 
 			return response.json();
 		},
-		onSuccess: ({ newChatId, isSearchEnabled }) => {
+		onSuccess: ({ newChatId }) => {
 			data.queryClient.invalidateQueries({ queryKey: ['chats'] });
-			goto(`/chats/${newChatId}?new=true&search=${isSearchEnabled}`);
+			goto(`/chats/${newChatId}?new=true`);
 		},
 		onError: (error) => {
 			console.error('Error creating chat:', error);
@@ -54,6 +58,9 @@
 		}
 
 		$createChatMutation.mutate(formData);
+
+		// Reset search after creating chat (optional behavior)
+		chatSettings.resetSearchAfterChat();
 	}
 </script>
 
@@ -101,4 +108,10 @@
 	{/if}
 </div>
 
-<MessageInput onSubmit={handleSubmit} isSubmitting={$createChatMutation.isPending} />
+<MessageInput
+	onSubmit={handleSubmit}
+	isSubmitting={$createChatMutation.isPending}
+	selectedModel={chatSettings.selectedModel}
+	isSearchEnabled={chatSettings.isSearchEnabled}
+	onModelChange={chatSettings.setModel}
+	onSearchToggle={chatSettings.toggleSearch} />

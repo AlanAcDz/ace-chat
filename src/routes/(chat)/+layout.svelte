@@ -1,8 +1,12 @@
 <script lang="ts">
 	import AppSidebar from '$lib/components/layout/app-sidebar.svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
+	import { setChatSettingsContext } from '$lib/contexts/chat-settings.svelte';
 
 	let { children, data } = $props();
+
+	// Initialize chat settings context
+	setChatSettingsContext();
 </script>
 
 <svelte:head>

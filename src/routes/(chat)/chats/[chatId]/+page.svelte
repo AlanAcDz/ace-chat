@@ -9,17 +9,18 @@
 	import type { PageData } from './$types';
 	import { afterNavigate, replaceState } from '$app/navigation';
 	import { page } from '$app/state';
-	import { AI_MODELS } from '$lib/ai/models';
 	import AssistantMessage from '$lib/components/chats/assistant-message.svelte';
 	import MessageInput from '$lib/components/chats/message-input.svelte';
 	import UserMessage from '$lib/components/chats/user-message.svelte';
 	import { Alert, AlertDescription, AlertTitle } from '$lib/components/ui/alert';
+	import { getChatSettingsContext } from '$lib/contexts/chat-settings.svelte';
 
 	let { data }: { data: PageData } = $props();
 	let messagesContainer: HTMLElement;
 
-	let isSearchEnabled = $state(page.url.searchParams.get('search') === 'true');
-	let selectedModel = $state(AI_MODELS[0].key);
+	// Get chat settings from context
+	const chatSettings = getChatSettingsContext();
+
 	let isAutoScrolling = $state(false);
 	let scrollInterval: ReturnType<typeof setInterval> | null = $state(null);
 
@@ -109,8 +110,8 @@
 	function getAIResponse() {
 		chat.reload({
 			body: {
-				model: selectedModel,
-				isSearchEnabled: isSearchEnabled,
+				model: chatSettings.selectedModel,
+				isSearchEnabled: chatSettings.isSearchEnabled,
 			},
 		});
 
@@ -152,7 +153,7 @@
 	});
 
 	afterNavigate(() => {
-		scrollToBottom('auto');
+		setTimeout(() => scrollToBottom('auto'), 100);
 	});
 </script>
 
@@ -168,7 +169,7 @@
 		{#if msg.role === 'user'}
 			<UserMessage {msg} />
 		{:else if msg.role === 'assistant'}
-			<AssistantMessage msg={{ model: selectedModel, ...msg }} />
+			<AssistantMessage msg={{ model: chatSettings.selectedModel, ...msg }} />
 		{/if}
 	{/each}
 </main>
@@ -187,6 +188,8 @@
 <MessageInput
 	isSubmitting={chat.status === 'streaming'}
 	bind:message={chat.input}
-	bind:isSearchEnabled
-	bind:selectedModel
-	onSubmit={handleSubmit} />
+	isSearchEnabled={chatSettings.isSearchEnabled}
+	selectedModel={chatSettings.selectedModel}
+	onSubmit={handleSubmit}
+	onModelChange={chatSettings.setModel}
+	onSearchToggle={chatSettings.toggleSearch} />

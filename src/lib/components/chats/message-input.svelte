@@ -18,14 +18,18 @@
 			isSearchEnabled: boolean;
 			files: FileList;
 		}) => Promise<void> | void;
+		onModelChange?: (model: AIModel['key']) => void;
+		onSearchToggle?: () => void;
 	}
 
 	let {
 		onSubmit,
 		isSubmitting = false,
 		message = $bindable(''),
-		isSearchEnabled = $bindable(false),
-		selectedModel = $bindable(AI_MODELS[0].key),
+		isSearchEnabled = false,
+		selectedModel = AI_MODELS[0].key,
+		onModelChange,
+		onSearchToggle,
 	}: Props = $props();
 
 	let fileAttachmentsHandler = createFileAttachmentsHandler();
@@ -43,7 +47,6 @@
 		await onSubmit(data);
 		// Clear the form after successful submission
 		fileAttachmentsHandler.attachedFiles = [];
-		isSearchEnabled = false;
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
@@ -54,7 +57,7 @@
 	}
 
 	function handleModelSelect(modelKey: AIModel['key']) {
-		selectedModel = modelKey;
+		onModelChange?.(modelKey);
 	}
 </script>
 
@@ -115,7 +118,7 @@
 					variant={isSearchEnabled ? 'default' : 'outline'}
 					size="sm"
 					disabled={isSubmitting}
-					onclick={() => (isSearchEnabled = !isSearchEnabled)}
+					onclick={() => onSearchToggle?.()}
 					class="text-xs"
 					aria-label="Toggle search">
 					<Globe class="h-3 w-3" />
