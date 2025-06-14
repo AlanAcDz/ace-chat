@@ -62,3 +62,51 @@ export const AI_MODELS = [
 ] as const;
 
 export type AIModel = (typeof AI_MODELS)[number];
+
+/**
+ * Detect if the user message contains a request for image generation
+ */
+export function detectImageGenerationRequest(content: string): boolean {
+	const imageGenerationKeywords = [
+		// Spanish variations
+		'genera una imagen',
+		'generar imagen',
+		'crea una imagen',
+		'crear imagen',
+		'dibuja',
+		'dibujar',
+		'haz una imagen',
+		'hacer imagen',
+		'produce una imagen',
+		'producir imagen',
+		'diseña',
+		'diseñar',
+		'ilustra',
+		'ilustrar',
+		// English variations
+		'generate an image',
+		'generate image',
+		'create an image',
+		'create image',
+		'draw',
+		'make an image',
+		'make image',
+		'produce an image',
+		'produce image',
+		'design',
+		'illustrate',
+		'sketch',
+		'render',
+		// Common phrases
+		'imagen de',
+		'image of',
+		'picture of',
+		'foto de',
+		'drawing of',
+		'dibujo de',
+	];
+
+	const lowerContent = content.toLowerCase();
+
+	return imageGenerationKeywords.some((keyword) => lowerContent.includes(keyword.toLowerCase()));
+}

@@ -5,7 +5,7 @@ import { z } from 'zod';
 
 import type { RequestHandler } from './$types';
 import type { AiRequest } from '$lib/server/ai/messages';
-import { AI_MODELS } from '$lib/ai/models';
+import { AI_MODELS, detectImageGenerationRequest } from '$lib/ai/models';
 import {
 	aiRequestSchema,
 	createAIModelInstance,
@@ -61,6 +61,12 @@ export const POST: RequestHandler = async ({ request }) => {
 		const needsOpenAISearch = isSearchEnabled && modelConfig.provider === 'openai';
 		const supportsImageGeneration = modelConfig.capabilities.some((cap) => cap === 'image');
 
+		// Check if user is requesting image generation
+		const lastUserMessage = messages.findLast((msg) => msg.role === 'user');
+		const userWantsImageGeneration = lastUserMessage
+			? detectImageGenerationRequest(lastUserMessage.content)
+			: false;
+
 		// Get OpenAI tools if search is enabled for OpenAI models
 		let openAISearchTools = null;
 		if (needsOpenAISearch) {
@@ -86,9 +92,10 @@ export const POST: RequestHandler = async ({ request }) => {
 				prefix: 'msg',
 				size: 16,
 			}),
-			// Add Google image generation support
+			// Add Google image generation support only if user requests it
 			...(supportsImageGeneration &&
-				modelConfig.provider === 'google' && {
+				modelConfig.provider === 'google' &&
+				userWantsImageGeneration && {
 					providerOptions: {
 						google: {
 							responseModalities: ['TEXT', 'IMAGE'],
