@@ -7,6 +7,7 @@
 	import { toast } from 'svelte-sonner';
 
 	import type { PageData } from './$types';
+	import type { UIMessage } from 'ai';
 	import { afterNavigate, replaceState } from '$app/navigation';
 	import { page } from '$app/state';
 	import AssistantMessage from '$lib/components/chats/assistant-message.svelte';
@@ -14,6 +15,9 @@
 	import UserMessage from '$lib/components/chats/user-message.svelte';
 	import { Alert, AlertDescription, AlertTitle } from '$lib/components/ui/alert';
 	import { getChatSettingsContext } from '$lib/contexts/chat-settings.svelte';
+
+	// Extended type for messages that might have hasAttachments from database
+	type ExtendedUIMessage = UIMessage & { hasAttachments?: boolean };
 
 	let { data }: { data: PageData } = $props();
 	let messagesContainer: HTMLElement;
@@ -167,7 +171,13 @@
 	class="mx-auto mb-8 flex w-full max-w-3xl flex-1 flex-col gap-4 overflow-y-auto">
 	{#each chat.messages as msg (msg.id)}
 		{#if msg.role === 'user'}
-			<UserMessage {msg} />
+			<UserMessage
+				msg={{
+					...msg,
+					hasAttachments:
+						(msg as ExtendedUIMessage).hasAttachments ||
+						(msg.experimental_attachments && msg.experimental_attachments.length > 0),
+				}} />
 		{:else if msg.role === 'assistant'}
 			<AssistantMessage msg={{ model: chatSettings.selectedModel, ...msg }} />
 		{/if}

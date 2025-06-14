@@ -100,6 +100,7 @@ interface CreateChatParams {
 	model: string;
 	isSearchEnabled: boolean;
 	files: File[];
+	temporaryId?: string; // AI SDK temporary ID
 }
 
 export async function createChat({
@@ -108,6 +109,7 @@ export async function createChat({
 	model,
 	isSearchEnabled,
 	files,
+	temporaryId,
 }: CreateChatParams) {
 	// Get user's system prompt
 	const userData = await db.query.user.findFirst({
@@ -144,10 +146,12 @@ export async function createChat({
 		// Add the user message
 		messagesToInsert.push({
 			chatId: newChat.id,
+			temporaryId: temporaryId,
 			role: 'user',
 			content: messageContent,
 			model: model,
 			hasWebSearch: isSearchEnabled,
+			hasAttachments: files.length > 0,
 		});
 
 		// Insert all messages
@@ -183,6 +187,7 @@ interface AddMessageToChatParams {
 	model: string;
 	isSearchEnabled: boolean;
 	files: File[];
+	temporaryId?: string; // AI SDK temporary ID
 }
 
 export async function addMessageToChat({
@@ -192,6 +197,7 @@ export async function addMessageToChat({
 	model,
 	isSearchEnabled,
 	files,
+	temporaryId,
 }: AddMessageToChatParams) {
 	// Insert the user message and update chat timestamp in a transaction
 	const newMessageId = await db.transaction(async (tx) => {
@@ -200,10 +206,12 @@ export async function addMessageToChat({
 			.insert(message)
 			.values({
 				chatId: chatId,
+				temporaryId: temporaryId,
 				role: 'user',
 				content: messageContent,
 				model: model,
 				hasWebSearch: isSearchEnabled,
+				hasAttachments: files.length > 0,
 			})
 			.returning({ id: message.id });
 

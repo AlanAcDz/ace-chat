@@ -3,12 +3,13 @@
 
 	import type { Attachment } from '$lib/server/db/schema';
 	import type { UIMessage } from 'ai';
-	import { formatFileSize, getFileIcon } from '$lib/utils';
 	import { Button } from '../ui/button';
+	import Attachments from './attachments.svelte';
 
 	interface Props {
 		msg: UIMessage & {
 			attachments?: Attachment[];
+			hasAttachments?: boolean;
 		};
 		onRetry?: () => void;
 	}
@@ -38,42 +39,12 @@
 			<p class="whitespace-pre-wrap">{msg.content}</p>
 		</div>
 
-		<!-- Attachments -->
-		{#if msg.attachments && msg.attachments.length > 0}
-			<div class="mt-4 flex flex-wrap gap-2">
-				{#each msg.attachments as attachment (attachment.id)}
-					{@const IconComponent = getFileIcon(attachment.fileType)}
-					<button
-						onclick={() => window.open(`/api/files/${attachment.filePath}`, '_blank')}
-						class="flex cursor-pointer items-center gap-2 rounded-md border border-gray-200 bg-gray-50 p-2 transition-colors hover:bg-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-700">
-						<IconComponent class="size-5 text-gray-600 dark:text-gray-400" />
-						<div class="min-w-0 flex-1 text-start">
-							<p class="truncate text-sm font-medium text-gray-900 dark:text-gray-100">
-								{attachment.fileName}
-							</p>
-							<p class="text-xs text-gray-500 dark:text-gray-400">
-								{formatFileSize(attachment.fileSize)}
-							</p>
-						</div>
-					</button>
-				{/each}
-			</div>
-		{/if}
-		{#if msg.experimental_attachments && msg.experimental_attachments.length > 0}
-			<div class="mt-4 flex flex-wrap gap-2">
-				{#each msg.experimental_attachments as attachment (attachment.url)}
-					{@const IconComponent = getFileIcon(attachment.contentType || '')}
-					<div class="flex items-center gap-2 rounded-md border border-gray-200 bg-gray-50 p-2">
-						<IconComponent class="size-5 text-gray-600 dark:text-gray-400" />
-						<div class="min-w-0 flex-1 text-start">
-							<p class="truncate text-sm font-medium text-gray-900 dark:text-gray-100">
-								{attachment.name}
-							</p>
-						</div>
-					</div>
-				{/each}
-			</div>
-		{/if}
+		<!-- Attachments using the new unified component -->
+		<Attachments
+			messageId={msg.id}
+			attachments={msg.attachments}
+			experimentalAttachments={msg.experimental_attachments}
+			hasAttachments={msg.hasAttachments} />
 	</div>
 	<div
 		class="flex items-center gap-2 opacity-0 transition-opacity group-hover/user-message:opacity-100">

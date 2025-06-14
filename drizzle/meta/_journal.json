@@ -22,6 +22,20 @@
       "when": 1749776599667,
       "tag": "0002_tiny_maddog",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1749935998940,
+      "tag": "0003_broken_quentin_quire",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1749937760838,
+      "tag": "0004_past_firestar",
+      "breakpoints": true
     }
   ]
 }

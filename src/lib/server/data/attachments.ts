@@ -1,8 +1,8 @@
-import { and, count, desc, eq, inArray, sum } from 'drizzle-orm';
+import { and, count, desc, eq, inArray, or, sum } from 'drizzle-orm';
 
 import type { NewAttachment } from '$lib/server/db/schema';
 import { db } from '$lib/server/db';
-import { attachment } from '$lib/server/db/schema';
+import { attachment, message } from '$lib/server/db/schema';
 import { deleteFile, saveFile } from '$lib/server/storage';
 
 /**
@@ -100,6 +100,35 @@ export async function processAttachments(
 export async function getUserAttachments(userId: string) {
 	return db.query.attachment.findMany({
 		where: eq(attachment.userId, userId),
+		orderBy: [desc(attachment.createdAt)],
+	});
+}
+
+/**
+ * Get attachments for a specific message
+ * @param messageId - The message ID (could be database ID or temporary ID)
+ * @param userId - The user ID for security verification
+ * @returns Promise resolving to array of attachments
+ */
+export async function getMessageAttachments(messageId: string, userId: string) {
+	// First try to find the message by database ID, then by temporary ID
+	const messageRecord = await db.query.message.findFirst({
+		where: or(eq(message.id, messageId), eq(message.temporaryId, messageId)),
+		with: {
+			chat: {
+				columns: { userId: true },
+			},
+		},
+	});
+
+	// Check if message exists and belongs to the user
+	if (!messageRecord || messageRecord.chat.userId !== userId) {
+		return [];
+	}
+
+	// Get attachments for the message
+	return db.query.attachment.findMany({
+		where: eq(attachment.messageId, messageRecord.id),
 		orderBy: [desc(attachment.createdAt)],
 	});
 }

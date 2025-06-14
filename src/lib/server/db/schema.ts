@@ -102,6 +102,7 @@ export const message = pgTable('message', {
 	id: text('id')
 		.primaryKey()
 		.$defaultFn(() => createId('msg')),
+	temporaryId: text('temporary_id'), // AI SDK temporary ID for lookup
 	chatId: text('chat_id')
 		.notNull()
 		.references(() => chat.id, { onDelete: 'cascade' }),
@@ -111,6 +112,7 @@ export const message = pgTable('message', {
 	model: text('model'),
 	isStreaming: boolean('is_streaming').default(false),
 	hasWebSearch: boolean('has_web_search').default(false),
+	hasAttachments: boolean('has_attachments').default(false),
 	createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
 });
 

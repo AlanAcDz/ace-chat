@@ -39,6 +39,7 @@ export type AiRequest = z.infer<typeof aiRequestSchema>;
 
 // Type for message with attachments (matches the Zod schema)
 interface MessageWithAttachments {
+	id?: string; // AI SDK temporary ID
 	role: 'system' | 'user' | 'assistant';
 	content: string;
 	chatId?: string; // Database messages have this, new messages don't
@@ -257,6 +258,7 @@ export async function saveUserMessageIfNeeded(
 			model: modelKey,
 			isSearchEnabled,
 			files,
+			temporaryId: lastMessage.id,
 		});
 	}
 }
