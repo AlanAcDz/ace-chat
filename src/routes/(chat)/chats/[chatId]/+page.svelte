@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { Chat } from '@ai-sdk/svelte';
 	import { AlertCircleIcon } from '@lucide/svelte';
+	import { createMutation } from '@tanstack/svelte-query';
 	import { createIdGenerator } from 'ai';
 	import { toast } from 'svelte-sonner';
 
@@ -37,6 +38,29 @@
 		})
 	);
 
+	// Title generation mutation
+	const generateTitleMutation = createMutation({
+		mutationFn: async (chatId: string) => {
+			const response = await fetch(`/api/chats/${chatId}/title`, {
+				method: 'POST',
+			});
+
+			if (!response.ok) {
+				throw new Error('Error al generar el título');
+			}
+
+			return response.json();
+		},
+		onSuccess: () => {
+			// Invalidate all chats queries to refresh the sidebar (including search variants)
+			data.queryClient.invalidateQueries({ queryKey: ['chats'] });
+		},
+		onError: (error) => {
+			console.error('Error generating title:', error);
+			// Don't show error toast as title generation is not critical
+		},
+	});
+
 	function scrollToBottom() {
 		if (messagesContainer) {
 			window.scrollTo({
@@ -53,6 +77,11 @@
 				isSearchEnabled: isSearchEnabled,
 			},
 		});
+
+		// Generate title if this is a new chat (title is "Nuevo chat")
+		if (data.chat.title === 'Nuevo chat') {
+			$generateTitleMutation.mutate(data.chat.id);
+		}
 	}
 
 	onMount(() => {

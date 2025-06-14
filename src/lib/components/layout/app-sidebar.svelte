@@ -181,7 +181,7 @@
 													{...props}
 													href="/chats/{chat.id}"
 													class={cn(props.class as string, 'group/link relative truncate')}>
-													<span class="truncate">{chat.title}</span>
+													<span class="truncate text-sm">{chat.title}</span>
 													<div
 														class="absolute inset-y-0 right-0 flex translate-x-full items-center justify-end transition-transform group-hover/link:translate-x-0">
 														<span

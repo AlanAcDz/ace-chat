@@ -222,6 +222,33 @@ export async function addMessageToChat({
 }
 
 /**
+ * Update chat title by id for a user
+ */
+export async function updateChatTitle(chatId: string, userId: string, title: string) {
+	// Verify the chat exists and belongs to the user
+	const chatExists = await db.query.chat.findFirst({
+		where: and(eq(chatTable.id, chatId), eq(chatTable.userId, userId)),
+		columns: { id: true },
+	});
+
+	if (!chatExists) {
+		error(404, 'Chat no encontrado');
+	}
+
+	// Update the chat title
+	const [updatedChat] = await db
+		.update(chatTable)
+		.set({
+			title: title,
+			updatedAt: new Date(),
+		})
+		.where(and(eq(chatTable.id, chatId), eq(chatTable.userId, userId)))
+		.returning({ id: chatTable.id, title: chatTable.title });
+
+	return updatedChat;
+}
+
+/**
  * Delete a chat by id for a user
  */
 export async function deleteChat(chatId: string, userId: string) {

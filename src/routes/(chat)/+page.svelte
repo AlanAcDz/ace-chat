@@ -66,7 +66,7 @@
 		</div>
 	{:then user}
 		<h1 class="mb-6 text-4xl font-semibold text-gray-800 md:text-5xl dark:text-gray-200">
-			¿Cómo puedo ayudarte, {user.name || user.username}?
+			¿Cómo puedo ayudarte, {user.name?.split(' ')[0] || user.username}?
 		</h1>
 	{/await}
 	<!-- Error State -->
