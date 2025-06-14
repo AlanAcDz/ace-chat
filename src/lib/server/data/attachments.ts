@@ -6,6 +6,50 @@ import { attachment } from '$lib/server/db/schema';
 import { deleteFile, saveFile } from '$lib/server/storage';
 
 /**
+ * Process generated files and save them as attachments
+ */
+export async function processGeneratedFiles(
+	files: Array<{ mimeType: string; uint8Array?: Uint8Array; base64: string }>,
+	chatId: string,
+	messageId: string,
+	userId: string
+): Promise<void> {
+	const fileObjects: File[] = [];
+
+	for (const [index, file] of files.entries()) {
+		try {
+			// Determine file extension from MIME type
+			const extension =
+				file.mimeType === 'image/png'
+					? '.png'
+					: file.mimeType === 'image/jpeg'
+						? '.jpg'
+						: file.mimeType === 'image/webp'
+							? '.webp'
+							: file.mimeType === 'image/gif'
+								? '.gif'
+								: '.png';
+
+			const fileName = `generated-image-${Date.now()}-${index + 1}${extension}`;
+
+			// Create File object from the generated file data
+			// GeneratedFile has either uint8Array or base64 property
+			const fileData = file.uint8Array || new Uint8Array(Buffer.from(file.base64, 'base64'));
+			const blob = new Blob([fileData], { type: file.mimeType });
+			const fileObject = new File([blob], fileName, { type: file.mimeType });
+			fileObjects.push(fileObject);
+		} catch (error) {
+			console.error(`Error processing generated file ${index + 1}:`, error);
+		}
+	}
+
+	// Save files as attachments (fire-and-forget)
+	if (fileObjects.length > 0) {
+		processAttachments(chatId, messageId, userId, fileObjects);
+	}
+}
+
+/**
  * Processes and saves chat message attachments in the background.
  * This function is designed to be called without `await` (fire-and-forget).
  * It handles its own errors to avoid crashing the main application thread.

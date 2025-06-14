@@ -247,8 +247,6 @@ export async function createAIModelInstance(
 		throw new Error('Invalid model');
 	}
 
-	console.log('search enabled', isSearchEnabled);
-
 	// Get the provider from the model config
 	const provider = modelConfig.provider;
 
@@ -288,7 +286,6 @@ export async function createAIModelInstance(
 
 		// Configure Google models with search grounding when enabled
 		if (isSearchEnabled) {
-			console.log('Using search grounding');
 			return google(modelConfig.key, {
 				useSearchGrounding: true,
 			});
