@@ -319,5 +319,17 @@
   "validation_system_prompt_max_length": "System prompt cannot be more than 2000 characters",
   "validation_password_min_length": "Password must be at least 6 characters",
   "validation_password_max_length": "Password cannot be more than 255 characters",
-  "validation_passwords_no_match": "Passwords do not match"
+  "validation_passwords_no_match": "Passwords do not match",
+  "message_edit_valid_index_required": "Valid message index is required",
+  "message_edit_valid_content_required": "Valid message content is required",
+  "message_edit_index_out_of_range": "Message index out of range",
+  "message_edit_user_messages_only": "Can only edit user messages",
+  "message_edit_update_success": "Message updated successfully",
+  "message_edit_delete_success": "Messages deleted successfully",
+  "message_edit_retry_error": "Error retrying message",
+  "message_edit_success": "Message edited successfully",
+  "message_edit_error": "Error editing message",
+  "message_edit_placeholder": "Type your message...",
+  "message_edit_cancel": "Cancel",
+  "message_edit_save": "Save"
 }

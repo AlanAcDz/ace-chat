@@ -319,5 +319,17 @@
   "validation_system_prompt_max_length": "El prompt del sistema no puede tener más de 2000 caracteres",
   "validation_password_min_length": "La contraseña debe tener al menos 6 caracteres",
   "validation_password_max_length": "La contraseña no puede tener más de 255 caracteres",
-  "validation_passwords_no_match": "Las contraseñas no coinciden"
+  "validation_passwords_no_match": "Las contraseñas no coinciden",
+  "message_edit_valid_index_required": "Se requiere un índice de mensaje válido",
+  "message_edit_valid_content_required": "Se requiere contenido de mensaje válido",
+  "message_edit_index_out_of_range": "Índice de mensaje fuera de rango",
+  "message_edit_user_messages_only": "Solo se pueden editar mensajes de usuario",
+  "message_edit_update_success": "Mensaje actualizado exitosamente",
+  "message_edit_delete_success": "Mensajes eliminados exitosamente",
+  "message_edit_retry_error": "Error al reintentar el mensaje",
+  "message_edit_success": "Mensaje editado exitosamente",
+  "message_edit_error": "Error al editar el mensaje",
+  "message_edit_placeholder": "Escribe tu mensaje...",
+  "message_edit_cancel": "Cancelar",
+  "message_edit_save": "Guardar"
 }

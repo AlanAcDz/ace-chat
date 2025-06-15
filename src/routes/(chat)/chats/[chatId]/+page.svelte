@@ -97,14 +97,44 @@
 			return response.json();
 		},
 		onSuccess: () => {
-			toast.success('Mensajes eliminados exitosamente');
+			toast.success(m.message_edit_delete_success());
 			data.queryClient.invalidateQueries({ queryKey: ['chats'] });
 			// Trigger AI response generation after successful deletion
 			getAIResponse();
 		},
 		onError: (error) => {
 			console.error('Error retrying message:', error);
-			toast.error('Error al reintentar el mensaje');
+			toast.error(m.message_edit_retry_error());
+		},
+	});
+
+	// Edit message mutation
+	const editMessageMutation = createMutation({
+		mutationFn: async ({ messageIndex, content }: { messageIndex: number; content: string }) => {
+			const response = await fetch(`/api/chats/${data.chat.id}/messages`, {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ messageIndex, content }),
+			});
+
+			if (!response.ok) {
+				const errorText = await response.text();
+				throw new Error(errorText || 'Error editing message');
+			}
+
+			return response.json();
+		},
+		onSuccess: () => {
+			toast.success(m.message_edit_success());
+			data.queryClient.invalidateQueries({ queryKey: ['chats'] });
+			// Trigger AI response generation after successful edit
+			getAIResponse();
+		},
+		onError: (error) => {
+			console.error('Error editing message:', error);
+			toast.error(m.message_edit_error());
 		},
 	});
 
@@ -149,6 +179,19 @@
 
 		// Delete messages from the database using message position
 		$retryMessageMutation.mutate(messageIndex);
+	}
+
+	function handleEdit(messageIndex: number, content: string) {
+		// Update the message content locally first
+		const updatedMessages = [...chat.messages];
+		updatedMessages[messageIndex] = { ...updatedMessages[messageIndex], content };
+
+		// Remove messages after the edited one
+		const messagesToKeep = updatedMessages.slice(0, messageIndex + 1);
+		chat.messages = messagesToKeep;
+
+		// Update the message in the database and delete subsequent messages
+		$editMessageMutation.mutate({ messageIndex, content });
 	}
 
 	function getAIResponse() {
@@ -217,7 +260,8 @@
 					hasAttachments:
 						(msg as ExtendedUIMessage).hasAttachments ||
 						(msg.experimental_attachments && msg.experimental_attachments.length > 0),
-				}} />
+				}}
+				onEdit={(content) => handleEdit(index, content)} />
 		{:else if msg.role === 'assistant'}
 			<AssistantMessage
 				msg={{ model: chatSettings.selectedModel, ...msg }}
