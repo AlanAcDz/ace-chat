@@ -11,6 +11,7 @@
 	import AnthropicIcon from '$lib/components/icons/anthropic-icon.svelte';
 	import GoogleIcon from '$lib/components/icons/google-icon.svelte';
 	import OpenaiIcon from '$lib/components/icons/openai-icon.svelte';
+	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Switch } from '$lib/components/ui/switch';
@@ -208,9 +209,9 @@
 					</p>
 					<div class="mb-4 flex flex-wrap gap-2">
 						{#each provider.models as model (model.key)}
-							<span class="rounded-full bg-gray-700 px-3 py-1 text-xs text-white">
+							<Badge>
 								{model.label}
-							</span>
+							</Badge>
 						{/each}
 					</div>
 
@@ -261,7 +262,7 @@
 							href={provider.linkUrl}
 							target="_blank"
 							rel="noopener noreferrer"
-							class="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">
+							class="text-primary hover:text-primary/80">
 							{provider.link}
 						</a>
 					</p>

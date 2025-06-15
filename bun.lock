@@ -10,6 +10,9 @@
         "@ai-sdk/openai-compatible": "^0.2.14",
         "@ai-sdk/svelte": "^2.1.12",
         "@cartamd/plugin-code": "^4.2.0",
+        "@fontsource-variable/fira-code": "^5.2.6",
+        "@fontsource-variable/geist": "^5.2.6",
+        "@fontsource-variable/lora": "^5.2.6",
         "@node-rs/argon2": "^2.0.2",
         "@oslojs/crypto": "^1.0.1",
         "@oslojs/encoding": "^1.1.0",
@@ -209,6 +212,12 @@
     "@floating-ui/dom": ["@floating-ui/dom@1.7.1", "", { "dependencies": { "@floating-ui/core": "^1.7.1", "@floating-ui/utils": "^0.2.9" } }, "sha512-cwsmW/zyw5ltYTUeeYJ60CnQuPqmGwuGVhG9w0PRaRKkAyi38BT5CKrpIbb+jtahSwUl04cWzSx9ZOIxeS6RsQ=="],
 
     "@floating-ui/utils": ["@floating-ui/utils@0.2.9", "", {}, "sha512-MDWhGtE+eHw5JW7lq4qhc5yRLS11ERl1c7Z6Xd0a58DozHES6EnNNwUWbMiG4J9Cgj053Bhk8zvlhFYKVhULwg=="],
+
+    "@fontsource-variable/fira-code": ["@fontsource-variable/fira-code@5.2.6", "", {}, "sha512-TZe+3xOB0JofZOTNeITYVsD1y/OiFucwTmcmhC19mj+GOgCnNkbp7bb1Jobfg+HjlAHr11HdptENKu0B+VkWLg=="],
+
+    "@fontsource-variable/geist": ["@fontsource-variable/geist@5.2.6", "", {}, "sha512-Bt9pdD55Fojq4h9yFKQAzh5+Xj4tKFpwbcDzK6t5PPSH2GrjPoPqm6N8y+tK6vzwKZ9hHyaOz/tAbO9cQd9UFQ=="],
+
+    "@fontsource-variable/lora": ["@fontsource-variable/lora@5.2.6", "", {}, "sha512-jBiQEQXX6jUgdOhJwcHaJFXT+Zozu2zMMoqcamdJaHxF3cc+ZBUbvcNpD2vL7J24KypLKwvEIYVaU+FjPdr9MQ=="],
 
     "@gcornut/valibot-json-schema": ["@gcornut/valibot-json-schema@0.31.0", "", { "dependencies": { "valibot": "~0.31.0" }, "optionalDependencies": { "@types/json-schema": ">= 7.0.14", "esbuild": ">= 0.18.20", "esbuild-runner": ">= 2.2.2" }, "bin": { "valibot-json-schema": "bin/index.js" } }, "sha512-3xGptCurm23e7nuPQkdrE5rEs1FeTPHhAUsBuwwqG4/YeZLwJOoYZv+fmsppUEfo5y9lzUwNQrNqLS/q7HMc7g=="],
 

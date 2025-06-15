@@ -19,7 +19,7 @@
 	let { user, currentUserId, canUpdate, canDelete, onEdit, onDelete }: Props = $props();
 </script>
 
-<div class="flex items-center gap-4 rounded-lg border border-gray-200 p-4 hover:bg-gray-50">
+<div class="flex items-center gap-4 rounded-lg border border-secondary bg-secondary/20 p-4">
 	<!-- User avatar -->
 	<Avatar class="h-12 w-12">
 		<AvatarImage src={user.avatarUrl} alt={user.name || user.username} />
@@ -65,7 +65,6 @@
 			<Button
 				variant="ghost"
 				size="sm"
-				class="text-gray-600 hover:bg-gray-100 hover:text-gray-700"
 				onclick={(e) => {
 					e.stopPropagation();
 					onEdit(user);

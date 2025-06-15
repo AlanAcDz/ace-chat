@@ -156,7 +156,7 @@
 					</Button>
 				{/if}
 			</div>
-			<div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
+			<div class="rounded-lg border border-secondary bg-secondary/20 p-4">
 				<p class="text-sm">
 					Gestiona los usuarios del sistema y las invitaciones pendientes. Los usuarios invitados
 					podrán registrarse con el nombre de usuario especificado y recibirán los permisos

@@ -33,7 +33,7 @@
 
 <div class="group/user-message flex flex-col items-end justify-end gap-2">
 	<!-- Message Content -->
-	<div class="w-full max-w-lg min-w-0 flex-1 rounded-lg bg-gray-100 p-4 dark:bg-gray-800">
+	<div class="w-full max-w-lg min-w-0 flex-1 rounded-lg bg-secondary/50 p-4">
 		<!-- Message Text -->
 		<div class="prose prose-sm max-w-none break-words dark:prose-invert">
 			<p class="whitespace-pre-wrap">{msg.content}</p>

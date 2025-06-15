@@ -137,7 +137,7 @@
 		<!-- Header -->
 		<div class="space-y-2">
 			<h1 class="text-2xl font-bold text-gray-900">Archivos Adjuntos</h1>
-			<div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
+			<div class="rounded-lg border border-secondary bg-secondary/20 p-4">
 				<p class="text-sm">
 					Gestiona tus archivos y adjuntos subidos. Ten en cuenta que eliminar archivos aquí los
 					eliminará de los hilos relevantes, pero no eliminará los hilos. Esto puede llevar a
@@ -155,6 +155,7 @@
 				<div class="flex items-center justify-between">
 					<div class="flex h-8 items-center gap-2">
 						<Checkbox
+							class="border-accent"
 							checked={selectAll}
 							onCheckedChange={() => handleSelectAll(attachments)}
 							id="select-all" />
@@ -178,7 +179,7 @@
 				<div class="space-y-2">
 					{#each attachments as attachment (attachment.id)}
 						<div
-							class="flex cursor-pointer items-center gap-4 rounded-lg border border-gray-200 p-4 hover:bg-gray-50"
+							class="flex cursor-pointer items-center gap-4 rounded-lg border border-secondary bg-secondary/20 p-4 hover:bg-secondary/60"
 							onclick={() => handleSelect(attachment.id, attachments)}
 							role="button"
 							tabindex="0"
@@ -189,13 +190,14 @@
 								}
 							}}>
 							<Checkbox
+								class="border-accent"
 								checked={selectedIds.includes(attachment.id)}
 								onCheckedChange={() => handleSelect(attachment.id, attachments)}
 								id="attachment-{attachment.id}"
 								onclick={(e) => e.stopPropagation()} />
 
 							<!-- File preview/icon -->
-							<div class="flex h-12 w-12 items-center justify-center rounded-lg bg-gray-100">
+							<div class="flex h-12 w-12 items-center justify-center rounded-lg bg-secondary/20">
 								{#if attachment.fileType.startsWith('image/')}
 									<img
 										src="/api/files/{attachment.filePath}"
@@ -211,7 +213,7 @@
 							<div class="flex flex-1 flex-col">
 								<div class="flex items-center gap-2">
 									<button
-										class="text-left font-medium text-gray-900 hover:text-blue-600 hover:underline"
+										class="text-left font-medium text-gray-900 hover:text-primary hover:underline"
 										onclick={(e) => {
 											e.stopPropagation();
 											window.open(`/api/files/${attachment.filePath}`, '_blank');

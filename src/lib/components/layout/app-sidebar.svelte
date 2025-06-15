@@ -141,14 +141,11 @@
 		<!-- Search Bar -->
 		<div class="relative">
 			<Search class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-			<Input
-				bind:value={searchQuery}
-				placeholder="Buscar chats..."
-				class="border-sidebar-border bg-sidebar-accent/50 pl-9" />
+			<Input bind:value={searchQuery} placeholder="Buscar chats..." class="pl-9" />
 		</div>
 	</Sidebar.Header>
 
-	<Sidebar.Content class="p-4">
+	<Sidebar.Content>
 		<!-- Chat List -->
 		{#if $chatsQuery.isPending}
 			<!-- Loading state -->
@@ -189,7 +186,7 @@
 															<GitBranch class="h-3 w-3 shrink-0 text-current" />
 														</div>
 													{/if}
-													<span class="truncate text-sm">{chat.title}</span>
+													<span class="truncate text-xs">{chat.title}</span>
 													<div
 														class="absolute inset-y-0 right-0 flex translate-x-full items-center justify-end transition-transform group-hover/link:translate-x-0">
 														<span

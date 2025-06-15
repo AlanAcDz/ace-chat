@@ -22,7 +22,7 @@
 	let { invite, canDelete, onCopyLink, onDelete }: Props = $props();
 </script>
 
-<div class="flex items-center gap-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
+<div class="flex items-center gap-4 rounded-lg border border-secondary bg-secondary/20 p-4">
 	<!-- Invite icon -->
 	<div class="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
 		<Mail class="h-6 w-6" />
