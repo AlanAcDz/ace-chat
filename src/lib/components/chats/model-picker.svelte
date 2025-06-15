@@ -9,9 +9,9 @@
 		Image as ImageIcon,
 		Text,
 	} from '@lucide/svelte';
+	import { createQuery } from '@tanstack/svelte-query';
 
 	import type { AIModel } from '$lib/ai/models.js';
-	import { AI_MODELS } from '$lib/ai/models.js';
 	import AnthropicIcon from '$lib/components/icons/anthropic-icon.svelte';
 	import GoogleIcon from '$lib/components/icons/google-icon.svelte';
 	import OpenAIIcon from '$lib/components/icons/openai-icon.svelte';
@@ -33,7 +33,37 @@
 	let open = $state(false);
 	let triggerRef = $state<HTMLButtonElement>(null!);
 
-	const selectedModel = $derived(AI_MODELS.find((model) => model.key === value));
+	// Fetch available models using svelte-query
+	const modelsQuery = createQuery({
+		queryKey: ['available-models'],
+		queryFn: async () => {
+			const response = await fetch('/api/models/available');
+			if (!response.ok) {
+				throw new Error('Failed to fetch available models');
+			}
+			const data = await response.json();
+			return data.models as AIModel[];
+		},
+		staleTime: 5 * 60 * 1000, // 5 minutes
+		gcTime: 10 * 60 * 1000, // 10 minutes
+	});
+
+	const selectedModel = $derived($modelsQuery.data?.find((model) => model.key === value));
+	const availableModels = $derived($modelsQuery.data || []);
+
+	// Auto-select first available model if current selection is not available
+	$effect(() => {
+		if (availableModels.length > 0) {
+			if (!value || !availableModels.some((model) => model.key === value)) {
+				// No model selected or current model is not available, select the first available one
+				const firstAvailableModel = availableModels[0];
+				if (firstAvailableModel) {
+					value = firstAvailableModel.key;
+					onSelect?.(firstAvailableModel.key);
+				}
+			}
+		}
+	});
 
 	// We want to refocus the trigger button when the user selects
 	// an item from the list so users can continue navigating the
@@ -111,7 +141,7 @@
 			<Command.List>
 				<Command.Empty>{m.model_picker_not_found()}</Command.Empty>
 				<Command.Group>
-					{#each AI_MODELS as model (model.key)}
+					{#each availableModels as model (model.key)}
 						{@const ProviderIcon = getProviderIcon(model.provider)}
 						<Command.Item
 							value={model.key}
@@ -126,8 +156,7 @@
 								<div class="flex gap-1">
 									{#each model.capabilities as capability (capability)}
 										{@const CapabilityIcon = getCapabilityIcon(capability)}
-										<div
-											class="flex items-center gap-1 rounded bg-gray-100 px-2 py-1 dark:bg-gray-800">
+										<div class="flex items-center gap-1 rounded bg-secondary px-2 py-1">
 											<CapabilityIcon class="h-3 w-3 text-gray-600 dark:text-gray-400" />
 										</div>
 									{/each}

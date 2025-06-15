@@ -207,6 +207,7 @@
   "model_picker_placeholder": "Select model...",
   "model_picker_search_placeholder": "Search model...",
   "model_picker_not_found": "Model not found.",
+  "model_picker_no_api_key": "no API key",
   "share_button_title": "Share chat",
   "share_button_share_error": "Error sharing chat",
   "share_button_unshare_error": "Error unsharing chat",

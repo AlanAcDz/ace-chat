@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { ActionResult } from '@sveltejs/kit';
 	import { Server, Zap } from '@lucide/svelte';
+	import { useQueryClient } from '@tanstack/svelte-query';
 	import { toast } from 'svelte-sonner';
 
 	import type { SubmitFunction } from './$types';
@@ -21,6 +22,9 @@
 
 	let { data } = $props();
 
+	// Get query client for invalidating cache
+	const queryClient = useQueryClient();
+
 	// Helper function to check if user has permission for shared API keys
 	function canCreateSharedKeys(): boolean {
 		return hasGrant(data.userGrants as UserGrant[], 'api-keys:create:shared');
@@ -35,6 +39,8 @@
 			if (result.type === 'success' && result.data) {
 				toast.success(result.data.message || m.settings_api_keys_save_success());
 				await invalidate('app:api-keys');
+				// Also invalidate the available models query so model picker updates
+				queryClient.invalidateQueries({ queryKey: ['available-models'] });
 			} else if (result.type === 'failure' && result.data) {
 				toast.error(result.data.error || m.settings_api_keys_save_error());
 			} else {
@@ -139,6 +145,8 @@
 				if (result.type === 'success') {
 					toast.success(result.data?.message || m.settings_api_keys_scope_update_success());
 					await invalidate('app:api-keys');
+					// Also invalidate the available models query so model picker updates
+					queryClient.invalidateQueries({ queryKey: ['available-models'] });
 				} else if (result.type === 'failure') {
 					toast.error(result.data?.error || m.settings_api_keys_scope_update_error());
 					// Revert the switch state

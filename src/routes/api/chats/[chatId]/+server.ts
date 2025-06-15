@@ -54,7 +54,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		const transformedMessages = await transformMessagesWithAttachments(messages);
 
 		// Get model configuration
-		const modelConfig = AI_MODELS.find((m) => m.key === modelKey);
+		const modelConfig = AI_MODELS.find((model) => model.key === modelKey);
 		if (!modelConfig) {
 			throw new Error(m.api_error_invalid_model());
 		}

@@ -275,3 +275,28 @@ export async function getUserApiKey(userId: string, provider: string) {
 		where: and(eq(apiKey.scope, 'shared'), eq(apiKey.provider, provider)),
 	});
 }
+
+/**
+ * Get all providers that have API keys available for a user (either personal or shared)
+ */
+export async function getAvailableProviders(userId: string): Promise<string[]> {
+	// Get user's personal API keys
+	const userKeys = await db
+		.select({ provider: apiKey.provider })
+		.from(apiKey)
+		.where(eq(apiKey.userId, userId));
+
+	// Get all shared API keys
+	const sharedKeys = await db
+		.select({ provider: apiKey.provider })
+		.from(apiKey)
+		.where(eq(apiKey.scope, 'shared'));
+
+	// Combine and deduplicate providers
+	const allProviders = new Set([
+		...userKeys.map((key) => key.provider),
+		...sharedKeys.map((key) => key.provider),
+	]);
+
+	return Array.from(allProviders);
+}

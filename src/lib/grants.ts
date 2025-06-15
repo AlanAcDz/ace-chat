@@ -43,3 +43,10 @@ export function hasAllGrants(
 ): boolean {
 	return grants.every((grant) => userGrants.includes(grant));
 }
+
+export function hasAnyGrant(
+	userGrants: readonly UserGrant[],
+	grants: readonly UserGrant[]
+): boolean {
+	return grants.some((grant) => userGrants.includes(grant));
+}

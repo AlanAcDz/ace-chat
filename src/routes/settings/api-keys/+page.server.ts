@@ -2,7 +2,7 @@ import { error, fail } from '@sveltejs/kit';
 
 import type { Actions, PageServerLoad } from './$types';
 import type { UserGrant } from '$lib/grants';
-import { hasAllGrants, hasGrant } from '$lib/grants';
+import { hasAnyGrant, hasGrant } from '$lib/grants';
 import { m } from '$lib/paraglide/messages.js';
 import { requireLogin } from '$lib/server/auth';
 import {
@@ -17,10 +17,7 @@ export const load: PageServerLoad = async ({ depends }) => {
 
 	// Check permissions
 	if (
-		!hasAllGrants(user.grants as UserGrant[], [
-			'api-keys:create:personal',
-			'api-keys:create:shared',
-		])
+		!hasAnyGrant(user.grants as UserGrant[], ['api-keys:create:personal', 'api-keys:create:shared'])
 	) {
 		throw error(403, 'Insufficient permissions');
 	}
