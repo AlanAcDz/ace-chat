@@ -4,12 +4,12 @@ import type { AIModel } from '$lib/ai/models';
 import { AI_MODELS } from '$lib/ai/models';
 
 interface ChatSettings {
-	selectedModel: AIModel['key'];
+	selectedModel: AIModel['key'] | string;
 	isSearchEnabled: boolean;
 }
 
 class ChatSettingsContext {
-	selectedModel = $state<AIModel['key']>(AI_MODELS[0].key);
+	selectedModel = $state<AIModel['key'] | string>(AI_MODELS[0].key);
 	isSearchEnabled = $state<boolean>(false);
 
 	constructor() {
@@ -37,7 +37,7 @@ class ChatSettingsContext {
 		}
 	}
 
-	setModel = (model: AIModel['key']) => {
+	setModel = (model: AIModel['key'] | string) => {
 		this.selectedModel = model;
 	};
 

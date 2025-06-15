@@ -12,14 +12,14 @@
 		isSubmitting?: boolean;
 		message?: string;
 		isSearchEnabled?: boolean;
-		selectedModel?: AIModel['key'];
+		selectedModel?: AIModel['key'] | string;
 		onSubmit: (data: {
 			message: string;
 			model: string;
 			isSearchEnabled: boolean;
 			files: FileList;
 		}) => Promise<void> | void;
-		onModelChange?: (model: AIModel['key']) => void;
+		onModelChange?: (model: AIModel['key'] | string) => void;
 		onSearchToggle?: () => void;
 	}
 
@@ -57,7 +57,7 @@
 		}
 	}
 
-	function handleModelSelect(modelKey: AIModel['key']) {
+	function handleModelSelect(modelKey: AIModel['key'] | string) {
 		onModelChange?.(modelKey);
 	}
 </script>

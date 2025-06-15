@@ -195,20 +195,17 @@
 							{provider.name}
 						</h3>
 						{#if isApiKeyConfigured(provider.key)}
-							<span
-								class="rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-200">
+							<Badge variant="outline">
 								{m.settings_api_keys_configured()}
-							</span>
+							</Badge>
 							{#if data.apiKeys[provider.key]?.scope === 'shared'}
-								<span
-									class="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+								<Badge variant="secondary">
 									{m.settings_api_keys_shared()}
-								</span>
+								</Badge>
 							{:else}
-								<span
-									class="rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-800 dark:bg-gray-900 dark:text-gray-200">
+								<Badge variant="outline">
 									{m.settings_api_keys_personal()}
-								</span>
+								</Badge>
 							{/if}
 						{/if}
 					</div>
@@ -292,20 +289,17 @@
 						{provider.name}
 					</h3>
 					{#if data.apiKeys[provider.key]?.url}
-						<span
-							class="rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-200">
+						<Badge variant="outline">
 							{m.settings_api_keys_configured()}
-						</span>
+						</Badge>
 						{#if data.apiKeys[provider.key]?.scope === 'shared'}
-							<span
-								class="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+							<Badge variant="secondary">
 								{m.settings_api_keys_shared()}
-							</span>
+							</Badge>
 						{:else}
-							<span
-								class="rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-800 dark:bg-gray-900 dark:text-gray-200">
+							<Badge variant="outline">
 								{m.settings_api_keys_personal()}
-							</span>
+							</Badge>
 						{/if}
 					{/if}
 				</div>

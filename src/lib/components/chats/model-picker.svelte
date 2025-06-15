@@ -14,6 +14,8 @@
 	import type { AIModel } from '$lib/ai/models.js';
 	import AnthropicIcon from '$lib/components/icons/anthropic-icon.svelte';
 	import GoogleIcon from '$lib/components/icons/google-icon.svelte';
+	import LMStudioIcon from '$lib/components/icons/lmstudio-icon.svelte';
+	import OllamaIcon from '$lib/components/icons/ollama-icon.svelte';
 	import OpenAIIcon from '$lib/components/icons/openai-icon.svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Command from '$lib/components/ui/command/index.js';
@@ -21,9 +23,22 @@
 	import { m } from '$lib/paraglide/messages.js';
 	import { cn } from '$lib/utils.js';
 
+	interface LocalModel {
+		id: string;
+		label: string;
+		provider: 'lmstudio' | 'ollama';
+		key: string;
+		capabilities: string[];
+	}
+
+	interface ModelsResponse {
+		models: AIModel[];
+		localModels: LocalModel[];
+	}
+
 	interface Props {
-		value?: AIModel['key'];
-		onSelect?: (modelKey: AIModel['key']) => void;
+		value?: AIModel['key'] | string;
+		onSelect?: (modelKey: AIModel['key'] | string) => void;
 		class?: string;
 		size?: 'sm' | 'default';
 	}
@@ -41,22 +56,32 @@
 			if (!response.ok) {
 				throw new Error('Failed to fetch available models');
 			}
-			const data = await response.json();
-			return data.models as AIModel[];
+			const data = (await response.json()) as ModelsResponse;
+			return data;
 		},
 		staleTime: 5 * 60 * 1000, // 5 minutes
 		gcTime: 10 * 60 * 1000, // 10 minutes
 	});
 
-	const selectedModel = $derived($modelsQuery.data?.find((model) => model.key === value));
-	const availableModels = $derived($modelsQuery.data || []);
+	// Combine static and local models
+	const allModels = $derived(() => {
+		const data = $modelsQuery.data;
+		if (!data) return [];
+		return [...data.models, ...data.localModels];
+	});
+
+	const selectedModel = $derived(() => {
+		const models = allModels();
+		return models.find((model) => model.key === value);
+	});
 
 	// Auto-select first available model if current selection is not available
 	$effect(() => {
-		if (availableModels.length > 0) {
-			if (!value || !availableModels.some((model) => model.key === value)) {
+		const models = allModels();
+		if (models.length > 0) {
+			if (!value || !models.some((model) => model.key === value)) {
 				// No model selected or current model is not available, select the first available one
-				const firstAvailableModel = availableModels[0];
+				const firstAvailableModel = models[0];
 				if (firstAvailableModel) {
 					value = firstAvailableModel.key;
 					onSelect?.(firstAvailableModel.key);
@@ -75,7 +100,7 @@
 		});
 	}
 
-	function handleSelect(modelKey: AIModel['key']) {
+	function handleSelect(modelKey: AIModel['key'] | string) {
 		value = modelKey;
 		onSelect?.(modelKey);
 		closeAndFocusTrigger();
@@ -89,6 +114,10 @@
 				return OpenAIIcon;
 			case 'google':
 				return GoogleIcon;
+			case 'lmstudio':
+				return LMStudioIcon;
+			case 'ollama':
+				return OllamaIcon;
 			default:
 				return GoogleIcon;
 		}
@@ -121,14 +150,15 @@
 				role="combobox"
 				aria-expanded={open}>
 				<div class="flex min-w-0 items-center gap-2">
-					{#if selectedModel}
-						{@const ProviderIcon = getProviderIcon(selectedModel.provider)}
+					{#if selectedModel()}
+						{@const model = selectedModel()!}
+						{@const ProviderIcon = getProviderIcon(model.provider)}
 						<ProviderIcon class={cn('shrink-0', size === 'sm' ? 'h-3 w-3' : 'h-4 w-4')} />
 					{:else}
 						<Bot class={cn('shrink-0', size === 'sm' ? 'h-3 w-3' : 'h-4 w-4')} />
 					{/if}
 					<span class="truncate text-xs">
-						{selectedModel?.label || m.model_picker_placeholder()}
+						{selectedModel()?.label || m.model_picker_placeholder()}
 					</span>
 				</div>
 				<ChevronsUpDown class={cn('shrink-0 opacity-50', size === 'sm' ? 'h-3 w-3' : 'h-4 w-4')} />
@@ -141,7 +171,7 @@
 			<Command.List>
 				<Command.Empty>{m.model_picker_not_found()}</Command.Empty>
 				<Command.Group>
-					{#each availableModels as model (model.key)}
+					{#each allModels() as model (model.key)}
 						{@const ProviderIcon = getProviderIcon(model.provider)}
 						<Command.Item
 							value={model.key}

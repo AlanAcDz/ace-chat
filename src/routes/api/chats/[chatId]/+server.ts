@@ -7,6 +7,7 @@ import type { RequestHandler } from './$types';
 import type { AiRequest } from '$lib/server/ai/messages';
 import { AI_MODELS, detectImageGenerationRequest } from '$lib/ai/models';
 import { m } from '$lib/paraglide/messages.js';
+import { checkLocalModelAvailability } from '$lib/server/ai/local-models';
 import {
 	aiRequestSchema,
 	createAIModelInstance,
@@ -53,14 +54,22 @@ export const POST: RequestHandler = async ({ request }) => {
 
 		const transformedMessages = await transformMessagesWithAttachments(messages);
 
-		// Get model configuration
+		// Get model configuration or check if it's a local model
 		const modelConfig = AI_MODELS.find((model) => model.key === modelKey);
+		let isLocalModel = false;
+
 		if (!modelConfig) {
-			throw new Error(m.api_error_invalid_model());
+			// Check if it's a valid local model
+			const localModelInfo = await checkLocalModelAvailability(modelKey, sessionUser.id);
+			if (!localModelInfo?.available) {
+				throw new Error(m.api_error_invalid_model());
+			}
+			isLocalModel = true;
 		}
 
-		const needsOpenAISearch = isSearchEnabled && modelConfig.provider === 'openai';
-		const supportsImageGeneration = modelConfig.capabilities.some((cap) => cap === 'image');
+		const needsOpenAISearch = isSearchEnabled && modelConfig?.provider === 'openai';
+		const supportsImageGeneration =
+			modelConfig?.capabilities.some((cap) => cap === 'image') || false;
 
 		// Check if user is requesting image generation
 		const lastUserMessage = messages.findLast((msg) => msg.role === 'user');
@@ -93,9 +102,10 @@ export const POST: RequestHandler = async ({ request }) => {
 				prefix: 'msg',
 				size: 16,
 			}),
-			// Add Google image generation support only if user requests it
-			...(supportsImageGeneration &&
-				modelConfig.provider === 'google' &&
+			// Add Google image generation support only if user requests it (only for non-local models)
+			...(!isLocalModel &&
+				supportsImageGeneration &&
+				modelConfig?.provider === 'google' &&
 				userWantsImageGeneration && {
 					providerOptions: {
 						google: {

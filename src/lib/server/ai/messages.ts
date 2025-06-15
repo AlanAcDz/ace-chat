@@ -2,10 +2,13 @@ import { readFile } from 'fs/promises';
 import { createAnthropic } from '@ai-sdk/anthropic';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { createOpenAI } from '@ai-sdk/openai';
+import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
+import { createOllama } from 'ollama-ai-provider';
 import { z } from 'zod';
 
 import type { CoreMessage, LanguageModel } from 'ai';
 import { AI_MODELS } from '$lib/ai/models';
+import { checkLocalModelAvailability } from '$lib/server/ai/local-models';
 import { getUserApiKey } from '$lib/server/data/api-keys';
 import { addMessageToChat } from '$lib/server/data/chats';
 import { getFullFilePath } from '$lib/server/storage';
@@ -274,6 +277,15 @@ export async function createAIModelInstance(
 	// Find the model configuration
 	const modelConfig = AI_MODELS.find((m) => m.key === modelKey);
 	if (!modelConfig) {
+		// Check if it's a local model (LM Studio or Ollama)
+		const localModelInfo = await checkLocalModelAvailability(modelKey, userId);
+		if (localModelInfo) {
+			return createLocalModelInstance({
+				provider: localModelInfo.provider,
+				modelId: localModelInfo.modelId,
+				baseUrl: localModelInfo.baseUrl,
+			});
+		}
 		throw new Error('Invalid model');
 	}
 
@@ -324,5 +336,33 @@ export async function createAIModelInstance(
 		return google(modelConfig.key);
 	} else {
 		throw new Error(`Unsupported provider: ${provider}`);
+	}
+}
+
+/**
+ * Create AI model instance for local providers (LM Studio or Ollama)
+ */
+function createLocalModelInstance(localModelInfo: {
+	provider: 'lmstudio' | 'ollama';
+	modelId: string;
+	baseUrl: string;
+}): LanguageModel {
+	if (localModelInfo.provider === 'lmstudio') {
+		// Normalize baseUrl - remove /v1 suffix if present, then add it
+		const normalizedUrl = localModelInfo.baseUrl.replace(/\/v1\/?$/, '');
+		const lmstudio = createOpenAICompatible({
+			name: 'lmstudio',
+			baseURL: `${normalizedUrl}/v1`,
+		});
+		return lmstudio(localModelInfo.modelId);
+	} else if (localModelInfo.provider === 'ollama') {
+		// Normalize baseUrl - remove /api suffix if present (Ollama uses base URL directly)
+		const normalizedUrl = localModelInfo.baseUrl.replace(/\/api\/?$/, '');
+		const ollama = createOllama({
+			baseURL: normalizedUrl,
+		});
+		return ollama(localModelInfo.modelId);
+	} else {
+		throw new Error(`Unsupported local provider: ${localModelInfo.provider}`);
 	}
 }
