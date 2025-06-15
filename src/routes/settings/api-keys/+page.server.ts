@@ -3,6 +3,7 @@ import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import type { UserGrant } from '$lib/grants';
 import { hasAllGrants, hasGrant } from '$lib/grants';
+import { m } from '$lib/paraglide/messages.js';
 import { requireLogin } from '$lib/server/auth';
 import {
 	getUserApiKeys,
@@ -38,7 +39,7 @@ export const load: PageServerLoad = async ({ depends }) => {
 export const actions: Actions = {
 	saveApiKey: async ({ request, locals }) => {
 		if (!locals.user) {
-			throw error(401, 'No autorizado');
+			throw error(401, m.server_error_unauthorized());
 		}
 
 		const formData = await request.formData();
@@ -48,7 +49,7 @@ export const actions: Actions = {
 
 		if (!provider || !apiKeyValue) {
 			return fail(400, {
-				error: 'El proveedor y la clave API son requeridos',
+				error: m.server_error_provider_key_required(),
 			});
 		}
 
@@ -58,7 +59,7 @@ export const actions: Actions = {
 			!hasGrant(locals.user.grants as UserGrant[], 'api-keys:create:shared')
 		) {
 			return fail(403, {
-				error: 'Sin permisos para crear claves API compartidas',
+				error: m.server_error_no_permission_shared_keys(),
 			});
 		}
 
@@ -68,7 +69,7 @@ export const actions: Actions = {
 			!hasGrant(locals.user.grants as UserGrant[], 'api-keys:create:personal')
 		) {
 			return fail(403, {
-				error: 'Sin permisos para crear claves API personales',
+				error: m.server_error_no_permission_personal_keys(),
 			});
 		}
 
@@ -82,7 +83,7 @@ export const actions: Actions = {
 
 			return {
 				success: true,
-				message: 'Clave API guardada exitosamente',
+				message: m.server_api_key_save_success(),
 			};
 		} catch (err) {
 			console.error('Error saving API key:', err);
@@ -95,14 +96,14 @@ export const actions: Actions = {
 			}
 
 			return fail(500, {
-				error: 'Error al guardar la clave API',
+				error: m.server_error_saving_api_key(),
 			});
 		}
 	},
 
 	saveApiUrl: async ({ request, locals }) => {
 		if (!locals.user) {
-			throw error(401, 'No autorizado');
+			throw error(401, m.server_error_unauthorized());
 		}
 
 		const formData = await request.formData();
@@ -112,7 +113,7 @@ export const actions: Actions = {
 
 		if (!provider || !apiUrl) {
 			return fail(400, {
-				error: 'El proveedor y la URL API son requeridos',
+				error: m.server_error_provider_url_required(),
 			});
 		}
 
@@ -122,7 +123,7 @@ export const actions: Actions = {
 			!hasGrant(locals.user.grants as UserGrant[], 'api-keys:create:shared')
 		) {
 			return fail(403, {
-				error: 'Sin permisos para crear claves API compartidas',
+				error: m.server_error_no_permission_shared_keys(),
 			});
 		}
 
@@ -132,7 +133,7 @@ export const actions: Actions = {
 			!hasGrant(locals.user.grants as UserGrant[], 'api-keys:create:personal')
 		) {
 			return fail(403, {
-				error: 'Sin permisos para crear claves API personales',
+				error: m.server_error_no_permission_personal_keys(),
 			});
 		}
 
@@ -146,7 +147,7 @@ export const actions: Actions = {
 
 			return {
 				success: true,
-				message: 'URL API guardada exitosamente',
+				message: m.server_api_url_save_success(),
 			};
 		} catch (err) {
 			console.error('Error saving API URL:', err);
@@ -159,14 +160,14 @@ export const actions: Actions = {
 			}
 
 			return fail(500, {
-				error: 'Error al guardar la URL API',
+				error: m.server_error_saving_api_url(),
 			});
 		}
 	},
 
 	updateScope: async ({ request, locals }) => {
 		if (!locals.user) {
-			throw error(401, 'No autorizado');
+			throw error(401, m.server_error_unauthorized());
 		}
 
 		const formData = await request.formData();
@@ -175,7 +176,7 @@ export const actions: Actions = {
 
 		if (!provider || !scope) {
 			return fail(400, {
-				error: 'El proveedor y el alcance son requeridos',
+				error: m.server_error_provider_scope_required(),
 			});
 		}
 
@@ -185,7 +186,7 @@ export const actions: Actions = {
 			!hasGrant(locals.user.grants as UserGrant[], 'api-keys:create:shared')
 		) {
 			return fail(403, {
-				error: 'Sin permisos para crear claves API compartidas',
+				error: m.server_error_no_permission_shared_keys(),
 			});
 		}
 
@@ -194,7 +195,7 @@ export const actions: Actions = {
 			!hasGrant(locals.user.grants as UserGrant[], 'api-keys:create:personal')
 		) {
 			return fail(403, {
-				error: 'Sin permisos para crear claves API personales',
+				error: m.server_error_no_permission_personal_keys(),
 			});
 		}
 
@@ -207,7 +208,10 @@ export const actions: Actions = {
 
 			return {
 				success: true,
-				message: `Alcance actualizado a ${scope === 'shared' ? 'compartido' : 'personal'}`,
+				message:
+					scope === 'shared'
+						? m.server_scope_updated_to_shared()
+						: m.server_scope_updated_to_personal(),
 			};
 		} catch (err) {
 			console.error('Error updating API key scope:', err);
@@ -220,7 +224,7 @@ export const actions: Actions = {
 			}
 
 			return fail(500, {
-				error: 'Error al actualizar el alcance',
+				error: m.server_error_updating_scope(),
 			});
 		}
 	},

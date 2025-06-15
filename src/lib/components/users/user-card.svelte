@@ -5,6 +5,7 @@
 	import { Avatar, AvatarFallback, AvatarImage } from '$lib/components/ui/avatar';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
+	import { m } from '$lib/paraglide/messages.js';
 	import { getUserInitials } from '$lib/utils';
 
 	interface Props {
@@ -47,15 +48,15 @@
 				{/each}
 				{#if user.grants.length > 3}
 					<Badge variant="outline" class="text-xs">
-						+{user.grants.length - 3} más
+						{m.user_card_more_permissions({ count: user.grants.length - 3 })}
 					</Badge>
 				{/if}
 			{:else}
-				<Badge variant="outline" class="text-xs">Sin permisos</Badge>
+				<Badge variant="outline" class="text-xs">{m.user_card_no_permissions()}</Badge>
 			{/if}
 		</div>
 		<div class="mt-1 text-xs text-gray-500">
-			Creado: {new Date(user.createdAt).toLocaleDateString()}
+			{m.user_card_created({ date: new Date(user.createdAt).toLocaleDateString() })}
 		</div>
 	</div>
 
@@ -69,7 +70,7 @@
 					e.stopPropagation();
 					onEdit(user);
 				}}
-				aria-label="Editar {user.name || user.username}">
+				aria-label={m.user_card_edit_aria({ name: user.name || user.username })}>
 				<Settings class="h-4 w-4" />
 			</Button>
 		{/if}
@@ -82,7 +83,7 @@
 					e.stopPropagation();
 					onDelete(user);
 				}}
-				aria-label="Eliminar {user.name || user.username}">
+				aria-label={m.user_card_delete_aria({ name: user.name || user.username })}>
 				<Trash2 class="h-4 w-4" />
 			</Button>
 		{/if}

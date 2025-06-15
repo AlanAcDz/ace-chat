@@ -1,6 +1,7 @@
 import { fail } from '@sveltejs/kit';
 
 import type { Actions, PageServerLoad } from './$types';
+import { m } from '$lib/paraglide/messages.js';
 import { requireLogin } from '$lib/server/auth';
 import {
 	deleteAttachment,
@@ -28,7 +29,7 @@ export const actions: Actions = {
 		const attachmentId = formData.get('id') as string;
 
 		if (!attachmentId) {
-			return fail(400, { error: 'ID de archivo requerido' });
+			return fail(400, { error: m.server_error_file_id_required() });
 		}
 
 		try {
@@ -36,7 +37,7 @@ export const actions: Actions = {
 			return { success: true };
 		} catch (e) {
 			console.error('Error deleting attachment:', e);
-			const message = e instanceof Error ? e.message : 'Error al eliminar el archivo';
+			const message = e instanceof Error ? e.message : m.server_error_deleting_file();
 			return fail(500, { error: message });
 		}
 	},
@@ -47,7 +48,7 @@ export const actions: Actions = {
 		const attachmentIds = formData.getAll('ids') as string[];
 
 		if (!attachmentIds || attachmentIds.length === 0) {
-			return fail(400, { error: 'Selecciona al menos un archivo para eliminar' });
+			return fail(400, { error: m.server_error_select_files_to_delete() });
 		}
 
 		try {
@@ -55,7 +56,7 @@ export const actions: Actions = {
 			return { success: true, deletedCount };
 		} catch (e) {
 			console.error('Error deleting multiple attachments:', e);
-			const message = e instanceof Error ? e.message : 'Error al eliminar los archivos';
+			const message = e instanceof Error ? e.message : m.server_error_deleting_files();
 			return fail(500, { error: message });
 		}
 	},

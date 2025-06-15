@@ -15,6 +15,7 @@
 	import UserMessage from '$lib/components/chats/user-message.svelte';
 	import { Alert, AlertDescription, AlertTitle } from '$lib/components/ui/alert';
 	import { getChatSettingsContext } from '$lib/contexts/chat-settings.svelte';
+	import { m } from '$lib/paraglide/messages.js';
 
 	// Extended type for messages that might have hasAttachments from database
 	type ExtendedUIMessage = UIMessage & { hasAttachments?: boolean };
@@ -48,7 +49,7 @@
 			},
 			onError: (error) => {
 				console.error('Error sending message:', error);
-				toast.error('Error al enviar el mensaje');
+				toast.error(m.chat_error_send_message());
 				stopAutoScrolling();
 			},
 		})
@@ -62,7 +63,7 @@
 			});
 
 			if (!response.ok) {
-				throw new Error('Error al generar el título');
+				throw new Error(m.chat_error_generate_title());
 			}
 
 			return response.json();
@@ -119,8 +120,8 @@
 			},
 		});
 
-		// Generate title if this is a new chat (title is "Nuevo chat")
-		if (data.chat.title === 'Nuevo chat') {
+		// Generate title if this is a new chat (title is "New chat")
+		if (data.chat.title === m.chat_new_chat_default_title()) {
 			$generateTitleMutation.mutate(data.chat.id);
 		}
 	}
@@ -188,9 +189,9 @@
 {#if chat.error}
 	<Alert variant="destructive" class="mx-auto mb-4 max-w-3xl" role="alert" aria-live="assertive">
 		<AlertCircleIcon />
-		<AlertTitle>Error</AlertTitle>
+		<AlertTitle>{m.chat_error_title()}</AlertTitle>
 		<AlertDescription>
-			{chat.error.message || 'Error desconocido'}
+			{chat.error.message || m.chat_error_unknown()}
 		</AlertDescription>
 	</Alert>
 {/if}

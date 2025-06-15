@@ -9,6 +9,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Tabs, TabsList, TabsTrigger } from '$lib/components/ui/tabs/index.js';
 	import { hasGrant } from '$lib/grants';
+	import { m } from '$lib/paraglide/messages.js';
 	import { getUserInitials } from '$lib/utils';
 
 	let { children, data } = $props();
@@ -28,17 +29,17 @@
 </script>
 
 <svelte:head>
-	<title>Configuración - AceChat</title>
+	<title>{m.settings_layout_title()}</title>
 </svelte:head>
 
 <div class="flex min-h-dvh flex-col gap-2">
 	<header class="flex items-center justify-between gap-2 px-4 py-6">
 		<Button href="/" variant="ghost">
 			<ArrowLeft class="h-4 w-4" />
-			Volver al Chat
+			{m.settings_layout_back_to_chat()}
 		</Button>
 		<form use:enhance method="POST" action="/settings?/logout">
-			<Button type="submit" variant="ghost">Cerrar sesión</Button>
+			<Button type="submit" variant="ghost">{m.settings_layout_logout()}</Button>
 		</form>
 	</header>
 	<div class="grid flex-1 gap-8 md:grid-cols-4">
@@ -66,22 +67,22 @@
 					class="no-scrollbar w-full max-w-[calc(100vw-2rem)] justify-start overflow-x-auto">
 					<TabsTrigger value="profile" onclick={() => goto('/settings')}>
 						<User class="h-4 w-4" />
-						Perfil
+						{m.settings_layout_profile()}
 					</TabsTrigger>
 					{#if canManageApiKeys}
 						<TabsTrigger value="api-keys" onclick={() => goto('/settings/api-keys')}>
 							<Key class="h-4 w-4" />
-							Claves API
+							{m.settings_layout_api_keys()}
 						</TabsTrigger>
 					{/if}
 					<TabsTrigger value="attachments" onclick={() => goto('/settings/attachments')}>
 						<Paperclip class="h-4 w-4" />
-						Archivos Adjuntos
+						{m.settings_layout_attachments()}
 					</TabsTrigger>
 					{#if canViewUsers}
 						<TabsTrigger value="users" onclick={() => goto('/settings/users')}>
 							<Users class="h-4 w-4" />
-							Usuarios
+							{m.settings_layout_users()}
 						</TabsTrigger>
 					{/if}
 				</TabsList>

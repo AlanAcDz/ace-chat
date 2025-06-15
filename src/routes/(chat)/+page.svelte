@@ -9,6 +9,7 @@
 	import { Alert, AlertDescription, AlertTitle } from '$lib/components/ui/alert';
 	import { Skeleton } from '$lib/components/ui/skeleton';
 	import { getChatSettingsContext } from '$lib/contexts/chat-settings.svelte';
+	import { m } from '$lib/paraglide/messages.js';
 
 	interface MessageData {
 		message: string;
@@ -32,7 +33,7 @@
 
 			if (!response.ok) {
 				const errorText = await response.text();
-				throw new Error(errorText || 'Error al crear el chat');
+				throw new Error(errorText || m.chat_error_create_api());
 			}
 
 			return response.json();
@@ -43,7 +44,7 @@
 		},
 		onError: (error) => {
 			console.error('Error creating chat:', error);
-			toast.error('Error al crear el chat');
+			toast.error(m.chat_error_create());
 		},
 	});
 
@@ -73,16 +74,16 @@
 		</div>
 	{:then user}
 		<h1 class="mb-6 text-4xl font-semibold text-gray-800 md:text-5xl dark:text-gray-200">
-			¿Cómo puedo ayudarte, {user.name?.split(' ')[0] || user.username}?
+			{m.chat_welcome_message({ name: user.name?.split(' ')[0] || user.username })}
 		</h1>
 	{/await}
 	<!-- Error State -->
 	{#if $createChatMutation.isError}
 		<Alert variant="destructive" class="mx-auto mb-4 max-w-3xl" role="alert" aria-live="assertive">
 			<AlertCircleIcon />
-			<AlertTitle>Error</AlertTitle>
+			<AlertTitle>{m.chat_error_title()}</AlertTitle>
 			<AlertDescription>
-				{$createChatMutation.error?.message || 'Error desconocido'}
+				{$createChatMutation.error?.message || m.chat_error_unknown()}
 			</AlertDescription>
 		</Alert>
 	{:else}
@@ -90,19 +91,19 @@
 		<div class="grid max-w-2xl grid-cols-1 gap-3 md:grid-cols-2">
 			<div
 				class="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
-				¿Cómo funciona la IA?
+				{m.chat_sample_questions_ai_how_works()}
 			</div>
 			<div
 				class="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
-				¿Son reales los agujeros negros?
+				{m.chat_sample_questions_black_holes_real()}
 			</div>
 			<div
 				class="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
-				¿Cuántas Rs hay en la palabra "fresa"?
+				{m.chat_sample_questions_rs_in_strawberry()}
 			</div>
 			<div
 				class="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
-				¿Cuál es el significado de la vida?
+				{m.chat_sample_questions_meaning_of_life()}
 			</div>
 		</div>
 	{/if}

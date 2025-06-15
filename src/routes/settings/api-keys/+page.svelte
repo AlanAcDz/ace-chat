@@ -17,6 +17,7 @@
 	import { Switch } from '$lib/components/ui/switch';
 	import { TabsContent } from '$lib/components/ui/tabs';
 	import { hasGrant } from '$lib/grants';
+	import { m } from '$lib/paraglide/messages.js';
 
 	let { data } = $props();
 
@@ -32,12 +33,12 @@
 	const submitFunction: SubmitFunction = () => {
 		return async ({ result }) => {
 			if (result.type === 'success' && result.data) {
-				toast.success(result.data.message || 'Guardado exitosamente');
+				toast.success(result.data.message || m.settings_api_keys_save_success());
 				await invalidate('app:api-keys');
 			} else if (result.type === 'failure' && result.data) {
-				toast.error(result.data.error || 'Error al guardar');
+				toast.error(result.data.error || m.settings_api_keys_save_error());
 			} else {
-				toast.error('Error inesperado');
+				toast.error(m.settings_api_keys_unexpected_error());
 			}
 		};
 	};
@@ -58,30 +59,30 @@
 	const apiKeyProviders = [
 		{
 			key: 'anthropic',
-			name: 'Clave API de Anthropic',
+			name: m.settings_api_keys_anthropic(),
 			placeholder: 'sk-ant-...',
-			description: 'Obtén tu clave API desde',
-			link: 'Consola de Anthropic',
+			description: m.settings_api_keys_anthropic_description(),
+			link: m.settings_api_keys_anthropic_link(),
 			linkUrl: 'https://console.anthropic.com/account/keys',
 			icon: AnthropicIcon,
 			models: modelsByProvider.anthropic || [],
 		},
 		{
 			key: 'openai',
-			name: 'Clave API de OpenAI',
+			name: m.settings_api_keys_openai(),
 			placeholder: 'sk-...',
-			description: 'Obtén tu clave API desde',
-			link: 'Panel de OpenAI',
+			description: m.settings_api_keys_openai_description(),
+			link: m.settings_api_keys_openai_link(),
 			linkUrl: 'https://platform.openai.com/api-keys',
 			icon: OpenaiIcon,
 			models: modelsByProvider.openai || [],
 		},
 		{
 			key: 'google',
-			name: 'Clave API de Google',
+			name: m.settings_api_keys_google(),
 			placeholder: 'AIza...',
-			description: 'Obtén tu clave API desde',
-			link: 'Consola de Google Cloud',
+			description: m.settings_api_keys_google_description(),
+			link: m.settings_api_keys_google_link(),
 			linkUrl: 'https://console.cloud.google.com/apis/credentials',
 			icon: GoogleIcon,
 			models: modelsByProvider.google || [],
@@ -92,16 +93,16 @@
 	const urlProviders = [
 		{
 			key: 'lmstudio',
-			name: 'URL de LM Studio',
+			name: m.settings_api_keys_lmstudio(),
 			placeholder: 'http://localhost:1234/v1',
-			description: 'Configura la URL de tu servidor LM Studio',
+			description: m.settings_api_keys_lmstudio_description(),
 			icon: Server,
 		},
 		{
 			key: 'ollama',
-			name: 'URL de Ollama',
+			name: m.settings_api_keys_ollama(),
 			placeholder: 'http://localhost:11434',
-			description: 'Configura la URL de tu servidor Ollama',
+			description: m.settings_api_keys_ollama_description(),
 			icon: Zap,
 		},
 	];
@@ -136,10 +137,10 @@
 				const result: ActionResult = deserialize(await response.text());
 
 				if (result.type === 'success') {
-					toast.success(result.data?.message || 'Alcance actualizado exitosamente');
+					toast.success(result.data?.message || m.settings_api_keys_scope_update_success());
 					await invalidate('app:api-keys');
 				} else if (result.type === 'failure') {
-					toast.error(result.data?.error || 'Error al actualizar el alcance');
+					toast.error(result.data?.error || m.settings_api_keys_scope_update_error());
 					// Revert the switch state
 					scopeStates[providerKey] = !newScope;
 				}
@@ -147,7 +148,7 @@
 				applyAction(result);
 			} catch (error) {
 				console.error('Error updating scope:', error);
-				toast.error('Error al actualizar el alcance');
+				toast.error(m.settings_api_keys_scope_update_error());
 				// Revert the switch state
 				scopeStates[providerKey] = !newScope;
 			}
@@ -160,7 +161,7 @@
 	function getApiKeyPlaceholder(provider: (typeof apiKeyProviders)[0]) {
 		const apiKeyData = data.apiKeys[provider.key];
 		if (apiKeyData?.hasApiKey) {
-			return 'Clave configurada - ingresa nueva clave para actualizar';
+			return m.settings_api_keys_placeholder_configured();
 		}
 		return provider.placeholder;
 	}
@@ -172,7 +173,7 @@
 </script>
 
 <TabsContent value="api-keys" class="space-y-6">
-	<h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Gestionar Claves API</h1>
+	<h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{m.settings_api_keys_title()}</h1>
 	<div class="space-y-6">
 		<!-- Proveedores de Claves API -->
 		{#each apiKeyProviders as provider (provider.key)}
@@ -188,24 +189,24 @@
 						{#if isApiKeyConfigured(provider.key)}
 							<span
 								class="rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-200">
-								Configurada
+								{m.settings_api_keys_configured()}
 							</span>
 							{#if data.apiKeys[provider.key]?.scope === 'shared'}
 								<span
 									class="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-									Compartida
+									{m.settings_api_keys_shared()}
 								</span>
 							{:else}
 								<span
 									class="rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-800 dark:bg-gray-900 dark:text-gray-200">
-									Personal
+									{m.settings_api_keys_personal()}
 								</span>
 							{/if}
 						{/if}
 					</div>
 
 					<p class="mb-3 text-sm text-gray-600 dark:text-gray-400">
-						Usado para los siguientes modelos:
+						{m.settings_api_keys_used_for_models()}
 					</p>
 					<div class="mb-4 flex flex-wrap gap-2">
 						{#each provider.models as model (model.key)}
@@ -229,10 +230,10 @@
 										<label
 											class="text-sm font-medium text-gray-700 dark:text-gray-300"
 											for="scope-{provider.key}">
-											Clave API Compartida
+											{m.settings_api_keys_shared_api_key()}
 										</label>
 										<p class="text-xs text-gray-500 dark:text-gray-400">
-											Permite que otros usuarios utilicen esta clave API
+											{m.settings_api_keys_shared_api_key_description()}
 										</p>
 									</div>
 									<Switch
@@ -250,7 +251,9 @@
 									class="flex-1 font-mono text-sm"
 									type="password" />
 								<Button type="submit">
-									{isApiKeyConfigured(provider.key) ? 'Actualizar' : 'Guardar'}
+									{isApiKeyConfigured(provider.key)
+										? m.settings_api_keys_update()
+										: m.settings_api_keys_save()}
 								</Button>
 							</div>
 						</div>
@@ -283,17 +286,17 @@
 					{#if data.apiKeys[provider.key]?.url}
 						<span
 							class="rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-200">
-							Configurada
+							{m.settings_api_keys_configured()}
 						</span>
 						{#if data.apiKeys[provider.key]?.scope === 'shared'}
 							<span
 								class="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-								Compartida
+								{m.settings_api_keys_shared()}
 							</span>
 						{:else}
 							<span
 								class="rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-800 dark:bg-gray-900 dark:text-gray-200">
-								Personal
+								{m.settings_api_keys_personal()}
 							</span>
 						{/if}
 					{/if}
@@ -315,10 +318,10 @@
 									<label
 										class="text-sm font-medium text-gray-700 dark:text-gray-300"
 										for="scope-url-{provider.key}">
-										URL Compartida
+										{m.settings_api_keys_shared_url()}
 									</label>
 									<p class="text-xs text-gray-500 dark:text-gray-400">
-										Permite que otros usuarios utilicen esta URL
+										{m.settings_api_keys_shared_url_description()}
 									</p>
 								</div>
 								<Switch
@@ -335,7 +338,9 @@
 								value={data.apiKeys[provider.key]?.url || ''}
 								class="flex-1 font-mono text-sm" />
 							<Button type="submit">
-								{data.apiKeys[provider.key]?.url ? 'Actualizar' : 'Guardar'}
+								{data.apiKeys[provider.key]?.url
+									? m.settings_api_keys_update()
+									: m.settings_api_keys_save()}
 							</Button>
 						</div>
 					</div>

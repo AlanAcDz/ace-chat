@@ -13,6 +13,7 @@
 		CardHeader,
 		CardTitle,
 	} from '$lib/components/ui/card';
+	import { m } from '$lib/paraglide/messages.js';
 
 	let { data }: { data: PageData } = $props();
 
@@ -21,8 +22,10 @@
 </script>
 
 <svelte:head>
-	<title>{chat.title} | Chat Compartido - AceChat</title>
-	<meta name="description" content="Chat compartido de {author.name || author.username}" />
+	<title>{chat.title} | {m.shared_chat_title()}</title>
+	<meta
+		name="description"
+		content={m.shared_chat_description({ author: author.name || author.username })} />
 </svelte:head>
 
 <div class="mx-auto w-full max-w-4xl py-8">
@@ -36,10 +39,10 @@
 						{chat.title}
 					</CardTitle>
 					<CardDescription>
-						Compartido por <strong>{author.name || author.username}</strong>
+						{m.shared_chat_shared_by({ author: author.name || author.username })}
 					</CardDescription>
 				</div>
-				<Badge variant="secondary" class="shrink-0">Chat Compartido</Badge>
+				<Badge variant="secondary" class="shrink-0">{m.shared_chat_badge()}</Badge>
 			</div>
 		</CardHeader>
 	</Card>
@@ -72,10 +75,10 @@
 		<Card class="bg-muted/50">
 			<CardContent class="pt-6">
 				<div class="flex flex-col items-center gap-4">
-					<div class="text-sm text-muted-foreground">¿Te gusta esta conversación?</div>
+					<div class="text-sm text-muted-foreground">{m.shared_chat_footer_question()}</div>
 					<Button href="/" variant="outline">
 						<ExternalLinkIcon class="size-4" />
-						Crear tu propio chat
+						{m.shared_chat_footer_cta()}
 					</Button>
 				</div>
 			</CardContent>

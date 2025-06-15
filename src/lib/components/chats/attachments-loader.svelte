@@ -3,6 +3,7 @@
 
 	import type { Attachment } from '$lib/server/db/schema';
 	import type { UIMessage } from 'ai';
+	import { m } from '$lib/paraglide/messages.js';
 	import { formatFileSize, getFileIcon } from '$lib/utils';
 
 	interface Props {
@@ -12,37 +13,29 @@
 
 	let { messageId, experimentalAttachments }: Props = $props();
 
-	// Query to fetch attachments with polling
-	const attachmentsQuery = $derived(
-		createQuery({
-			queryKey: ['message-attachments', messageId],
-			queryFn: async () => {
-				const response = await fetch(`/api/messages/${messageId}/attachments`);
-				if (!response.ok) {
-					throw new Error('Failed to fetch attachments');
-				}
-				const data = await response.json();
-				return data.attachments as Attachment[];
-			},
-			refetchInterval: (query) => {
-				// Stop polling if we have attachments or there's an error
-				if (query.state.data && query.state.data.length > 0) {
-					return false;
-				}
-				// Poll every 2 seconds
-				return 2000;
-			},
-			refetchIntervalInBackground: false,
-			retry: 3,
-			retryDelay: 1000,
-		})
-	);
+	// Fetch actual attachments from database
+	const attachmentsQuery = createQuery({
+		queryKey: ['attachments', messageId],
+		queryFn: async () => {
+			const response = await fetch(`/api/attachments/${messageId}`);
+			if (!response.ok) throw new Error('Failed to fetch attachments');
+			return response.json() as Promise<Attachment[]>;
+		},
+		refetchInterval: (query) => {
+			// If there are no attachments yet and we have experimental ones, keep polling
+			const hasData = query.state.data && query.state.data.length > 0;
+			const hasExperimental = experimentalAttachments && experimentalAttachments.length > 0;
+			return !hasData && hasExperimental ? 1000 : false;
+		},
+		refetchIntervalInBackground: false,
+	});
 
-	const hasExperimentalAttachments = $derived(
-		experimentalAttachments && experimentalAttachments.length > 0
-	);
+	// Determine what to show
 	const hasActualAttachments = $derived(
 		$attachmentsQuery.data && $attachmentsQuery.data.length > 0
+	);
+	const hasExperimentalAttachments = $derived(
+		experimentalAttachments && experimentalAttachments.length > 0
 	);
 </script>
 
@@ -76,7 +69,9 @@
 					<p class="truncate text-sm font-medium text-gray-900 dark:text-gray-100">
 						{attachment.name}
 					</p>
-					<p class="text-xs text-gray-500 dark:text-gray-400">Procesando...</p>
+					<p class="text-xs text-gray-500 dark:text-gray-400">
+						{m.attachments_loader_processing()}
+					</p>
 				</div>
 				<!-- Processing indicator -->
 				<div
@@ -102,8 +97,8 @@
 			class="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 p-2 text-red-700 dark:border-red-800 dark:bg-red-900/10 dark:text-red-400">
 			<div class="size-5 text-red-500">⚠️</div>
 			<div class="min-w-0 flex-1 text-start">
-				<p class="text-sm font-medium">Error al cargar archivos</p>
-				<p class="text-xs">Inténtalo de nuevo más tarde</p>
+				<p class="text-sm font-medium">{m.attachments_loading_error()}</p>
+				<p class="text-xs">{m.attachments_loading_error_retry()}</p>
 			</div>
 		</div>
 	{/if}

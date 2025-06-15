@@ -2,6 +2,7 @@ import { error, json } from '@sveltejs/kit';
 import { and, asc, eq } from 'drizzle-orm';
 
 import type { RequestHandler } from './$types';
+import { m } from '$lib/paraglide/messages.js';
 import { requireLogin } from '$lib/server/auth';
 import { db } from '$lib/server/db';
 import { attachment, chat, message } from '$lib/server/db/schema';
@@ -19,10 +20,10 @@ export const POST: RequestHandler = async ({ params, request }) => {
 		branchFromMessageId = body.messageId;
 
 		if (!branchFromMessageId) {
-			error(400, 'Se requiere messageId');
+			error(400, m.api_error_message_id_required());
 		}
 	} catch {
-		error(400, 'Invalid JSON body');
+		error(400, m.api_error_invalid_json());
 	}
 
 	// Get the original chat and verify ownership
@@ -31,7 +32,7 @@ export const POST: RequestHandler = async ({ params, request }) => {
 	});
 
 	if (!originalChat) {
-		error(404, 'Chat no encontrado');
+		error(404, m.api_error_chat_not_found());
 	}
 
 	// Get all messages in the chat (ordered by creation time)
@@ -47,7 +48,7 @@ export const POST: RequestHandler = async ({ params, request }) => {
 	const branchMessageIndex = allMessages.findIndex((msg) => msg.id === branchFromMessageId);
 
 	if (branchMessageIndex === -1) {
-		error(404, 'Mensaje no encontrado');
+		error(404, m.api_error_message_not_found());
 	}
 
 	// Get all messages up to and including the branch point
@@ -60,7 +61,7 @@ export const POST: RequestHandler = async ({ params, request }) => {
 			.insert(chat)
 			.values({
 				userId: user.id,
-				title: `Rama de ${originalChat.title}`,
+				title: m.api_message_branch_from_title({ title: originalChat.title }),
 				isBranched: true,
 			})
 			.returning({ id: chat.id });
@@ -101,6 +102,6 @@ export const POST: RequestHandler = async ({ params, request }) => {
 	return json({
 		success: true,
 		newChatId,
-		message: 'Chat ramificado exitosamente',
+		message: m.api_message_branch_success(),
 	});
 };

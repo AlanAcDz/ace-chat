@@ -3,6 +3,7 @@ import { generateText } from 'ai';
 import { and, asc, eq } from 'drizzle-orm';
 
 import { AI_MODELS } from '$lib/ai/models';
+import { m } from '$lib/paraglide/messages.js';
 import { createAIModelInstance } from '$lib/server/ai/messages';
 import { requireLogin } from '$lib/server/auth';
 import { updateChatTitle } from '$lib/server/data/chats';
@@ -15,7 +16,7 @@ export async function POST({ params }: { params: { chatId: string } }) {
 		const chatId = params.chatId;
 
 		if (!chatId) {
-			return error(400, 'ID de chat requerido');
+			return error(400, m.api_error_chat_id_required());
 		}
 
 		// Get the chat and its first user message
@@ -31,11 +32,11 @@ export async function POST({ params }: { params: { chatId: string } }) {
 		});
 
 		if (!chatData) {
-			return error(404, 'Chat no encontrado');
+			return error(404, m.api_error_chat_not_found());
 		}
 
 		if (!chatData.messages || chatData.messages.length === 0) {
-			return error(400, 'No se encontró mensaje de usuario para generar el título');
+			return error(400, m.api_error_no_user_message());
 		}
 
 		const firstUserMessage = chatData.messages[0];
@@ -55,8 +56,7 @@ export async function POST({ params }: { params: { chatId: string } }) {
 			messages: [
 				{
 					role: 'system',
-					content:
-						'Genera un título muy breve y conciso (máximo 8 palabras) basado en el mensaje del usuario. El título debe ser descriptivo pero corto. Responde solo con el título, sin comillas ni puntuación adicional.',
+					content: m.api_title_generation_prompt(),
 				},
 				{
 					role: 'user',
@@ -83,6 +83,6 @@ export async function POST({ params }: { params: { chatId: string } }) {
 		});
 	} catch (e) {
 		console.error('Error generating chat title:', e);
-		return error(500, 'Error al generar el título del chat');
+		return error(500, m.api_error_generating_title());
 	}
 }

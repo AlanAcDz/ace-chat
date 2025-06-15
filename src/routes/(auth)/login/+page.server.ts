@@ -5,6 +5,7 @@ import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 
 import type { Actions, PageServerLoad } from './$types';
+import { m } from '$lib/paraglide/messages.js';
 import * as auth from '$lib/server/auth';
 import { db } from '$lib/server/db';
 import * as table from '$lib/server/db/schema';
@@ -35,7 +36,7 @@ export const actions: Actions = {
 			return fail(400, {
 				form: {
 					...form,
-					message: 'Nombre de usuario o contraseña incorrectos',
+					message: m.server_auth_invalid_credentials(),
 				},
 			});
 		}
@@ -51,7 +52,7 @@ export const actions: Actions = {
 			return fail(400, {
 				form: {
 					...form,
-					message: 'Nombre de usuario o contraseña incorrectos',
+					message: m.server_auth_invalid_credentials(),
 				},
 			});
 		}

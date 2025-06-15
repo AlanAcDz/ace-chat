@@ -22,6 +22,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Checkbox } from '$lib/components/ui/checkbox';
 	import { TabsContent } from '$lib/components/ui/tabs';
+	import { m } from '$lib/paraglide/messages.js';
 	import { formatFileSize, getFileIcon } from '$lib/utils';
 
 	let { data }: { data: PageData } = $props();
@@ -82,10 +83,10 @@
 		const result: ActionResult = deserialize(await response.text());
 
 		if (result.type === 'success') {
-			toast.success('Archivo eliminado correctamente');
+			toast.success(m.attachments_delete_success());
 			await invalidate('app:attachments');
 		} else {
-			toast.error('Error al eliminar el archivo');
+			toast.error(m.attachments_delete_single_error());
 		}
 
 		applyAction(result);
@@ -109,12 +110,12 @@
 		const result: ActionResult = deserialize(await response.text());
 
 		if (result.type === 'success') {
-			toast.success(`Se eliminaron ${selectedIds.length} archivo(s)`);
+			toast.success(m.attachments_deleted_multiple_success({ count: selectedIds.length }));
 			selectedIds = [];
 			selectAll = false;
 			await invalidate('app:attachments');
 		} else {
-			toast.error('Error al eliminar los archivos');
+			toast.error(m.attachments_delete_error());
 		}
 
 		applyAction(result);
@@ -136,13 +137,10 @@
 	<div class="space-y-4">
 		<!-- Header -->
 		<div class="space-y-2">
-			<h1 class="text-2xl font-bold text-gray-900">Archivos Adjuntos</h1>
+			<h1 class="text-2xl font-bold text-gray-900">{m.attachments_title()}</h1>
 			<div class="rounded-lg border border-secondary bg-secondary/20 p-4">
 				<p class="text-sm">
-					Gestiona tus archivos y adjuntos subidos. Ten en cuenta que eliminar archivos aquí los
-					eliminará de los hilos relevantes, pero no eliminará los hilos. Esto puede llevar a
-					comportamientos inesperados si eliminas un archivo que todavía se está utilizando en un
-					hilo.
+					{m.attachments_description()}
 				</p>
 			</div>
 		</div>
@@ -160,7 +158,7 @@
 							onCheckedChange={() => handleSelectAll(attachments)}
 							id="select-all" />
 						<label for="select-all" class="cursor-pointer text-sm font-medium">
-							Seleccionar todos
+							{m.attachments_select_all()}
 						</label>
 					</div>
 					{#if selectedIds.length > 0}
@@ -170,7 +168,7 @@
 							onclick={showDeleteMultipleDialog}
 							disabled={isDeleting}>
 							<Trash2 class="mr-2 h-4 w-4" />
-							Eliminar seleccionados ({selectedIds.length})
+							{m.attachments_delete_selected({ count: selectedIds.length })}
 						</Button>
 					{/if}
 				</div>
@@ -218,7 +216,7 @@
 											e.stopPropagation();
 											window.open(`/api/files/${attachment.filePath}`, '_blank');
 										}}
-										aria-label="Abrir {attachment.fileName}">
+										aria-label={m.attachments_open_file_aria({ fileName: attachment.fileName })}>
 										{attachment.fileName}
 									</button>
 									<ExternalLink class="h-4 w-4 text-gray-400" />
@@ -237,7 +235,7 @@
 									e.stopPropagation();
 									showDeleteDialog(attachment);
 								}}
-								aria-label="Eliminar {attachment.fileName}">
+								aria-label={m.attachments_delete_file_aria({ fileName: attachment.fileName })}>
 								<Trash2 class="h-4 w-4" />
 							</Button>
 						</div>
@@ -247,19 +245,19 @@
 				<div class="py-12 text-center">
 					<File class="mx-auto mb-4 h-12 w-12 text-gray-400" />
 					<h3 class="mb-2 text-lg font-medium text-gray-900">
-						No se encontraron archivos adjuntos
+						{m.attachments_no_files_title()}
 					</h3>
 					<p class="text-gray-500">
-						Sus archivos subidos aparecerán aquí una vez que comience a adjuntarlos a los mensajes.
+						{m.attachments_no_files_description()}
 					</p>
 				</div>
 			{/if}
 		{:catch}
 			<Alert variant="destructive" class="mx-auto max-w-md">
 				<AlertCircle class="h-4 w-4" />
-				<AlertTitle>Error al cargar los archivos adjuntos</AlertTitle>
+				<AlertTitle>{m.attachments_loading_error_title()}</AlertTitle>
 				<AlertDescription>
-					Ocurrió un error al cargar sus archivos adjuntos. Por favor, inténtelo de nuevo.
+					{m.attachments_loading_error_description()}
 				</AlertDescription>
 			</Alert>
 		{/await}
@@ -269,26 +267,26 @@
 	<AlertDialog bind:open={dialogOpen}>
 		<AlertDialogContent>
 			<AlertDialogHeader>
-				<AlertDialogTitle>Confirmar eliminación</AlertDialogTitle>
+				<AlertDialogTitle>{m.attachments_confirm_delete_title()}</AlertDialogTitle>
 				<AlertDialogDescription>
 					{#if deleteType === 'single' && attachmentToDelete}
-						¿Estás seguro de que quieres eliminar el archivo "{attachmentToDelete.fileName}"?
+						{m.attachments_confirm_delete_single({ fileName: attachmentToDelete.fileName })}
 					{:else if deleteType === 'multiple'}
-						¿Estás seguro de que quieres eliminar {selectedIds.length} archivo(s) seleccionado(s)?
+						{m.attachments_confirm_delete_multiple({ count: selectedIds.length })}
 					{/if}
-					Esta acción no se puede deshacer.
+					{m.attachments_confirm_delete_warning()}
 				</AlertDialogDescription>
 			</AlertDialogHeader>
 			<AlertDialogFooter>
-				<AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+				<AlertDialogCancel disabled={isDeleting}>{m.attachments_cancel()}</AlertDialogCancel>
 				<AlertDialogAction
 					onclick={handleConfirmDelete}
 					disabled={isDeleting}
 					class="bg-red-600 hover:bg-red-700">
 					{#if isDeleting}
-						Eliminando...
+						{m.attachments_deleting()}
 					{:else}
-						Eliminar
+						{m.attachments_delete()}
 					{/if}
 				</AlertDialogAction>
 			</AlertDialogFooter>

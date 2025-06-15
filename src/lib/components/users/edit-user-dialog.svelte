@@ -18,6 +18,7 @@
 	import { Label } from '$lib/components/ui/label';
 	import { Textarea } from '$lib/components/ui/textarea';
 	import { USER_GRANTS } from '$lib/grants';
+	import { m } from '$lib/paraglide/messages.js';
 
 	interface Props {
 		open: boolean;
@@ -31,7 +32,7 @@
 	const availableGrants = Object.entries(USER_GRANTS).map(([key, value]) => ({
 		key,
 		name: key.replace(/:/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase()),
-		description: value.description,
+		description: value.description(),
 	}));
 
 	let isSubmitting = $state(false);
@@ -80,7 +81,7 @@
 		const result: ActionResult = deserialize(await response.text());
 
 		if (result.type === 'success') {
-			toast.success('Usuario actualizado correctamente');
+			toast.success(m.edit_user_dialog_update_success());
 			await invalidate('app:users');
 			onOpenChange(false);
 		} else if (result.type === 'failure') {
@@ -88,7 +89,7 @@
 				toast.error(result.data.errors._form[0]);
 			}
 		} else {
-			toast.error('Error al actualizar el usuario');
+			toast.error(m.edit_user_dialog_update_error());
 		}
 
 		applyAction(result);
@@ -115,10 +116,13 @@
 <Dialog {open} onOpenChange={handleClose}>
 	<DialogContent class="max-h-[80vh] max-w-md overflow-y-auto">
 		<DialogHeader>
-			<DialogTitle>Editar Usuario</DialogTitle>
+			<DialogTitle>{m.edit_user_dialog_title()}</DialogTitle>
 			<DialogDescription>
 				{#if user}
-					Modifica los permisos y configuración para {user.name || user.username} (@{user.username}).
+					{m.edit_user_dialog_description({
+						name: user.name || user.username,
+						username: user.username,
+					})}
 				{/if}
 			</DialogDescription>
 		</DialogHeader>
@@ -127,7 +131,7 @@
 			<form onsubmit={handleSubmit} class="space-y-4">
 				<!-- Grants Selection -->
 				<div class="space-y-3">
-					<Label>Permisos</Label>
+					<Label>{m.edit_user_dialog_permissions_label()}</Label>
 					<div class="space-y-2">
 						{#each availableGrants as grant (grant.key)}
 							<div class="flex items-center space-x-2">
@@ -146,36 +150,36 @@
 						{/each}
 					</div>
 					{#if selectedGrants.length === 0}
-						<p class="text-sm text-gray-500">El usuario no tendrá permisos asignados.</p>
+						<p class="text-sm text-gray-500">{m.edit_user_dialog_no_permissions()}</p>
 					{/if}
 				</div>
 
 				<!-- System Prompt Section -->
 				{#if showSystemPromptTextarea}
 					<div class="space-y-2">
-						<Label for="systemPrompt">Prompt del Sistema</Label>
+						<Label for="systemPrompt">{m.edit_user_dialog_system_prompt_label()}</Label>
 						<Textarea
 							id="systemPrompt"
 							bind:value={systemPrompt}
-							placeholder="Ingrese el prompt del sistema personalizado para este usuario..."
+							placeholder={m.edit_user_dialog_system_prompt_placeholder()}
 							rows={4}
 							disabled={isSubmitting}
 							class="resize-none" />
 						<p class="text-xs text-gray-500">
-							Este prompt se aplicará como predeterminado para este usuario.
+							{m.edit_user_dialog_system_prompt_description()}
 						</p>
 					</div>
 				{/if}
 
 				<DialogFooter>
 					<Button type="button" variant="outline" onclick={handleClose} disabled={isSubmitting}>
-						Cancelar
+						{m.edit_user_dialog_cancel()}
 					</Button>
 					<Button type="submit" disabled={isSubmitting}>
 						{#if isSubmitting}
-							Guardando...
+							{m.edit_user_dialog_saving()}
 						{:else}
-							Guardar Cambios
+							{m.edit_user_dialog_save()}
 						{/if}
 					</Button>
 				</DialogFooter>

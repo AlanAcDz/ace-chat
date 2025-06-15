@@ -3,6 +3,7 @@ import { readFile } from 'fs/promises';
 import { error } from '@sveltejs/kit';
 
 import type { RequestHandler } from './$types';
+import { m } from '$lib/paraglide/messages.js';
 import { getFullFilePath } from '$lib/server/storage';
 
 export const GET: RequestHandler = async ({ params }) => {
@@ -10,12 +11,12 @@ export const GET: RequestHandler = async ({ params }) => {
 		const filePath = params.path;
 
 		if (!filePath) {
-			return error(400, 'Ruta de archivo requerida');
+			return error(400, m.api_error_avatar_path_required());
 		}
 
 		// Security check: ensure the file path starts with 'avatars/'
 		if (!filePath.startsWith('avatars/')) {
-			return error(403, 'Acceso denegado');
+			return error(403, m.api_error_access_denied());
 		}
 
 		// Get the full file path
@@ -23,7 +24,7 @@ export const GET: RequestHandler = async ({ params }) => {
 
 		// Check if file exists
 		if (!existsSync(fullPath)) {
-			return error(404, 'Avatar no encontrado');
+			return error(404, m.api_error_avatar_not_found());
 		}
 
 		// Read the file
@@ -59,6 +60,6 @@ export const GET: RequestHandler = async ({ params }) => {
 		});
 	} catch (e) {
 		console.error('Error serving avatar:', e);
-		return error(500, 'Error al servir el avatar');
+		return error(500, m.api_error_serving_avatar());
 	}
 };

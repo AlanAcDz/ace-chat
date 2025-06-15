@@ -3,6 +3,7 @@
 
 	import type { AIModel } from '$lib/ai/models.js';
 	import { AI_MODELS } from '$lib/ai/models.js';
+	import { m } from '$lib/paraglide/messages.js';
 	import { Button } from '../ui/button';
 	import { createFileAttachmentsHandler } from './file-attachments.svelte';
 	import ModelPicker from './model-picker.svelte';
@@ -87,7 +88,7 @@
 								size="sm"
 								onclick={() => fileAttachmentsHandler.removeFile(index)}
 								class="h-6 w-6 p-0 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
-								aria-label="Remove file">
+								aria-label={m.message_input_remove_file_aria()}>
 								<X class="h-3 w-3" />
 							</Button>
 						</div>
@@ -101,7 +102,7 @@
 			<textarea
 				bind:value={message}
 				onkeydown={handleKeydown}
-				placeholder="Escribe tu mensaje aquí..."
+				placeholder={m.message_input_placeholder()}
 				disabled={isSubmitting}
 				class="field-sizing-content h-full max-h-[200px] min-h-[60px] w-full resize-none border-none bg-transparent text-gray-900 placeholder-gray-500 outline-none disabled:opacity-50 dark:text-gray-100 dark:placeholder-gray-400"
 				rows="1"></textarea>
@@ -120,9 +121,9 @@
 					disabled={isSubmitting}
 					onclick={() => onSearchToggle?.()}
 					class="text-xs"
-					aria-label="Toggle search">
+					aria-label={m.message_input_search_toggle_aria()}>
 					<Globe class="h-3 w-3" />
-					<span class="hidden sm:block">Busqueda</span>
+					<span class="hidden sm:block">{m.message_input_search()}</span>
 				</Button>
 
 				<!-- Attach Button -->
@@ -131,10 +132,10 @@
 					size="sm"
 					disabled={isSubmitting}
 					onclick={() => fileAttachmentsHandler.handleAttachClick()}
-					aria-label="Attach file"
+					aria-label={m.message_input_attach_aria()}
 					class="text-xs">
 					<Paperclip class="h-3 w-3" />
-					<span class="hidden sm:block">Adjuntar</span>
+					<span class="hidden sm:block">{m.message_input_attach()}</span>
 				</Button>
 			</div>
 
@@ -159,4 +160,4 @@
 	accept=".txt,.md,.json,.csv,.xml,.html,.css,.js,.ts,.pdf,image/*,text/*"
 	onchange={(e) => fileAttachmentsHandler.handleFileChange(e)}
 	class="hidden"
-	aria-label="Select files to attach" />
+	aria-label={m.message_input_select_files_aria()} />

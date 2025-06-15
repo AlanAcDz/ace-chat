@@ -6,6 +6,7 @@ import { z } from 'zod';
 import type { RequestHandler } from './$types';
 import type { AiRequest } from '$lib/server/ai/messages';
 import { AI_MODELS, detectImageGenerationRequest } from '$lib/ai/models';
+import { m } from '$lib/paraglide/messages.js';
 import {
 	aiRequestSchema,
 	createAIModelInstance,
@@ -29,7 +30,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		if (error instanceof z.ZodError) {
 			return json(
 				{
-					error: 'Invalid request data',
+					error: m.api_error_invalid_request_data(),
 					details: error.issues.map((issue) => ({
 						path: issue.path.join('.'),
 						message: issue.message,
@@ -38,7 +39,7 @@ export const POST: RequestHandler = async ({ request }) => {
 				{ status: 400 }
 			);
 		}
-		return json({ error: 'Invalid JSON' }, { status: 400 });
+		return json({ error: m.api_error_invalid_json() }, { status: 400 });
 	}
 
 	const { id, messages, model: modelKey, isSearchEnabled } = body;
@@ -55,7 +56,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		// Get model configuration
 		const modelConfig = AI_MODELS.find((m) => m.key === modelKey);
 		if (!modelConfig) {
-			throw new Error('Invalid model');
+			throw new Error(m.api_error_invalid_model());
 		}
 
 		const needsOpenAISearch = isSearchEnabled && modelConfig.provider === 'openai';
@@ -132,7 +133,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		console.error('AI request error:', error);
 		return json(
 			{
-				error: error instanceof Error ? error.message : 'Internal server error',
+				error: error instanceof Error ? error.message : m.api_error_internal_server(),
 			},
 			{ status: 500 }
 		);
@@ -145,7 +146,7 @@ export const DELETE: RequestHandler = async ({ params }) => {
 		const chatId = params.chatId;
 
 		if (!chatId) {
-			return error(400, 'ID de chat requerido');
+			return error(400, m.api_error_chat_id_required());
 		}
 
 		await deleteChat(chatId, sessionUser.id);
@@ -153,6 +154,6 @@ export const DELETE: RequestHandler = async ({ params }) => {
 		return json({ success: true });
 	} catch (e) {
 		console.error('Error deleting chat:', e);
-		return error(500, 'Error al eliminar el chat');
+		return error(500, m.api_error_deleting_chat());
 	}
 };

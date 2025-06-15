@@ -1,6 +1,7 @@
 import { error, json } from '@sveltejs/kit';
 
 import type { RequestHandler } from './$types';
+import { m } from '$lib/paraglide/messages.js';
 import { requireLogin } from '$lib/server/auth';
 import { createChat, getUserChats, groupChatsByDate } from '$lib/server/data/chats';
 
@@ -13,7 +14,7 @@ export const GET: RequestHandler = async ({ url }) => {
 		return json(groupedChats);
 	} catch (e) {
 		console.error('Error fetching chats:', e);
-		return error(500, 'Error al cargar los chats');
+		return error(500, m.api_error_loading_chats());
 	}
 };
 
@@ -29,7 +30,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		const files = formData.getAll('files') as File[];
 
 		if (!messageContent?.trim()) {
-			return error(400, 'El mensaje no puede estar vacío');
+			return error(400, m.api_error_message_empty());
 		}
 
 		newChatId = await createChat({
@@ -43,6 +44,6 @@ export const POST: RequestHandler = async ({ request }) => {
 		return json({ newChatId, isSearchEnabled });
 	} catch (e) {
 		console.error('Error creating chat:', e);
-		return error(500, 'Error al crear el chat');
+		return error(500, m.api_error_creating_chat());
 	}
 };

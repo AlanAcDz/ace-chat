@@ -14,6 +14,7 @@
 	import { Input } from '$lib/components/ui/input/index.js';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { Skeleton } from '$lib/components/ui/skeleton/index.js';
+	import { m } from '$lib/paraglide/messages.js';
 	import { cn, getUserInitials } from '$lib/utils';
 
 	interface Props {
@@ -41,7 +42,7 @@
 
 				const response = await fetch(url);
 				if (!response.ok) {
-					throw new Error('Error al cargar los chats');
+					throw new Error(m.sidebar_load_error());
 				}
 
 				return response.json() as Promise<ChatGroups>;
@@ -57,7 +58,7 @@
 			});
 
 			if (!response.ok) {
-				throw new Error('Error al eliminar el chat');
+				throw new Error(m.sidebar_delete_error());
 			}
 
 			return response.json();
@@ -81,16 +82,16 @@
 		},
 	});
 
-	// Get group label in Spanish
+	// Get group label with translations
 	function getGroupLabel(groupKey: keyof ChatGroups): string {
-		const labels = {
-			today: 'Hoy',
-			yesterday: 'Ayer',
-			last7Days: 'Últimos 7 días',
-			last30Days: 'Últimos 30 días',
-			older: 'Más antiguos',
+		const labelMap = {
+			today: m.sidebar_group_today(),
+			yesterday: m.sidebar_group_yesterday(),
+			last7Days: m.sidebar_group_last7days(),
+			last30Days: m.sidebar_group_last30days(),
+			older: m.sidebar_group_older(),
 		};
-		return labels[groupKey];
+		return labelMap[groupKey];
 	}
 
 	// Check if a group has chats
@@ -135,13 +136,13 @@
 		<!-- New Chat Button -->
 		<Button href="/" variant="outline" size="sm" class="w-full gap-2">
 			<MessageCirclePlus class="h-4 w-4" />
-			<span>Nuevo Chat</span>
+			<span>{m.sidebar_new_chat()}</span>
 		</Button>
 
 		<!-- Search Bar -->
 		<div class="relative">
 			<Search class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-			<Input bind:value={searchQuery} placeholder="Buscar chats..." class="pl-9" />
+			<Input bind:value={searchQuery} placeholder={m.sidebar_search_placeholder()} class="pl-9" />
 		</div>
 	</Sidebar.Header>
 
@@ -160,7 +161,7 @@
 			</Sidebar.Group>
 		{:else if $chatsQuery.isError}
 			<!-- Error state -->
-			<div class="py-8 text-center text-sm text-destructive">Error al cargar los chats</div>
+			<div class="py-8 text-center text-sm text-destructive">{m.sidebar_error_loading_chats()}</div>
 		{:else if $chatsQuery.data}
 			<!-- Success state -->
 			{@const groups = $chatsQuery.data}
@@ -182,7 +183,7 @@
 													href="/chats/{chat.id}"
 													class={cn(props.class as string, 'group/link relative truncate')}>
 													{#if chat.isBranched}
-														<div title="Chat ramificado">
+														<div title={m.sidebar_chat_branched_title()}>
 															<GitBranch class="h-3 w-3 shrink-0 text-current" />
 														</div>
 													{/if}
@@ -217,7 +218,7 @@
 			{#if !Object.values(groups).some(hasChats)}
 				<!-- No chats found -->
 				<div class="py-8 text-center text-sm text-muted-foreground">
-					{searchQuery.trim() ? 'No se encontraron chats' : 'Los chats aparecerán aquí'}
+					{searchQuery.trim() ? m.sidebar_no_chats_found() : m.sidebar_chats_appear_here()}
 				</div>
 			{/if}
 		{/if}
@@ -254,7 +255,7 @@
 			</Button>
 		{:catch}
 			<!-- Error state -->
-			<div class="p-3 text-center text-sm text-destructive">Error al cargar usuario</div>
+			<div class="p-3 text-center text-sm text-destructive">{m.sidebar_error_loading_user()}</div>
 		{/await}
 	</Sidebar.Footer>
 </Sidebar.Root>
@@ -263,16 +264,16 @@
 <AlertDialog.Root bind:open={showDeleteDialog}>
 	<AlertDialog.Content>
 		<AlertDialog.Header>
-			<AlertDialog.Title>Eliminar chat</AlertDialog.Title>
+			<AlertDialog.Title>{m.sidebar_delete_chat_title()}</AlertDialog.Title>
 			<AlertDialog.Description>
-				¿Estás seguro de que quieres eliminar el chat "{chatToDelete?.title}"? Esta acción no se
-				puede deshacer.
+				{m.sidebar_delete_chat_description({ title: chatToDelete?.title || '' })}
 			</AlertDialog.Description>
 		</AlertDialog.Header>
 		<AlertDialog.Footer>
-			<AlertDialog.Cancel onclick={handleCancelDelete}>Cancelar</AlertDialog.Cancel>
+			<AlertDialog.Cancel onclick={handleCancelDelete}
+				>{m.sidebar_delete_cancel()}</AlertDialog.Cancel>
 			<AlertDialog.Action onclick={handleConfirmDelete} disabled={$deleteChatMutation.isPending}>
-				{$deleteChatMutation.isPending ? 'Eliminando...' : 'Eliminar'}
+				{$deleteChatMutation.isPending ? m.sidebar_delete_deleting() : m.sidebar_delete_confirm()}
 			</AlertDialog.Action>
 		</AlertDialog.Footer>
 	</AlertDialog.Content>

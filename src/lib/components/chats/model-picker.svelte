@@ -18,6 +18,7 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Command from '$lib/components/ui/command/index.js';
 	import * as Popover from '$lib/components/ui/popover/index.js';
+	import { m } from '$lib/paraglide/messages.js';
 	import { cn } from '$lib/utils.js';
 
 	interface Props {
@@ -97,7 +98,7 @@
 						<Bot class={cn('shrink-0', size === 'sm' ? 'h-3 w-3' : 'h-4 w-4')} />
 					{/if}
 					<span class="truncate text-xs">
-						{selectedModel?.label || 'Seleccionar modelo...'}
+						{selectedModel?.label || m.model_picker_placeholder()}
 					</span>
 				</div>
 				<ChevronsUpDown class={cn('shrink-0 opacity-50', size === 'sm' ? 'h-3 w-3' : 'h-4 w-4')} />
@@ -106,9 +107,9 @@
 	</Popover.Trigger>
 	<Popover.Content class="w-80 p-0">
 		<Command.Root>
-			<Command.Input placeholder="Buscar modelo..." />
+			<Command.Input placeholder={m.model_picker_search_placeholder()} />
 			<Command.List>
-				<Command.Empty>No se encontró el modelo.</Command.Empty>
+				<Command.Empty>{m.model_picker_not_found()}</Command.Empty>
 				<Command.Group>
 					{#each AI_MODELS as model (model.key)}
 						{@const ProviderIcon = getProviderIcon(model.provider)}

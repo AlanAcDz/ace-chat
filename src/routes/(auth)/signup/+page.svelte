@@ -12,6 +12,7 @@
 	import * as Form from '$lib/components/ui/form';
 	import { Input, PasswordInput } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
+	import { m } from '$lib/paraglide/messages.js';
 	import { registerSchema } from './schema';
 
 	let { data }: { data: PageData } = $props();
@@ -37,31 +38,32 @@
 </script>
 
 <svelte:head>
-	<title>Registrarse | AceChat</title>
+	<title>{m.auth_signup_title()}</title>
 </svelte:head>
 
 <Card.Header>
 	<Card.Title class="text-center">
 		{#if data.requiresInvite}
-			Registro Restringido
+			{m.auth_signup_header_restricted()}
 		{:else if data.invite}
-			¡Bienvenido! Completa tu registro
+			{m.auth_signup_header_invite()}
 		{:else if data.isFirstUser}
-			¡Bienvenido! Configura el sistema
+			{m.auth_signup_header_first_user()}
 		{:else}
-			Registrarse
+			{m.auth_signup_header_default()}
 		{/if}
 	</Card.Title>
 	<Card.Description class="text-center">
 		{#if data.requiresInvite}
-			El registro está restringido solo a usuarios invitados
+			{m.auth_signup_description_restricted()}
 		{:else if data.invite}
-			Has sido invitado por {data.invite.invitedBy.name || data.invite.invitedBy.username} para unirte
-			al sistema
+			{m.auth_signup_description_invite({
+				inviterName: data.invite.invitedBy.name || data.invite.invitedBy.username,
+			})}
 		{:else if data.isFirstUser}
-			Eres el primer usuario. Configura tu cuenta de administrador
+			{m.auth_signup_description_first_user()}
 		{:else}
-			Completa el formulario para crear tu cuenta
+			{m.auth_signup_description_default()}
 		{/if}
 	</Card.Description>
 </Card.Header>
@@ -73,10 +75,9 @@
 			<Mail class="h-4 w-4 text-red-600" />
 			<AlertDescription class="text-red-800">
 				<div class="space-y-2">
-					<p class="font-medium">Se requiere una invitación</p>
+					<p class="font-medium">{m.auth_signup_invite_required_title()}</p>
 					<p class="text-sm">
-						Para registrarte en este sistema necesitas una invitación válida. Contacta con un
-						administrador para obtener un enlace de invitación.
+						{m.auth_signup_invite_required_description()}
 					</p>
 				</div>
 			</AlertDescription>
@@ -86,7 +87,7 @@
 		<Alert class="mb-4 border-blue-200 bg-blue-50">
 			<Mail class="h-4 w-4 text-blue-600" />
 			<AlertDescription class="text-blue-800">
-				<p class="font-medium">Invitación activa para: @{data.invite.username}</p>
+				<p class="font-medium">{m.auth_signup_invite_active({ username: data.invite.username })}</p>
 			</AlertDescription>
 		</Alert>
 	{:else if data.isFirstUser}
@@ -95,9 +96,9 @@
 			<Mail class="h-4 w-4 text-green-600" />
 			<AlertDescription class="text-green-800">
 				<div class="space-y-2">
-					<p class="font-medium">¡Bienvenido al sistema!</p>
+					<p class="font-medium">{m.auth_signup_first_user_title()}</p>
 					<p class="text-sm">
-						Eres el primer usuario. Tu cuenta tendrá permisos de administrador completos.
+						{m.auth_signup_first_user_description()}
 					</p>
 				</div>
 			</AlertDescription>
@@ -110,24 +111,24 @@
 			<input type="hidden" name="username" value={data.invite.username} />
 
 			<div class="space-y-2">
-				<Label>Nombre de usuario</Label>
+				<Label>{m.auth_signup_username_label()}</Label>
 				<Input
 					type="text"
 					value={data.invite.username}
 					disabled
 					readonly
 					class="cursor-not-allowed bg-gray-50" />
-				<p class="text-sm text-gray-600">El nombre de usuario está predefinido por la invitación</p>
+				<p class="text-sm text-gray-600">{m.auth_signup_username_predefined()}</p>
 			</div>
 		{:else}
 			<Form.Field {form} name="username">
 				<Form.Control>
 					{#snippet children({ props })}
-						<Form.Label>Nombre de usuario</Form.Label>
+						<Form.Label>{m.auth_signup_username_label()}</Form.Label>
 						<Input
 							{...props}
 							type="text"
-							placeholder="johndoe"
+							placeholder={m.auth_signup_username_placeholder()}
 							bind:value={$formData.username}
 							disabled={$submitting || data.requiresInvite}
 							class={data.requiresInvite ? 'cursor-not-allowed bg-gray-50' : ''} />
@@ -140,10 +141,10 @@
 		<Form.Field {form} name="password">
 			<Form.Control>
 				{#snippet children({ props })}
-					<Form.Label>Contraseña</Form.Label>
+					<Form.Label>{m.auth_signup_password_label()}</Form.Label>
 					<PasswordInput
 						{...props}
-						placeholder="••••••••"
+						placeholder={m.auth_signup_password_placeholder()}
 						bind:value={$formData.password}
 						disabled={$submitting || data.requiresInvite} />
 				{/snippet}
@@ -154,10 +155,10 @@
 		<Form.Field {form} name="confirmPassword">
 			<Form.Control>
 				{#snippet children({ props })}
-					<Form.Label>Confirmar contraseña</Form.Label>
+					<Form.Label>{m.auth_signup_confirm_password_label()}</Form.Label>
 					<PasswordInput
 						{...props}
-						placeholder="••••••••"
+						placeholder={m.auth_signup_confirm_password_placeholder()}
 						bind:value={$formData.confirmPassword}
 						disabled={$submitting || data.requiresInvite} />
 				{/snippet}
@@ -167,13 +168,13 @@
 
 		<Button type="submit" class="w-full" disabled={$submitting || data.requiresInvite}>
 			{#if $submitting}
-				Creando cuenta...
+				{m.auth_signup_submit_creating()}
 			{:else if data.requiresInvite}
-				Invitación Requerida
+				{m.auth_signup_submit_invite_required()}
 			{:else if data.invite}
-				Completar Registro
+				{m.auth_signup_submit_complete()}
 			{:else}
-				Crear Cuenta
+				{m.auth_signup_submit_create()}
 			{/if}
 		</Button>
 	</form>
@@ -182,9 +183,9 @@
 <Card.Footer>
 	<div class="w-full text-center">
 		<p class="text-sm text-muted-foreground">
-			¿Ya tienes una cuenta?
+			{m.auth_signup_have_account()}
 			<a href="/login" class="ml-1 font-medium text-primary underline-offset-4 hover:underline">
-				Inicia sesión
+				{m.auth_signup_login_link()}
 			</a>
 		</p>
 	</div>

@@ -6,6 +6,7 @@ import { zod } from 'sveltekit-superforms/adapters';
 
 import type { Actions, PageServerLoad } from './$types';
 import { getGrantKeys } from '$lib/grants';
+import { m } from '$lib/paraglide/messages.js';
 import * as auth from '$lib/server/auth';
 import { deleteInviteByUsername, getInviteByUsername } from '$lib/server/data/invites';
 import { getUserCount } from '$lib/server/data/users';
@@ -57,7 +58,7 @@ export const actions: Actions = {
 			return fail(400, {
 				form: {
 					...form,
-					message: 'Este nombre de usuario ya está en uso',
+					message: m.server_auth_username_taken(),
 				},
 			});
 		}
@@ -74,7 +75,7 @@ export const actions: Actions = {
 			return fail(400, {
 				form: {
 					...form,
-					message: 'Solo se puede registrar con una invitación válida',
+					message: m.server_auth_signup_invite_only(),
 				},
 			});
 		}
@@ -120,7 +121,7 @@ export const actions: Actions = {
 			return fail(500, {
 				form: {
 					...form,
-					message: 'Ha ocurrido un error al crear la cuenta',
+					message: m.server_auth_signup_error(),
 				},
 			});
 		}

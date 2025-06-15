@@ -3,6 +3,7 @@ import { and, eq } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 
 import type { RequestHandler } from './$types';
+import { m } from '$lib/paraglide/messages.js';
 import { requireLogin } from '$lib/server/auth';
 import { db } from '$lib/server/db';
 import { chat } from '$lib/server/db/schema';
@@ -18,7 +19,7 @@ export const POST: RequestHandler = async ({ params }) => {
 	});
 
 	if (!chatData) {
-		return json({ error: 'Chat no encontrado' }, { status: 404 });
+		return json({ error: m.api_error_chat_not_found() }, { status: 404 });
 	}
 
 	// If chat already has a sharePath, return it
@@ -49,7 +50,7 @@ export const POST: RequestHandler = async ({ params }) => {
 		}
 
 		if (attempts >= maxAttempts) {
-			return json({ error: 'Error al generar enlace único' }, { status: 500 });
+			return json({ error: m.api_error_unique_link() }, { status: 500 });
 		}
 	} while (attempts < maxAttempts);
 
@@ -76,7 +77,7 @@ export const DELETE: RequestHandler = async ({ params }) => {
 	});
 
 	if (!chatData) {
-		return json({ error: 'Chat no encontrado' }, { status: 404 });
+		return json({ error: m.api_error_chat_not_found() }, { status: 404 });
 	}
 
 	// Remove the sharePath

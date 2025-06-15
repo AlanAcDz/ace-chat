@@ -4,6 +4,7 @@ import { z } from 'zod';
 import type { Actions, PageServerLoad } from './$types';
 import type { UserGrant } from '$lib/grants';
 import { hasGrant } from '$lib/grants';
+import { m } from '$lib/paraglide/messages.js';
 import { requireLogin } from '$lib/server/auth';
 import { validateApiKeyAccess } from '$lib/server/data/api-keys';
 import { createInvite, deleteInvite, getAllInvites } from '$lib/server/data/invites';
@@ -35,7 +36,7 @@ export const load: PageServerLoad = async ({ depends }) => {
 
 	// Check permissions
 	if (!hasGrant(user.grants as UserGrant[], 'users:view')) {
-		throw error(403, 'Insufficient permissions');
+		throw error(403, m.server_error_insufficient_permissions());
 	}
 
 	// Return promises for both users and invites
@@ -56,7 +57,7 @@ export const actions: Actions = {
 		const sessionUser = requireLogin();
 
 		if (!hasGrant(sessionUser.grants as UserGrant[], 'users:create')) {
-			throw error(403, 'Insufficient permissions');
+			throw error(403, m.server_error_insufficient_permissions());
 		}
 
 		const formData = await event.request.formData();
@@ -88,7 +89,9 @@ export const actions: Actions = {
 		} catch (err) {
 			console.error('Error creating invite:', err);
 			return fail(500, {
-				errors: { _form: [err instanceof Error ? err.message : 'Failed to create invite'] },
+				errors: {
+					_form: [err instanceof Error ? err.message : m.server_error_failed_create_invite()],
+				},
 			});
 		}
 	},
@@ -97,7 +100,7 @@ export const actions: Actions = {
 		const sessionUser = requireLogin();
 
 		if (!hasGrant(sessionUser.grants as UserGrant[], 'users:update')) {
-			throw error(403, 'Insufficient permissions');
+			throw error(403, m.server_error_insufficient_permissions());
 		}
 
 		const formData = await event.request.formData();
@@ -117,7 +120,7 @@ export const actions: Actions = {
 		// Prevent updating own grants
 		if (validation.data.id === sessionUser.id) {
 			return fail(400, {
-				errors: { _form: ['Cannot update your own grants'] },
+				errors: { _form: [m.server_error_cannot_update_own_grants()] },
 			});
 		}
 
@@ -137,7 +140,9 @@ export const actions: Actions = {
 		} catch (err) {
 			console.error('Error updating user:', err);
 			return fail(500, {
-				errors: { _form: [err instanceof Error ? err.message : 'Failed to update user'] },
+				errors: {
+					_form: [err instanceof Error ? err.message : m.server_error_failed_update_user()],
+				},
 			});
 		}
 	},
@@ -146,7 +151,7 @@ export const actions: Actions = {
 		const sessionUser = requireLogin();
 
 		if (!hasGrant(sessionUser.grants as UserGrant[], 'users:delete')) {
-			throw error(403, 'Insufficient permissions');
+			throw error(403, m.server_error_insufficient_permissions());
 		}
 
 		const formData = await event.request.formData();
@@ -162,7 +167,7 @@ export const actions: Actions = {
 		// Prevent self-deletion
 		if (validation.data.id === sessionUser.id) {
 			return fail(400, {
-				errors: { _form: ['Cannot delete your own account'] },
+				errors: { _form: [m.server_error_cannot_delete_own_account()] },
 			});
 		}
 
@@ -175,7 +180,7 @@ export const actions: Actions = {
 		} catch (err) {
 			console.error('Error deleting user:', err);
 			return fail(500, {
-				errors: { _form: ['Failed to delete user'] },
+				errors: { _form: [m.server_error_failed_delete_user()] },
 			});
 		}
 	},
@@ -184,7 +189,7 @@ export const actions: Actions = {
 		const sessionUser = requireLogin();
 
 		if (!hasGrant(sessionUser.grants as UserGrant[], 'users:delete')) {
-			throw error(403, 'Insufficient permissions');
+			throw error(403, m.server_error_insufficient_permissions());
 		}
 
 		const formData = await event.request.formData();
@@ -206,7 +211,7 @@ export const actions: Actions = {
 		} catch (err) {
 			console.error('Error deleting invite:', err);
 			return fail(500, {
-				errors: { _form: ['Failed to delete invite'] },
+				errors: { _form: [m.server_error_failed_delete_invite()] },
 			});
 		}
 	},

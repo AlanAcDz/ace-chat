@@ -3,6 +3,7 @@
 	import { createMutation, createQuery, useQueryClient } from '@tanstack/svelte-query';
 	import { toast } from 'svelte-sonner';
 
+	import { m } from '$lib/paraglide/messages.js';
 	import { Button } from '../ui/button';
 	import * as Dialog from '../ui/dialog';
 
@@ -48,7 +49,7 @@
 
 			if (!response.ok) {
 				const errorData = await response.json();
-				throw new Error(errorData.error || 'Error al compartir el chat');
+				throw new Error(errorData.error || m.share_button_share_error());
 			}
 
 			return response.json();
@@ -56,12 +57,12 @@
 		onSuccess: (data) => {
 			shareUrl = `${window.location.origin}${data.shareUrl}`;
 			isDialogOpen = true;
-			toast.success('Chat compartido exitosamente');
+			toast.success(m.share_button_share_success());
 			queryClient.invalidateQueries({ queryKey: ['chat-share-status', chatId] });
 		},
 		onError: (error) => {
 			console.error('Error sharing chat:', error);
-			toast.error('Error al compartir el chat');
+			toast.error(m.share_button_share_error());
 		},
 	});
 
@@ -74,7 +75,7 @@
 
 			if (!response.ok) {
 				const errorData = await response.json();
-				throw new Error(errorData.error || 'Error al dejar de compartir el chat');
+				throw new Error(errorData.error || m.share_button_unshare_error());
 			}
 
 			return response.json();
@@ -82,12 +83,12 @@
 		onSuccess: () => {
 			shareUrl = '';
 			isDialogOpen = false;
-			toast.success('Chat ya no está compartido');
+			toast.success(m.share_button_unshare_success());
 			queryClient.invalidateQueries({ queryKey: ['chat-share-status', chatId] });
 		},
 		onError: (error) => {
 			console.error('Error unsharing chat:', error);
-			toast.error('Error al dejar de compartir el chat');
+			toast.error(m.share_button_unshare_error());
 		},
 	});
 
@@ -108,10 +109,10 @@
 			setTimeout(() => {
 				isCopied = false;
 			}, 2000);
-			toast.success('Enlace copiado al portapapeles');
+			toast.success(m.share_button_copy_success());
 		} catch (error) {
 			console.error('Failed to copy:', error);
-			toast.error('Error al copiar el enlace');
+			toast.error(m.share_button_copy_error());
 		}
 	}
 
@@ -125,7 +126,7 @@
 	size="icon"
 	onclick={handleShare}
 	disabled={$shareMutation.isPending}
-	title="Compartir chat"
+	title={m.share_button_title()}
 	class="size-8">
 	<Share class="size-4" />
 </Button>
@@ -133,14 +134,14 @@
 <Dialog.Root bind:open={isDialogOpen}>
 	<Dialog.Content class="sm:max-w-md">
 		<Dialog.Header>
-			<Dialog.Title>Compartir Chat</Dialog.Title>
+			<Dialog.Title>{m.share_dialog_title()}</Dialog.Title>
 			<Dialog.Description>
-				Cualquier persona con este enlace podrá ver esta conversación.
+				{m.share_dialog_description()}
 			</Dialog.Description>
 		</Dialog.Header>
 		<div class="flex items-stretch space-x-2">
 			<div class="grid flex-1 gap-2">
-				<label for="share-url" class="sr-only">Enlace</label>
+				<label for="share-url" class="sr-only">{m.share_dialog_link_label()}</label>
 				<input
 					id="share-url"
 					value={shareUrl}
@@ -148,7 +149,7 @@
 					class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50" />
 			</div>
 			<Button class="h-auto px-3" onclick={copyToClipboard}>
-				<span class="sr-only">Copiar</span>
+				<span class="sr-only">{m.share_dialog_copy_aria()}</span>
 				{#if isCopied}
 					<Check class="h-4 w-4" />
 				{:else}
@@ -158,10 +159,10 @@
 		</div>
 		<Dialog.Footer>
 			<Button variant="destructive" onclick={handleUnshare} disabled={$unshareMutation.isPending}>
-				Dejar de compartir
+				{m.share_dialog_unshare()}
 			</Button>
 			<Dialog.Close>
-				<Button type="button" variant="secondary">Cerrar</Button>
+				<Button type="button" variant="secondary">{m.share_dialog_close()}</Button>
 			</Dialog.Close>
 		</Dialog.Footer>
 	</Dialog.Content>

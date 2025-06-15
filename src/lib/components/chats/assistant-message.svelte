@@ -9,6 +9,7 @@
 	import type { Attachment } from '$lib/server/db/schema';
 	import type { Message } from 'ai';
 	import { goto } from '$app/navigation';
+	import { m } from '$lib/paraglide/messages.js';
 	import { Button } from '../ui/button';
 
 	import 'carta-md/default.css'; /* Default theme */
@@ -43,19 +44,19 @@
 
 			if (!response.ok) {
 				const errorText = await response.text();
-				throw new Error(errorText || 'Error al ramificar el chat');
+				throw new Error(errorText || m.assistant_message_branch_error());
 			}
 
 			return response.json();
 		},
 		onSuccess: ({ newChatId }) => {
-			toast.success('Chat ramificado exitosamente');
+			toast.success(m.assistant_message_branch_success());
 			queryClient.invalidateQueries({ queryKey: ['chats'] });
 			goto(`/chats/${newChatId}`);
 		},
 		onError: (error) => {
 			console.error('Error branching chat:', error);
-			toast.error('Error al ramificar el chat');
+			toast.error(m.assistant_message_branch_error());
 		},
 	});
 
@@ -109,7 +110,7 @@
 				<div class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
 					<img
 						src={imageData.startsWith('data:') ? imageData : `data:image/png;base64,${imageData}`}
-						alt="Generated image {index + 1}"
+						alt={m.assistant_message_generated_image({ index: index + 1 })}
 						class="h-auto w-full object-cover"
 						loading="lazy" />
 				</div>
@@ -147,7 +148,7 @@
 				variant="ghost"
 				onclick={handleBranch}
 				disabled={$branchMutation.isPending}
-				title="Ramificar chat desde este mensaje">
+				title={m.assistant_message_branch_tooltip()}>
 				<GitBranch />
 			</Button>
 		{/if}

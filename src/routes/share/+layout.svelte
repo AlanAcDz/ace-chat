@@ -1,13 +1,14 @@
 <script lang="ts">
 	import { ArrowLeft, MessageCircleIcon } from '@lucide/svelte';
 
-	import Button from '../../lib/components/ui/button/button.svelte';
+	import { Button } from '$lib/components/ui/button';
+	import { m } from '$lib/paraglide/messages.js';
 
 	let { children } = $props();
 </script>
 
 <svelte:head>
-	<title>Chat Compartido | AceChat</title>
+	<title>{m.share_layout_title()}</title>
 </svelte:head>
 
 <div class="min-h-screen bg-background">
@@ -21,7 +22,7 @@
 			</div>
 			<Button href="/" variant="secondary">
 				<ArrowLeft class="size-4" />
-				Ir a la aplicación
+				{m.share_layout_go_to_app()}
 			</Button>
 		</div>
 	</header>
@@ -34,7 +35,7 @@
 	<!-- Footer -->
 	<footer class="border-t py-6 text-center text-sm text-muted-foreground">
 		<div class="container mx-auto px-4">
-			Powered by <strong>AceChat</strong> - Una aplicación de chat auto-hospedada
+			{m.share_layout_footer()}
 		</div>
 	</footer>
 </div>

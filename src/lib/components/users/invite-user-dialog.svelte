@@ -18,6 +18,7 @@
 	import { Label } from '$lib/components/ui/label';
 	import { Separator } from '$lib/components/ui/separator';
 	import { USER_GRANTS } from '$lib/grants';
+	import { m } from '$lib/paraglide/messages.js';
 
 	interface Props {
 		open: boolean;
@@ -30,7 +31,7 @@
 	const availableGrants = Object.entries(USER_GRANTS).map(([key, value]) => ({
 		key,
 		name: key.replace(/:/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase()),
-		description: value.description,
+		description: value.description(),
 	}));
 
 	let isSubmitting = $state(false);
@@ -49,13 +50,13 @@
 
 		// Basic validation
 		if (!formData.username.trim()) {
-			errors.username = ['El nombre de usuario es requerido'];
+			errors.username = [m.invite_dialog_username_required()];
 			isSubmitting = false;
 			return;
 		}
 
 		if (formData.username.length < 3) {
-			errors.username = ['El nombre de usuario debe tener al menos 3 caracteres'];
+			errors.username = [m.invite_dialog_username_min_length()];
 			isSubmitting = false;
 			return;
 		}
@@ -74,7 +75,7 @@
 		const result: ActionResult = deserialize(await response.text());
 
 		if (result.type === 'success') {
-			toast.success('Invitación creada correctamente');
+			toast.success(m.invite_dialog_success());
 			await invalidate('app:users');
 			onOpenChange(false);
 			resetForm();
@@ -84,7 +85,7 @@
 				toast.error(result.data.errors._form[0]);
 			}
 		} else {
-			toast.error('Error al crear la invitación');
+			toast.error(m.invite_dialog_error());
 		}
 
 		applyAction(result);
@@ -119,22 +120,21 @@
 <Dialog {open} onOpenChange={handleClose}>
 	<DialogContent class="max-w-md">
 		<DialogHeader>
-			<DialogTitle>Invitar Usuario</DialogTitle>
+			<DialogTitle>{m.invite_dialog_title()}</DialogTitle>
 			<DialogDescription>
-				Crea una invitación para que un nuevo usuario se registre en el sistema con los permisos
-				especificados.
+				{m.invite_dialog_description()}
 			</DialogDescription>
 		</DialogHeader>
 
 		<form onsubmit={handleSubmit} class="space-y-4">
 			<!-- Username Input -->
 			<div class="space-y-2">
-				<Label for="username">Nombre de usuario</Label>
+				<Label for="username">{m.invite_dialog_username_label()}</Label>
 				<Input
 					id="username"
 					type="text"
 					bind:value={formData.username}
-					placeholder="Ingresa el nombre de usuario"
+					placeholder={m.invite_dialog_username_placeholder()}
 					class={errors.username ? 'border-red-500' : ''}
 					disabled={isSubmitting}
 					required />
@@ -147,7 +147,7 @@
 
 			<!-- Grants Selection -->
 			<div class="space-y-3">
-				<Label>Permisos</Label>
+				<Label>{m.invite_dialog_permissions_label()}</Label>
 				<div class="space-y-2">
 					{#each availableGrants as grant (grant.key)}
 						<div class="flex items-center space-x-2">
@@ -166,19 +166,19 @@
 					{/each}
 				</div>
 				{#if formData.grants.length === 0}
-					<p class="text-sm text-gray-500">El usuario no tendrá permisos asignados inicialmente.</p>
+					<p class="text-sm text-gray-500">{m.invite_dialog_no_permissions_warning()}</p>
 				{/if}
 			</div>
 
 			<DialogFooter>
 				<Button type="button" variant="outline" onclick={handleClose} disabled={isSubmitting}>
-					Cancelar
+					{m.invite_dialog_cancel()}
 				</Button>
 				<Button type="submit" disabled={isSubmitting}>
 					{#if isSubmitting}
-						Creando...
+						{m.invite_dialog_creating()}
 					{:else}
-						Crear Invitación
+						{m.invite_dialog_create()}
 					{/if}
 				</Button>
 			</DialogFooter>

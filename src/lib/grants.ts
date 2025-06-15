@@ -1,27 +1,29 @@
+import { m } from '$lib/paraglide/messages.js';
+
 export const USER_GRANTS = {
 	// User Management
 	'users:view': {
-		description: 'Can view the list of all users in the system.',
+		description: () => m.grants_users_view_description(),
 	},
 	'users:create': {
-		description: 'Can create new users.',
+		description: () => m.grants_users_create_description(),
 	},
 	'users:delete': {
-		description: 'Can delete existing users.',
+		description: () => m.grants_users_delete_description(),
 	},
 	'users:update': {
-		description: "Can update other users' information and grants.",
+		description: () => m.grants_users_update_description(),
 	},
 
 	// Chat Behavior & Settings
 	'settings:update:system-prompt': {
-		description: 'Can modify their personal default system prompt.',
+		description: () => m.grants_settings_system_prompt_description(),
 	},
 	'api-keys:create:personal': {
-		description: 'Can add and use their own personal API keys.',
+		description: () => m.grants_api_keys_personal_description(),
 	},
 	'api-keys:create:shared': {
-		description: 'Can add shared API keys that are available to all users.',
+		description: () => m.grants_api_keys_shared_description(),
 	},
 } as const;
 

@@ -12,6 +12,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import { TabsContent } from '$lib/components/ui/tabs';
 	import { Textarea } from '$lib/components/ui/textarea';
+	import { m } from '$lib/paraglide/messages.js';
 	import { getUserInitials } from '$lib/utils';
 	import { profileSchema } from './schema';
 
@@ -44,13 +45,13 @@
 		if (file) {
 			// Validate file type
 			if (!file.type.startsWith('image/')) {
-				toast.error('El archivo debe ser una imagen');
+				toast.error(m.settings_profile_avatar_error_type());
 				return;
 			}
 
 			// Validate file size (max 5MB)
 			if (file.size > 5 * 1024 * 1024) {
-				toast.error('La imagen no puede ser mayor a 5MB');
+				toast.error(m.settings_profile_avatar_error_size());
 				return;
 			}
 
@@ -75,7 +76,7 @@
 </script>
 
 <TabsContent value="profile" class="space-y-6">
-	<h1 class="text-2xl font-bold">Perfil</h1>
+	<h1 class="text-2xl font-bold">{m.settings_profile_title()}</h1>
 	<form
 		method="POST"
 		action="?/updateProfile"
@@ -101,7 +102,7 @@
 						onclick={() => fileInput?.click()}
 						disabled={$submitting}>
 						<User class="mr-2 h-4 w-4" />
-						{avatarFile ? 'Cambiar Avatar' : 'Subir Avatar'}
+						{avatarFile ? m.settings_profile_avatar_change() : m.settings_profile_avatar_upload()}
 					</Button>
 					{#if avatarFile}
 						<Button
@@ -110,12 +111,12 @@
 							size="sm"
 							onclick={removeAvatar}
 							disabled={$submitting}>
-							Eliminar
+							{m.settings_profile_avatar_remove()}
 						</Button>
 					{/if}
 				</div>
 			</div>
-			<p class="text-sm text-muted-foreground">JPG, PNG o GIF. Máximo 5MB.</p>
+			<p class="text-sm text-muted-foreground">{m.settings_profile_avatar_description()}</p>
 			<input
 				bind:this={fileInput}
 				type="file"
@@ -129,14 +130,14 @@
 		<Form.Field {form} name="username">
 			<Form.Control>
 				{#snippet children({ props })}
-					<Form.Label>Nombre de usuario</Form.Label>
+					<Form.Label>{m.settings_profile_username_label()}</Form.Label>
 					<Input
 						{...props}
 						type="text"
-						placeholder="johndoe"
+						placeholder={m.settings_profile_username_placeholder()}
 						bind:value={$formData.username}
 						disabled={$submitting} />
-					<Form.Description>Tu nombre de usuario único.</Form.Description>
+					<Form.Description>{m.settings_profile_username_description()}</Form.Description>
 				{/snippet}
 			</Form.Control>
 			<Form.FieldErrors />
@@ -145,15 +146,15 @@
 		<Form.Field {form} name="name">
 			<Form.Control>
 				{#snippet children({ props })}
-					<Form.Label>¿Cómo debería llamarte AceChat?</Form.Label>
+					<Form.Label>{m.settings_profile_name_label()}</Form.Label>
 					<Input
 						{...props}
 						type="text"
-						placeholder="Tu nombre completo"
+						placeholder={m.settings_profile_name_placeholder()}
 						bind:value={$formData.name}
 						disabled={$submitting} />
 					<Form.Description>
-						Tu nombre completo o como prefieres que te llamen (opcional).
+						{m.settings_profile_name_description()}
 					</Form.Description>
 				{/snippet}
 			</Form.Control>
@@ -164,15 +165,15 @@
 			<Form.Field {form} name="defaultSystemPrompt">
 				<Form.Control>
 					{#snippet children({ props })}
-						<Form.Label>Prompt del Sistema por Defecto</Form.Label>
+						<Form.Label>{m.settings_profile_system_prompt_label()}</Form.Label>
 						<Textarea
 							{...props}
-							placeholder="Eres un asistente útil y amigable..."
+							placeholder={m.settings_profile_system_prompt_placeholder()}
 							class="min-h-24"
 							bind:value={$formData.defaultSystemPrompt}
 							disabled={$submitting} />
 						<Form.Description>
-							Define cómo debe comportarse AceChat por defecto en nuevas conversaciones (opcional).
+							{m.settings_profile_system_prompt_description()}
 						</Form.Description>
 					{/snippet}
 				</Form.Control>
@@ -181,7 +182,7 @@
 		{/if}
 
 		<Button type="submit" disabled={$submitting}>
-			{$submitting ? 'Guardando...' : 'Guardar Preferencias'}
+			{$submitting ? m.settings_profile_submit_saving() : m.settings_profile_submit()}
 		</Button>
 	</form>
 </TabsContent>

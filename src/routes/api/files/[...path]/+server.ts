@@ -4,6 +4,7 @@ import { error } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 
 import type { RequestHandler } from './$types';
+import { m } from '$lib/paraglide/messages.js';
 import { requireLogin } from '$lib/server/auth';
 import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
@@ -14,7 +15,7 @@ export const GET: RequestHandler = async ({ params }) => {
 		const filePath = params.path;
 
 		if (!filePath) {
-			return error(400, 'Ruta de archivo requerida');
+			return error(400, m.api_error_file_path_required());
 		}
 
 		// Get the full file path
@@ -22,7 +23,7 @@ export const GET: RequestHandler = async ({ params }) => {
 
 		// Check if file exists
 		if (!existsSync(fullPath)) {
-			return error(404, 'Archivo no encontrado');
+			return error(404, m.api_error_file_not_found());
 		}
 
 		// First, check if the attachment exists and get its associated chat info
@@ -49,7 +50,7 @@ export const GET: RequestHandler = async ({ params }) => {
 		});
 
 		if (!attachment) {
-			return error(404, 'Archivo no encontrado');
+			return error(404, m.api_error_file_not_found());
 		}
 
 		// Check if the attachment belongs to a shared chat (public access)
@@ -62,7 +63,7 @@ export const GET: RequestHandler = async ({ params }) => {
 			// Security check: ensure the file belongs to the authenticated user
 			const userId = filePath.split('/')[0];
 			if (userId !== sessionUser.id || attachment.user.id !== sessionUser.id) {
-				return error(403, 'Acceso denegado');
+				return error(403, m.api_error_access_denied());
 			}
 		}
 		// If it's a shared chat, allow public access without authentication
@@ -83,6 +84,6 @@ export const GET: RequestHandler = async ({ params }) => {
 		});
 	} catch (e) {
 		console.error('Error serving file:', e);
-		return error(500, 'Error al servir el archivo');
+		return error(500, m.api_error_serving_file());
 	}
 };

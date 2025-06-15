@@ -6,6 +6,7 @@ import { zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
 import type { UserGrant } from '$lib/grants';
 import { hasGrant } from '$lib/grants';
+import { m } from '$lib/paraglide/messages.js';
 import { requireLogin } from '$lib/server/auth';
 import * as auth from '$lib/server/auth';
 import { updateUserProfile } from '$lib/server/data/users';
@@ -72,15 +73,14 @@ export const actions: Actions = {
 			return {
 				form: {
 					...form,
-					message: 'Perfil actualizado correctamente',
+					message: m.server_profile_update_success(),
 				},
 			};
 		} catch (error) {
 			console.error('Error updating profile:', error);
 
 			// Handle specific error messages
-			const errorMessage =
-				error instanceof Error ? error.message : 'Ha ocurrido un error al actualizar el perfil';
+			const errorMessage = error instanceof Error ? error.message : m.server_profile_update_error();
 
 			return fail(400, {
 				form: {

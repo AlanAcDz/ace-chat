@@ -26,6 +26,7 @@
 	import InviteUserDialog from '$lib/components/users/invite-user-dialog.svelte';
 	import UserCard from '$lib/components/users/user-card.svelte';
 	import UserSkeleton from '$lib/components/users/user-skeleton.svelte';
+	import { m } from '$lib/paraglide/messages.js';
 
 	// Create types that match the data returned from the server
 	type UserDisplay = Omit<UserType, 'passwordHash'>;
@@ -84,10 +85,10 @@
 		const result: ActionResult = deserialize(await response.text());
 
 		if (result.type === 'success') {
-			toast.success('Usuario eliminado correctamente');
+			toast.success(m.settings_users_delete_success());
 			await invalidate('app:users');
 		} else {
-			toast.error('Error al eliminar el usuario');
+			toast.error(m.settings_users_delete_error());
 		}
 
 		applyAction(result);
@@ -109,10 +110,10 @@
 		const result: ActionResult = deserialize(await response.text());
 
 		if (result.type === 'success') {
-			toast.success('Invitación eliminada correctamente');
+			toast.success(m.settings_users_invite_delete_success());
 			await invalidate('app:users');
 		} else {
-			toast.error('Error al eliminar la invitación');
+			toast.error(m.settings_users_invite_delete_error());
 		}
 
 		applyAction(result);
@@ -135,10 +136,10 @@
 		navigator.clipboard
 			.writeText(inviteUrl)
 			.then(() => {
-				toast.success('Enlace de invitación copiado al portapapeles');
+				toast.success(m.settings_users_invite_link_copied());
 			})
 			.catch(() => {
-				toast.error('Error al copiar el enlace');
+				toast.error(m.settings_users_invite_link_copy_error());
 			});
 	}
 </script>
@@ -148,19 +149,17 @@
 		<!-- Header -->
 		<div class="space-y-2">
 			<div class="flex items-center justify-between">
-				<h1 class="text-2xl font-bold text-gray-900">Gestionar Usuarios</h1>
+				<h1 class="text-2xl font-bold text-gray-900">{m.settings_users_title()}</h1>
 				{#if data.canCreate}
 					<Button size="sm" onclick={() => (inviteDialogOpen = true)}>
 						<Plus class="mr-2 h-4 w-4" />
-						Invitar Usuario
+						{m.settings_users_invite_button()}
 					</Button>
 				{/if}
 			</div>
 			<div class="rounded-lg border border-secondary bg-secondary/20 p-4">
 				<p class="text-sm">
-					Gestiona los usuarios del sistema y las invitaciones pendientes. Los usuarios invitados
-					podrán registrarse con el nombre de usuario especificado y recibirán los permisos
-					asignados.
+					{m.settings_users_description()}
 				</p>
 			</div>
 		</div>
@@ -173,7 +172,7 @@
 				<div class="space-y-3">
 					<div class="flex items-center gap-2">
 						<UserCheck class="h-5 w-5 text-gray-600" />
-						<h2 class="text-lg font-semibold text-gray-900">Usuarios Activos</h2>
+						<h2 class="text-lg font-semibold text-gray-900">{m.settings_users_active_title()}</h2>
 						<Badge variant="secondary">{users.length}</Badge>
 					</div>
 					<div class="space-y-2">
@@ -195,7 +194,9 @@
 				<div class="space-y-3">
 					<div class="flex items-center gap-2">
 						<Mail class="h-5 w-5" />
-						<h2 class="text-lg font-semibold text-gray-900">Invitaciones Pendientes</h2>
+						<h2 class="text-lg font-semibold text-gray-900">
+							{m.settings_users_pending_invites_title()}
+						</h2>
 						<Badge variant="default">{invites.length}</Badge>
 					</div>
 					<div class="space-y-2">
@@ -214,12 +215,12 @@
 			{#if users.length === 0 && invites.length === 0}
 				<div class="py-12 text-center">
 					<User class="mx-auto mb-4 h-12 w-12 text-gray-400" />
-					<h3 class="mb-2 text-lg font-medium text-gray-900">No hay usuarios ni invitaciones</h3>
+					<h3 class="mb-2 text-lg font-medium text-gray-900">{m.settings_users_empty_title()}</h3>
 					<p class="text-gray-500">
 						{#if data.canCreate}
-							Comienza invitando el primer usuario al sistema.
+							{m.settings_users_empty_description_can_create()}
 						{:else}
-							No tienes permisos para ver usuarios.
+							{m.settings_users_empty_description_no_permission()}
 						{/if}
 					</p>
 				</div>
@@ -227,9 +228,9 @@
 		{:catch}
 			<Alert variant="destructive" class="mx-auto max-w-md">
 				<AlertCircle class="h-4 w-4" />
-				<AlertTitle>Error al cargar los datos</AlertTitle>
+				<AlertTitle>{m.settings_users_error_loading_title()}</AlertTitle>
 				<AlertDescription>
-					Ocurrió un error al cargar los usuarios e invitaciones. Por favor, inténtelo de nuevo.
+					{m.settings_users_error_loading_description()}
 				</AlertDescription>
 			</Alert>
 		{/await}
@@ -250,27 +251,28 @@
 	<AlertDialog bind:open={dialogOpen}>
 		<AlertDialogContent>
 			<AlertDialogHeader>
-				<AlertDialogTitle>Confirmar eliminación</AlertDialogTitle>
+				<AlertDialogTitle>{m.settings_users_confirm_delete_title()}</AlertDialogTitle>
 				<AlertDialogDescription>
 					{#if deleteType === 'user' && userToDelete}
-						¿Estás seguro de que quieres eliminar al usuario "{userToDelete.name ||
-							userToDelete.username}"?
+						{m.settings_users_confirm_delete_user({
+							username: userToDelete.name || userToDelete.username,
+						})}
 					{:else if deleteType === 'invite' && inviteToDelete}
-						¿Estás seguro de que quieres eliminar la invitación para "{inviteToDelete.username}"?
+						{m.settings_users_confirm_delete_invite({ username: inviteToDelete.username })}
 					{/if}
-					Esta acción no se puede deshacer.
+					{m.settings_users_confirm_delete_warning()}
 				</AlertDialogDescription>
 			</AlertDialogHeader>
 			<AlertDialogFooter>
-				<AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+				<AlertDialogCancel disabled={isDeleting}>{m.settings_users_cancel()}</AlertDialogCancel>
 				<AlertDialogAction
 					onclick={handleConfirmDelete}
 					disabled={isDeleting}
 					class="bg-red-600 hover:bg-red-700">
 					{#if isDeleting}
-						Eliminando...
+						{m.settings_users_deleting()}
 					{:else}
-						Eliminar
+						{m.settings_users_delete()}
 					{/if}
 				</AlertDialogAction>
 			</AlertDialogFooter>

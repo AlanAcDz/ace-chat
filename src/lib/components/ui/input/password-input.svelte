@@ -3,6 +3,7 @@
 
 	import type { WithElementRef } from '$lib/utils.js';
 	import type { HTMLInputAttributes } from 'svelte/elements';
+	import { m } from '$lib/paraglide/messages.js';
 	import { cn } from '$lib/utils.js';
 	import { Input } from '.';
 	import { Button } from '../button';
@@ -42,7 +43,7 @@
 		class="absolute top-0 right-0 h-9 w-10 hover:bg-transparent"
 		onclick={togglePasswordVisibility}
 		{disabled}
-		aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}>
+		aria-label={showPassword ? m.password_input_hide_aria() : m.password_input_show_aria()}>
 		{#if showPassword}
 			<EyeOff class="h-4 w-4 text-muted-foreground" />
 		{:else}
