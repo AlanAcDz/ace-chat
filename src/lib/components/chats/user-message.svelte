@@ -55,7 +55,7 @@
 		{/if}
 		<Button size="icon" variant="ghost" onclick={copyMessage}>
 			{#if isCopied}
-				<Check class="text-green-600 dark:text-green-400" />
+				<Check class="text-primary" />
 			{:else}
 				<Copy />
 			{/if}
