@@ -197,7 +197,7 @@
 															<Button
 																size="icon"
 																variant="ghost"
-																class="hover:bg-gray-200"
+																class="hover:bg-primary/10"
 																onclick={(e) => handleShowDeleteDialog(chat, e)}
 																disabled={$deleteChatMutation.isPending}>
 																<X />
