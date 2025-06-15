@@ -32,11 +32,11 @@
 	<!-- User info -->
 	<div class="flex flex-1 flex-col">
 		<div class="flex items-center gap-2">
-			<span class="font-medium text-gray-900">
+			<span class="font-medium text-foreground">
 				{user.name || user.username}
 			</span>
 			{#if user.name}
-				<span class="text-sm text-gray-500">@{user.username}</span>
+				<span class="text-sm text-muted-foreground">@{user.username}</span>
 			{/if}
 		</div>
 		<div class="mt-1 flex flex-wrap gap-1">
@@ -55,7 +55,7 @@
 				<Badge variant="outline" class="text-xs">{m.user_card_no_permissions()}</Badge>
 			{/if}
 		</div>
-		<div class="mt-1 text-xs text-gray-500">
+		<div class="mt-1 text-xs text-muted-foreground">
 			{m.user_card_created({ date: new Date(user.createdAt).toLocaleDateString() })}
 		</div>
 	</div>

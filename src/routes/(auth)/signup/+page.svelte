@@ -118,7 +118,7 @@
 					disabled
 					readonly
 					class="cursor-not-allowed bg-gray-50" />
-				<p class="text-sm text-gray-600">{m.auth_signup_username_predefined()}</p>
+				<p class="text-sm text-muted-foreground">{m.auth_signup_username_predefined()}</p>
 			</div>
 		{:else}
 			<Form.Field {form} name="username">

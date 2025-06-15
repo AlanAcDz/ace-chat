@@ -2,6 +2,7 @@
 	import { ArrowLeft, MessageCircleIcon } from '@lucide/svelte';
 
 	import LanguagePicker from '$lib/components/layout/language-picker.svelte';
+	import ModeToggle from '$lib/components/layout/mode-toggle.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { m } from '$lib/paraglide/messages.js';
 
@@ -22,6 +23,7 @@
 				<span class="font-semibold">AceChat</span>
 			</div>
 			<div class="flex items-center gap-2">
+				<ModeToggle />
 				<LanguagePicker />
 				<Button href="/" variant="secondary">
 					<ArrowLeft class="size-4" />

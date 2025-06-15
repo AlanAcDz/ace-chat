@@ -1,5 +1,6 @@
 <script lang="ts">
 	import LanguagePicker from '$lib/components/layout/language-picker.svelte';
+	import ModeToggle from '$lib/components/layout/mode-toggle.svelte';
 	import * as Card from '$lib/components/ui/card';
 
 	let { children } = $props();
@@ -9,6 +10,7 @@
 	class="relative flex min-h-screen items-center justify-center bg-background px-4 py-12 sm:px-6 lg:px-8">
 	<!-- Language Picker - Absolute positioned in top-right corner -->
 	<div class="absolute top-4 right-4 z-10 rounded bg-secondary/50 p-0.5 backdrop-blur-sm">
+		<ModeToggle />
 		<LanguagePicker />
 	</div>
 

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { QueryClientProvider } from '@tanstack/svelte-query';
+	import { ModeWatcher } from 'mode-watcher';
 
 	import { Toaster } from '$lib/components/ui/sonner/index.js';
 
@@ -11,6 +12,7 @@
 	let { children, data } = $props();
 </script>
 
+<ModeWatcher />
 <QueryClientProvider client={data.queryClient}>
 	{@render children?.()}
 </QueryClientProvider>

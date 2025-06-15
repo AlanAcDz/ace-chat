@@ -181,17 +181,16 @@
 </script>
 
 <TabsContent value="api-keys" class="space-y-6">
-	<h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{m.settings_api_keys_title()}</h1>
+	<h1 class="text-2xl font-bold text-foreground">{m.settings_api_keys_title()}</h1>
 	<div class="space-y-6">
 		<!-- Proveedores de Claves API -->
 		{#each apiKeyProviders as provider (provider.key)}
 			{#if provider.models.length > 0}
 				{@const IconComponent = provider.icon}
-				<div
-					class="rounded-lg border border-gray-200 bg-gray-50 p-6 dark:border-gray-700 dark:bg-gray-800">
+				<div class="rounded-lg border border-secondary bg-secondary/20 p-6">
 					<div class="mb-4 flex items-center gap-2">
 						<IconComponent class="h-5 w-5" />
-						<h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+						<h3 class="text-lg font-semibold text-foreground">
 							{provider.name}
 						</h3>
 						{#if isApiKeyConfigured(provider.key)}
@@ -210,7 +209,7 @@
 						{/if}
 					</div>
 
-					<p class="mb-3 text-sm text-gray-600 dark:text-gray-400">
+					<p class="mb-3 text-sm text-muted-foreground">
 						{m.settings_api_keys_used_for_models()}
 					</p>
 					<div class="mb-4 flex flex-wrap gap-2">
@@ -232,12 +231,10 @@
 							{#if canCreateSharedKeys()}
 								<div class="flex items-center justify-between">
 									<div class="space-y-0.5">
-										<label
-											class="text-sm font-medium text-gray-700 dark:text-gray-300"
-											for="scope-{provider.key}">
+										<label class="text-sm font-medium text-foreground" for="scope-{provider.key}">
 											{m.settings_api_keys_shared_api_key()}
 										</label>
-										<p class="text-xs text-gray-500 dark:text-gray-400">
+										<p class="text-xs text-muted-foreground">
 											{m.settings_api_keys_shared_api_key_description()}
 										</p>
 									</div>
@@ -264,7 +261,7 @@
 						</div>
 					</form>
 
-					<p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+					<p class="mt-2 text-sm text-muted-foreground">
 						{provider.description}
 						<a
 							href={provider.linkUrl}
@@ -281,11 +278,10 @@
 		<!-- Proveedores de URLs -->
 		{#each urlProviders as provider (provider.key)}
 			{@const IconComponent = provider.icon}
-			<div
-				class="rounded-lg border border-gray-200 bg-gray-50 p-6 dark:border-gray-700 dark:bg-gray-800">
+			<div class="rounded-lg border border-secondary bg-secondary/20 p-6">
 				<div class="mb-4 flex items-center gap-2">
 					<IconComponent class="h-5 w-5" />
-					<h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+					<h3 class="text-lg font-semibold text-foreground">
 						{provider.name}
 					</h3>
 					{#if data.apiKeys[provider.key]?.url}
@@ -304,7 +300,7 @@
 					{/if}
 				</div>
 
-				<p class="mb-4 text-sm text-gray-600 dark:text-gray-400">{provider.description}</p>
+				<p class="mb-4 text-sm text-muted-foreground">{provider.description}</p>
 
 				<form method="POST" action="?/saveApiUrl" use:enhance={submitFunction}>
 					<input type="hidden" name="provider" value={provider.key} />
@@ -317,12 +313,10 @@
 						{#if canCreateSharedKeys()}
 							<div class="flex items-center justify-between">
 								<div class="space-y-0.5">
-									<label
-										class="text-sm font-medium text-gray-700 dark:text-gray-300"
-										for="scope-url-{provider.key}">
+									<label class="text-sm font-medium text-foreground" for="scope-url-{provider.key}">
 										{m.settings_api_keys_shared_url()}
 									</label>
-									<p class="text-xs text-gray-500 dark:text-gray-400">
+									<p class="text-xs text-muted-foreground">
 										{m.settings_api_keys_shared_url_description()}
 									</p>
 								</div>

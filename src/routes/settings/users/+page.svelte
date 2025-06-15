@@ -149,7 +149,7 @@
 		<!-- Header -->
 		<div class="space-y-2">
 			<div class="flex items-center justify-between">
-				<h1 class="text-2xl font-bold text-gray-900">{m.settings_users_title()}</h1>
+				<h1 class="text-2xl font-bold text-foreground">{m.settings_users_title()}</h1>
 				{#if data.canCreate}
 					<Button size="sm" onclick={() => (inviteDialogOpen = true)}>
 						<Plus class="mr-2 h-4 w-4" />
@@ -171,8 +171,8 @@
 			{#if users.length > 0}
 				<div class="space-y-3">
 					<div class="flex items-center gap-2">
-						<UserCheck class="h-5 w-5 text-gray-600" />
-						<h2 class="text-lg font-semibold text-gray-900">{m.settings_users_active_title()}</h2>
+						<UserCheck class="h-5 w-5 text-muted-foreground" />
+						<h2 class="text-lg font-semibold text-foreground">{m.settings_users_active_title()}</h2>
 						<Badge variant="secondary">{users.length}</Badge>
 					</div>
 					<div class="space-y-2">
@@ -194,7 +194,7 @@
 				<div class="space-y-3">
 					<div class="flex items-center gap-2">
 						<Mail class="h-5 w-5" />
-						<h2 class="text-lg font-semibold text-gray-900">
+						<h2 class="text-lg font-semibold text-foreground">
 							{m.settings_users_pending_invites_title()}
 						</h2>
 						<Badge variant="default">{invites.length}</Badge>
@@ -215,8 +215,8 @@
 			{#if users.length === 0 && invites.length === 0}
 				<div class="py-12 text-center">
 					<User class="mx-auto mb-4 h-12 w-12 text-gray-400" />
-					<h3 class="mb-2 text-lg font-medium text-gray-900">{m.settings_users_empty_title()}</h3>
-					<p class="text-gray-500">
+					<h3 class="mb-2 text-lg font-medium text-foreground">{m.settings_users_empty_title()}</h3>
+					<p class="text-muted-foreground">
 						{#if data.canCreate}
 							{m.settings_users_empty_description_can_create()}
 						{:else}

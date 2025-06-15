@@ -137,7 +137,7 @@
 	<div class="space-y-4">
 		<!-- Header -->
 		<div class="space-y-2">
-			<h1 class="text-2xl font-bold text-gray-900">{m.attachments_title()}</h1>
+			<h1 class="text-2xl font-bold text-foreground">{m.attachments_title()}</h1>
 			<div class="rounded-lg border border-secondary bg-secondary/20 p-4">
 				<p class="text-sm">
 					{m.attachments_description()}
@@ -211,7 +211,7 @@
 							<div class="flex flex-1 flex-col">
 								<div class="flex items-center gap-2">
 									<button
-										class="text-left font-medium text-gray-900 hover:text-primary hover:underline"
+										class="text-left font-medium text-foreground hover:text-primary hover:underline"
 										onclick={(e) => {
 											e.stopPropagation();
 											window.open(`/api/files/${attachment.filePath}`, '_blank');
@@ -219,9 +219,9 @@
 										aria-label={m.attachments_open_file_aria({ fileName: attachment.fileName })}>
 										{attachment.fileName}
 									</button>
-									<ExternalLink class="h-4 w-4 text-gray-400" />
+									<ExternalLink class="h-4 w-4 text-muted-foreground" />
 								</div>
-								<div class="text-sm text-gray-500">
+								<div class="text-sm text-muted-foreground">
 									{attachment.fileType} • {formatFileSize(attachment.fileSize)}
 								</div>
 							</div>
@@ -244,10 +244,10 @@
 			{:else}
 				<div class="py-12 text-center">
 					<File class="mx-auto mb-4 h-12 w-12 text-gray-400" />
-					<h3 class="mb-2 text-lg font-medium text-gray-900">
+					<h3 class="mb-2 text-lg font-medium text-foreground">
 						{m.attachments_no_files_title()}
 					</h3>
-					<p class="text-gray-500">
+					<p class="text-muted-foreground">
 						{m.attachments_no_files_description()}
 					</p>
 				</div>

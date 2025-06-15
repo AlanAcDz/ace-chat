@@ -5,6 +5,7 @@
 	import ShareButton from '$lib/components/chats/share-button.svelte';
 	import AppSidebar from '$lib/components/layout/app-sidebar.svelte';
 	import LanguagePicker from '$lib/components/layout/language-picker.svelte';
+	import ModeToggle from '$lib/components/layout/mode-toggle.svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import { setChatSettingsContext } from '$lib/contexts/chat-settings.svelte';
 	import Button from '../../lib/components/ui/button/button.svelte';
@@ -37,6 +38,7 @@
 				{#if isInChatPage && chatId}
 					<ShareButton {chatId} />
 				{/if}
+				<ModeToggle />
 				<LanguagePicker />
 				<Button href="/settings" variant="ghost" size="icon" class="size-8">
 					<Settings2 class="size-4" />

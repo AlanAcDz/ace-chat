@@ -32,7 +32,7 @@
 	<!-- Invite info -->
 	<div class="flex flex-1 flex-col">
 		<div class="flex items-center gap-2">
-			<span class="font-medium text-gray-900">@{invite.username}</span>
+			<span class="font-medium text-foreground">@{invite.username}</span>
 			<Badge variant="outline" class="text-xs">{m.invite_card_pending()}</Badge>
 		</div>
 		<div class="mt-1 flex flex-wrap gap-1">
@@ -51,7 +51,7 @@
 				<Badge variant="outline" class="text-xs">{m.invite_card_no_permissions()}</Badge>
 			{/if}
 		</div>
-		<div class="mt-1 text-xs text-gray-600">
+		<div class="mt-1 text-xs text-muted-foreground">
 			{m.invite_card_invited_by({
 				name: invite.invitedBy.name || invite.invitedBy.username,
 				date: new Date(invite.createdAt).toLocaleDateString(),

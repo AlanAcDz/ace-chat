@@ -6,6 +6,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import LanguagePicker from '$lib/components/layout/language-picker.svelte';
+	import ModeToggle from '$lib/components/layout/mode-toggle.svelte';
 	import { Avatar, AvatarFallback, AvatarImage } from '$lib/components/ui/avatar';
 	import { Button } from '$lib/components/ui/button';
 	import { Tabs, TabsList, TabsTrigger } from '$lib/components/ui/tabs/index.js';
@@ -40,6 +41,7 @@
 			{m.settings_layout_back_to_chat()}
 		</Button>
 		<div class="flex items-center gap-2">
+			<ModeToggle />
 			<LanguagePicker />
 			<form use:enhance method="POST" action="/settings?/logout">
 				<Button type="submit" variant="ghost">{m.settings_layout_logout()}</Button>
@@ -57,10 +59,10 @@
 						</AvatarFallback>
 					</Avatar>
 				</div>
-				<h2 class="mb-1 text-xl font-semibold text-gray-900">
+				<h2 class="mb-1 text-xl font-semibold text-foreground">
 					{data.user.name || data.user.username}
 				</h2>
-				<p class="mb-4 text-sm text-gray-500">
+				<p class="mb-4 text-sm text-muted-foreground">
 					@{data.user.username}
 				</p>
 			</div>
