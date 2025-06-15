@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { ArrowLeft, MessageCircleIcon } from '@lucide/svelte';
 
+	import LanguagePicker from '$lib/components/layout/language-picker.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { m } from '$lib/paraglide/messages.js';
 
@@ -20,10 +21,13 @@
 				<MessageCircleIcon class="size-6" />
 				<span class="font-semibold">AceChat</span>
 			</div>
-			<Button href="/" variant="secondary">
-				<ArrowLeft class="size-4" />
-				{m.share_layout_go_to_app()}
-			</Button>
+			<div class="flex items-center gap-2">
+				<LanguagePicker />
+				<Button href="/" variant="secondary">
+					<ArrowLeft class="size-4" />
+					{m.share_layout_go_to_app()}
+				</Button>
+			</div>
 		</div>
 	</header>
 

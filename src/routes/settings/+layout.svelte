@@ -5,6 +5,7 @@
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import LanguagePicker from '$lib/components/layout/language-picker.svelte';
 	import { Avatar, AvatarFallback, AvatarImage } from '$lib/components/ui/avatar';
 	import { Button } from '$lib/components/ui/button';
 	import { Tabs, TabsList, TabsTrigger } from '$lib/components/ui/tabs/index.js';
@@ -38,9 +39,12 @@
 			<ArrowLeft class="h-4 w-4" />
 			{m.settings_layout_back_to_chat()}
 		</Button>
-		<form use:enhance method="POST" action="/settings?/logout">
-			<Button type="submit" variant="ghost">{m.settings_layout_logout()}</Button>
-		</form>
+		<div class="flex items-center gap-2">
+			<LanguagePicker />
+			<form use:enhance method="POST" action="/settings?/logout">
+				<Button type="submit" variant="ghost">{m.settings_layout_logout()}</Button>
+			</form>
+		</div>
 	</header>
 	<div class="grid flex-1 gap-8 md:grid-cols-4">
 		<aside class="hidden md:block">
