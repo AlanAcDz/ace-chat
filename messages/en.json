@@ -308,5 +308,15 @@
   "api_error_serving_avatar": "Error serving avatar",
   "api_error_message_not_found": "Message not found",
   "api_title_generation_prompt": "Generate a very brief and concise title (maximum 8 words) based on the user's message. The title should be descriptive but short. Respond only with the title, no quotes or additional punctuation.",
-  "api_message_branch_from_title": "Branch from {title}"
+  "api_message_branch_from_title": "Branch from {title}",
+  "validation_username_min_length": "Username must be at least 3 characters",
+  "validation_username_max_length_30": "Username cannot be more than 30 characters",
+  "validation_username_max_length_31": "Username cannot be more than 31 characters",
+  "validation_username_regex_general": "Username can only contain letters, numbers and underscores",
+  "validation_username_regex_auth": "Username can only contain lowercase letters, numbers, hyphens and underscores",
+  "validation_name_max_length": "Name cannot be more than 100 characters",
+  "validation_system_prompt_max_length": "System prompt cannot be more than 2000 characters",
+  "validation_password_min_length": "Password must be at least 6 characters",
+  "validation_password_max_length": "Password cannot be more than 255 characters",
+  "validation_passwords_no_match": "Passwords do not match"
 }

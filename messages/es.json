@@ -308,5 +308,15 @@
   "api_error_serving_avatar": "Error al servir el avatar",
   "api_error_message_not_found": "Mensaje no encontrado",
   "api_title_generation_prompt": "Genera un título muy breve y conciso (máximo 8 palabras) basado en el mensaje del usuario. El título debe ser descriptivo pero corto. Responde solo con el título, sin comillas ni puntuación adicional.",
-  "api_message_branch_from_title": "Rama de {title}"
+  "api_message_branch_from_title": "Rama de {title}",
+  "validation_username_min_length": "El nombre de usuario debe tener al menos 3 caracteres",
+  "validation_username_max_length_30": "El nombre de usuario no puede tener más de 30 caracteres",
+  "validation_username_max_length_31": "El nombre de usuario no puede tener más de 31 caracteres",
+  "validation_username_regex_general": "El nombre de usuario solo puede contener letras, números y guiones bajos",
+  "validation_username_regex_auth": "El nombre de usuario solo puede contener letras minúsculas, números, guiones y guiones bajos",
+  "validation_name_max_length": "El nombre no puede tener más de 100 caracteres",
+  "validation_system_prompt_max_length": "El prompt del sistema no puede tener más de 2000 caracteres",
+  "validation_password_min_length": "La contraseña debe tener al menos 6 caracteres",
+  "validation_password_max_length": "La contraseña no puede tener más de 255 caracteres",
+  "validation_passwords_no_match": "Las contraseñas no coinciden"
 }
