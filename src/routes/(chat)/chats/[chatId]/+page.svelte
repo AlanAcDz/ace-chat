@@ -203,7 +203,7 @@
 		});
 
 		// Generate title if this is a new chat (title is "New chat")
-		if (data.chat.title === m.chat_new_chat_default_title()) {
+		if (data.chat.title === 'Nuevo chat') {
 			$generateTitleMutation.mutate(data.chat.id);
 		}
 	}
