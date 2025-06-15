@@ -65,7 +65,7 @@ export async function fetchLMStudioModels(baseUrl: string): Promise<LocalModel[]
 				label: model.id,
 				provider: 'lmstudio' as const,
 				key: `lmstudio-${model.id}`,
-				capabilities: ['text', 'tools'], // Default capabilities for LM Studio models
+				capabilities: ['text'], // Default capabilities for LM Studio models
 			})) || []
 		);
 	} catch (error) {

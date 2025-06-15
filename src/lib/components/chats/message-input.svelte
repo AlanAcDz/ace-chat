@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { ArrowUp, Globe, Paperclip, X } from '@lucide/svelte';
+	import { createQuery } from '@tanstack/svelte-query';
 
 	import type { AIModel } from '$lib/ai/models.js';
 	import { AI_MODELS } from '$lib/ai/models.js';
@@ -7,6 +8,19 @@
 	import { Button } from '../ui/button';
 	import { createFileAttachmentsHandler } from './file-attachments.svelte';
 	import ModelPicker from './model-picker.svelte';
+
+	interface LocalModel {
+		id: string;
+		label: string;
+		provider: 'lmstudio' | 'ollama';
+		key: string;
+		capabilities: string[];
+	}
+
+	interface ModelsResponse {
+		models: AIModel[];
+		localModels: LocalModel[];
+	}
 
 	interface Props {
 		isSubmitting?: boolean;
@@ -34,6 +48,35 @@
 	}: Props = $props();
 
 	let fileAttachmentsHandler = createFileAttachmentsHandler();
+
+	// Fetch available models to check capabilities
+	const modelsQuery = createQuery({
+		queryKey: ['available-models'],
+		queryFn: async () => {
+			const response = await fetch('/api/models/available');
+			if (!response.ok) {
+				throw new Error('Failed to fetch available models');
+			}
+			const data = (await response.json()) as ModelsResponse;
+			return data;
+		},
+		staleTime: 5 * 60 * 1000, // 5 minutes
+		gcTime: 10 * 60 * 1000, // 10 minutes
+	});
+
+	// Combine static and local models
+	const allModels = $derived(() => {
+		const data = $modelsQuery.data;
+		if (!data) return [];
+		return [...data.models, ...data.localModels];
+	});
+
+	// Check if selected model has tools capability
+	const selectedModelHasTools = $derived(() => {
+		const models = allModels();
+		const currentModel = models.find((model) => model.key === selectedModel);
+		return currentModel?.capabilities?.includes('tools') || false;
+	});
 
 	async function handleSubmit() {
 		if (!message.trim() && fileAttachmentsHandler.attachedFiles.length === 0) return;
@@ -112,31 +155,37 @@
 		<div class="flex items-center justify-between px-4 py-2">
 			<div class="flex items-center gap-2">
 				<!-- Model Picker -->
-				<ModelPicker value={selectedModel} onSelect={handleModelSelect} size="sm" />
+				<ModelPicker
+					value={selectedModel}
+					onSelect={handleModelSelect}
+					models={allModels()}
+					size="sm" />
 
-				<!-- Search Toggle -->
-				<Button
-					variant={isSearchEnabled ? 'default' : 'outline'}
-					size="sm"
-					disabled={isSubmitting}
-					onclick={() => onSearchToggle?.()}
-					class="text-xs"
-					aria-label={m.message_input_search_toggle_aria()}>
-					<Globe class="h-3 w-3" />
-					<span class="hidden sm:block">{m.message_input_search()}</span>
-				</Button>
+				{#if selectedModelHasTools()}
+					<!-- Search Toggle -->
+					<Button
+						variant={isSearchEnabled ? 'default' : 'outline'}
+						size="sm"
+						disabled={isSubmitting}
+						onclick={() => onSearchToggle?.()}
+						class="text-xs"
+						aria-label={m.message_input_search_toggle_aria()}>
+						<Globe class="h-3 w-3" />
+						<span class="hidden sm:block">{m.message_input_search()}</span>
+					</Button>
 
-				<!-- Attach Button -->
-				<Button
-					variant="outline"
-					size="sm"
-					disabled={isSubmitting}
-					onclick={() => fileAttachmentsHandler.handleAttachClick()}
-					aria-label={m.message_input_attach_aria()}
-					class="text-xs">
-					<Paperclip class="h-3 w-3" />
-					<span class="hidden sm:block">{m.message_input_attach()}</span>
-				</Button>
+					<!-- Attach Button -->
+					<Button
+						variant="outline"
+						size="sm"
+						disabled={isSubmitting}
+						onclick={() => fileAttachmentsHandler.handleAttachClick()}
+						aria-label={m.message_input_attach_aria()}
+						class="text-xs">
+						<Paperclip class="h-3 w-3" />
+						<span class="hidden sm:block">{m.message_input_attach()}</span>
+					</Button>
+				{/if}
 			</div>
 
 			<!-- Submit Button -->

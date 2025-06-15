@@ -9,7 +9,6 @@
 		Image as ImageIcon,
 		Text,
 	} from '@lucide/svelte';
-	import { createQuery } from '@tanstack/svelte-query';
 
 	import type { AIModel } from '$lib/ai/models.js';
 	import AnthropicIcon from '$lib/components/icons/anthropic-icon.svelte';
@@ -31,53 +30,27 @@
 		capabilities: string[];
 	}
 
-	interface ModelsResponse {
-		models: AIModel[];
-		localModels: LocalModel[];
-	}
+	type ModelType = AIModel | LocalModel;
 
 	interface Props {
 		value?: AIModel['key'] | string;
 		onSelect?: (modelKey: AIModel['key'] | string) => void;
+		models?: ModelType[];
 		class?: string;
 		size?: 'sm' | 'default';
 	}
 
-	let { value, onSelect, class: className, size = 'sm' }: Props = $props();
+	let { value, onSelect, models = [], class: className, size = 'sm' }: Props = $props();
 
 	let open = $state(false);
 	let triggerRef = $state<HTMLButtonElement>(null!);
 
-	// Fetch available models using svelte-query
-	const modelsQuery = createQuery({
-		queryKey: ['available-models'],
-		queryFn: async () => {
-			const response = await fetch('/api/models/available');
-			if (!response.ok) {
-				throw new Error('Failed to fetch available models');
-			}
-			const data = (await response.json()) as ModelsResponse;
-			return data;
-		},
-		staleTime: 5 * 60 * 1000, // 5 minutes
-		gcTime: 10 * 60 * 1000, // 10 minutes
-	});
-
-	// Combine static and local models
-	const allModels = $derived(() => {
-		const data = $modelsQuery.data;
-		if (!data) return [];
-		return [...data.models, ...data.localModels];
-	});
-
 	const selectedModel = $derived(() => {
-		const models = allModels();
 		return models.find((model) => model.key === value);
 	});
 
 	// Auto-select first available model if current selection is not available
 	$effect(() => {
-		const models = allModels();
 		if (models.length > 0) {
 			if (!value || !models.some((model) => model.key === value)) {
 				// No model selected or current model is not available, select the first available one
@@ -171,7 +144,7 @@
 			<Command.List>
 				<Command.Empty>{m.model_picker_not_found()}</Command.Empty>
 				<Command.Group>
-					{#each allModels() as model (model.key)}
+					{#each models as model (model.key)}
 						{@const ProviderIcon = getProviderIcon(model.provider)}
 						<Command.Item
 							value={model.key}
