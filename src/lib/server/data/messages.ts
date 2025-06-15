@@ -2,7 +2,7 @@ import { asc, eq } from 'drizzle-orm';
 
 import type { NewMessage } from '../db/schema';
 import { db } from '../db';
-import { message } from '../db/schema';
+import { chat, message } from '../db/schema';
 
 export async function getMessages(chatId: string) {
 	return db.query.message.findMany({
@@ -17,6 +17,18 @@ export async function getMessages(chatId: string) {
 }
 
 export async function saveMessage(newMessage: NewMessage) {
-	const [savedMessage] = await db.insert(message).values(newMessage).returning();
-	return savedMessage;
+	// Use a transaction to save the message and update the chat timestamp
+	const result = await db.transaction(async (tx) => {
+		// Save the message
+		const [savedMessage] = await tx.insert(message).values(newMessage).returning();
+
+		// Update chat's updatedAt timestamp
+		if (newMessage.chatId) {
+			await tx.update(chat).set({ updatedAt: new Date() }).where(eq(chat.id, newMessage.chatId));
+		}
+
+		return savedMessage;
+	});
+
+	return result;
 }

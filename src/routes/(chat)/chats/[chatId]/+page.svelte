@@ -78,6 +78,36 @@
 		},
 	});
 
+	// Retry message mutation
+	const retryMessageMutation = createMutation({
+		mutationFn: async (messageIndex: number) => {
+			const response = await fetch(`/api/chats/${data.chat.id}/messages`, {
+				method: 'DELETE',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ messageIndex }),
+			});
+
+			if (!response.ok) {
+				const errorText = await response.text();
+				throw new Error(errorText || 'Error retrying message');
+			}
+
+			return response.json();
+		},
+		onSuccess: () => {
+			toast.success('Mensajes eliminados exitosamente');
+			data.queryClient.invalidateQueries({ queryKey: ['chats'] });
+			// Trigger AI response generation after successful deletion
+			getAIResponse();
+		},
+		onError: (error) => {
+			console.error('Error retrying message:', error);
+			toast.error('Error al reintentar el mensaje');
+		},
+	});
+
 	function scrollToBottom(behavior: 'auto' | 'smooth' = 'auto') {
 		if (messagesContainer) {
 			window.scrollTo({
@@ -110,6 +140,15 @@
 			clearInterval(scrollInterval);
 			scrollInterval = null;
 		}
+	}
+
+	function handleRetry(messageIndex: number) {
+		// Update the messages state to remove messages from the selected index onwards
+		const messagesToKeep = chat.messages.slice(0, messageIndex);
+		chat.messages = messagesToKeep;
+
+		// Delete messages from the database using message position
+		$retryMessageMutation.mutate(messageIndex);
 	}
 
 	function getAIResponse() {
@@ -170,7 +209,7 @@
 <main
 	bind:this={messagesContainer}
 	class="mx-auto mb-8 flex w-full max-w-3xl flex-1 flex-col gap-4 overflow-y-auto">
-	{#each chat.messages as msg (msg.id)}
+	{#each chat.messages as msg, index (msg.id)}
 		{#if msg.role === 'user'}
 			<UserMessage
 				msg={{
@@ -180,7 +219,10 @@
 						(msg.experimental_attachments && msg.experimental_attachments.length > 0),
 				}} />
 		{:else if msg.role === 'assistant'}
-			<AssistantMessage msg={{ model: chatSettings.selectedModel, ...msg }} chatId={data.chat.id} />
+			<AssistantMessage
+				msg={{ model: chatSettings.selectedModel, ...msg }}
+				chatId={data.chat.id}
+				onRetry={() => handleRetry(index)} />
 		{/if}
 	{/each}
 </main>

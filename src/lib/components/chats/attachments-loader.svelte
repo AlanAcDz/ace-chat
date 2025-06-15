@@ -17,9 +17,10 @@
 	const attachmentsQuery = createQuery({
 		queryKey: ['attachments', messageId],
 		queryFn: async () => {
-			const response = await fetch(`/api/attachments/${messageId}`);
+			const response = await fetch(`/api/messages/${messageId}/attachments`);
 			if (!response.ok) throw new Error('Failed to fetch attachments');
-			return response.json() as Promise<Attachment[]>;
+			const data = (await response.json()) as { attachments: Attachment[] };
+			return data.attachments;
 		},
 		refetchInterval: (query) => {
 			// If there are no attachments yet and we have experimental ones, keep polling
@@ -46,7 +47,7 @@
 			{@const IconComponent = getFileIcon(attachment.fileType)}
 			<button
 				onclick={() => window.open(`/api/files/${attachment.filePath}`, '_blank')}
-				class="flex cursor-pointer items-center gap-2 rounded-md border border-gray-200 bg-gray-50 p-2 transition-colors hover:bg-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-700">
+				class="flex cursor-pointer items-center gap-2 rounded-md border border-primary bg-secondary/80 p-2 transition-colors hover:bg-secondary">
 				<IconComponent class="size-5 text-gray-600 dark:text-gray-400" />
 				<div class="min-w-0 flex-1 text-start">
 					<p class="truncate text-sm font-medium text-gray-900 dark:text-gray-100">
