@@ -331,5 +331,10 @@
   "message_edit_error": "Error editing message",
   "message_edit_placeholder": "Type your message...",
   "message_edit_cancel": "Cancel",
-  "message_edit_save": "Save"
+  "message_edit_save": "Save",
+  "settings_api_keys_openrouter": "OpenRouter API Key",
+  "settings_api_keys_openrouter_description": "Get your API key from",
+  "settings_api_keys_openrouter_link": "OpenRouter Keys",
+  "settings_api_keys_openrouter_explanation": "OpenRouter provides unified access to multiple AI models. If you configure an OpenRouter API key, you can use any OpenAI, Anthropic, or Google model even without their specific API keys. Direct provider keys will always take priority over OpenRouter.",
+  "settings_api_keys_openrouter_fallback_description": "Provides fallback access to OpenAI, Anthropic, and Google models when their specific API keys are not configured."
 }

@@ -34,8 +34,8 @@
 	<title>{m.settings_layout_title()}</title>
 </svelte:head>
 
-<div class="flex min-h-dvh flex-col gap-2">
-	<header class="flex items-center justify-between gap-2 px-4 py-6">
+<div class="relative flex min-h-dvh flex-col">
+	<header class="sticky top-0 z-10 flex items-center justify-between gap-2 bg-background px-4 py-6">
 		<Button href="/" variant="ghost">
 			<ArrowLeft class="h-4 w-4" />
 			{m.settings_layout_back_to_chat()}
@@ -50,7 +50,7 @@
 	</header>
 	<div class="grid flex-1 gap-8 md:grid-cols-4">
 		<aside class="hidden md:block">
-			<div class="mb-8 text-center">
+			<div class="sticky top-21 mb-8 text-center">
 				<div class="mb-4">
 					<Avatar class="mx-auto h-24 w-24">
 						<AvatarImage src={data.user.avatarUrl} alt={data.user.name} />
@@ -70,7 +70,7 @@
 		<main class="px-4 pb-8 md:col-span-3">
 			<Tabs value={activeTab} class="w-full gap-6">
 				<TabsList
-					class="no-scrollbar w-full max-w-[calc(100vw-2rem)] justify-start overflow-x-auto">
+					class="no-scrollbar sticky top-21 w-full max-w-[calc(100vw-2rem)] justify-start overflow-x-auto">
 					<TabsTrigger value="profile" onclick={() => goto('/settings')}>
 						<User class="h-4 w-4" />
 						{m.settings_layout_profile()}

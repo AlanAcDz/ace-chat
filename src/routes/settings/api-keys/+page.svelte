@@ -12,6 +12,7 @@
 	import AnthropicIcon from '$lib/components/icons/anthropic-icon.svelte';
 	import GoogleIcon from '$lib/components/icons/google-icon.svelte';
 	import OpenaiIcon from '$lib/components/icons/openai-icon.svelte';
+	import OpenrouterIcon from '$lib/components/icons/openrouter-icon.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -63,6 +64,16 @@
 
 	// Configuraciones de proveedores con claves API
 	const apiKeyProviders = [
+		{
+			key: 'openrouter',
+			name: m.settings_api_keys_openrouter(),
+			placeholder: 'sk-or-v1-...',
+			description: m.settings_api_keys_openrouter_description(),
+			link: m.settings_api_keys_openrouter_link(),
+			linkUrl: 'https://openrouter.ai/keys',
+			icon: OpenrouterIcon,
+			models: modelsByProvider.openrouter || [],
+		},
 		{
 			key: 'anthropic',
 			name: m.settings_api_keys_anthropic(),
@@ -185,7 +196,7 @@
 	<div class="space-y-6">
 		<!-- Proveedores de Claves API -->
 		{#each apiKeyProviders as provider (provider.key)}
-			{#if provider.models.length > 0}
+			{#if provider.models.length > 0 || provider.key === 'openrouter'}
 				{@const IconComponent = provider.icon}
 				<div class="rounded-lg border border-secondary bg-secondary/20 p-6">
 					<div class="mb-4 flex items-center gap-2">
@@ -209,16 +220,22 @@
 						{/if}
 					</div>
 
-					<p class="mb-3 text-sm text-muted-foreground">
-						{m.settings_api_keys_used_for_models()}
-					</p>
-					<div class="mb-4 flex flex-wrap gap-2">
-						{#each provider.models as model (model.key)}
-							<Badge>
-								{model.label}
-							</Badge>
-						{/each}
-					</div>
+					{#if provider.key === 'openrouter'}
+						<p class="mb-4 text-sm text-muted-foreground">
+							{m.settings_api_keys_openrouter_explanation()}
+						</p>
+					{:else}
+						<p class="mb-3 text-sm text-muted-foreground">
+							{m.settings_api_keys_used_for_models()}
+						</p>
+						<div class="mb-4 flex flex-wrap gap-2">
+							{#each provider.models as model (model.key)}
+								<Badge>
+									{model.label}
+								</Badge>
+							{/each}
+						</div>
+					{/if}
 
 					<form method="POST" action="?/saveApiKey" use:enhance={submitFunction}>
 						<input type="hidden" name="provider" value={provider.key} />

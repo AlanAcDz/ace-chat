@@ -81,7 +81,7 @@ export async function saveApiKey(data: SaveApiKeyData) {
 	const { userId, provider, apiKey: apiKeyValue, scope = 'personal' } = data;
 
 	// Validate provider
-	const validProviders = ['openai', 'anthropic', 'google'];
+	const validProviders = ['openai', 'anthropic', 'google', 'openrouter'];
 	if (!validProviders.includes(provider)) {
 		throw new Error('Proveedor inválido');
 	}

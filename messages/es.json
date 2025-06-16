@@ -331,5 +331,10 @@
   "message_edit_error": "Error al editar el mensaje",
   "message_edit_placeholder": "Escribe tu mensaje...",
   "message_edit_cancel": "Cancelar",
-  "message_edit_save": "Guardar"
+  "message_edit_save": "Guardar",
+  "settings_api_keys_openrouter": "Clave API de OpenRouter",
+  "settings_api_keys_openrouter_description": "Obtén tu clave API desde",
+  "settings_api_keys_openrouter_link": "Claves de OpenRouter",
+  "settings_api_keys_openrouter_explanation": "OpenRouter proporciona acceso unificado a múltiples modelos de IA. Si configuras una clave API de OpenRouter, puedes usar cualquier modelo de OpenAI, Anthropic o Google incluso sin sus claves API específicas. Las claves de proveedor directo siempre tendrán prioridad sobre OpenRouter.",
+  "settings_api_keys_openrouter_fallback_description": "Proporciona acceso de respaldo a modelos de OpenAI, Anthropic y Google cuando sus claves API específicas no están configuradas."
 }

@@ -68,6 +68,7 @@
 		"@fontsource-variable/geist": "^5.2.6",
 		"@fontsource-variable/lora": "^5.2.6",
 		"@node-rs/argon2": "^2.0.2",
+		"@openrouter/ai-sdk-provider": "^0.7.2",
 		"@oslojs/crypto": "^1.0.1",
 		"@oslojs/encoding": "^1.1.0",
 		"@tanstack/svelte-query": "^5.80.7",

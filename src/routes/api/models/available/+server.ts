@@ -12,10 +12,22 @@ export const GET: RequestHandler = async () => {
 		const user = requireLogin();
 		const availableProviders = await getAvailableProviders(user.id);
 
+		// Check if OpenRouter is available as a fallback
+		const hasOpenRouter = availableProviders.includes('openrouter');
+
 		// Filter static models to only include those with available providers
-		const availableStaticModels = AI_MODELS.filter((model) =>
-			availableProviders.includes(model.provider)
-		);
+		// If OpenRouter is available, it can provide models for any provider
+		const availableStaticModels = AI_MODELS.filter((model) => {
+			// If we have a direct provider key, include the model
+			if (availableProviders.includes(model.provider)) {
+				return true;
+			}
+			// If we have OpenRouter, it can provide access to OpenAI, Anthropic, and Google models
+			if (hasOpenRouter && ['openai', 'anthropic', 'google'].includes(model.provider)) {
+				return true;
+			}
+			return false;
+		});
 
 		// Fetch dynamic models from local providers
 		const localModels: LocalModel[] = [];

@@ -3,6 +3,7 @@ import { createAnthropic } from '@ai-sdk/anthropic';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { createOpenAI } from '@ai-sdk/openai';
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
+import { createOpenRouter } from '@openrouter/ai-sdk-provider';
 import { createOllama } from 'ollama-ai-provider';
 import { z } from 'zod';
 
@@ -292,9 +293,28 @@ export async function createAIModelInstance(
 	// Get the provider from the model config
 	const provider = modelConfig.provider;
 
-	// Get the API key for the provider
-	const userApiKey = await getUserApiKey(userId, provider);
+	// Try to get the provider-specific API key first
+	let userApiKey = await getUserApiKey(userId, provider);
+
+	// If no provider-specific key, try to get OpenRouter key as fallback
 	if (!userApiKey) {
+		userApiKey = await getUserApiKey(userId, 'openrouter');
+		if (userApiKey) {
+			// Use OpenRouter for this model
+			if (!userApiKey.encryptedKey) {
+				throw new Error('OpenRouter API key not found');
+			}
+			const openrouter = createOpenRouter({
+				apiKey: userApiKey.encryptedKey,
+			});
+
+			// Map provider to OpenRouter model format
+			const openrouterModelKey =
+				modelConfig.key === 'gemini-2.0-flash-exp'
+					? `${provider}/${modelConfig.key}:free`
+					: `${provider}/${modelConfig.key}`;
+			return openrouter.chat(openrouterModelKey);
+		}
 		throw new Error(`API key for ${provider} not found`);
 	}
 
