@@ -246,6 +246,8 @@
   "assistant_message_branch_success": "Chat branched successfully",
   "assistant_message_generated_image": "Generated image {index}",
   "assistant_message_branch_tooltip": "Branch chat from this message",
+  "assistant_message_reasoning": "Reasoning",
+  "assistant_message_sources": "Sources",
   "attachments_loader_processing": "Processing...",
   "grants_users_view_description": "Can view the list of all users in the system.",
   "grants_users_create_description": "Can create new users.",

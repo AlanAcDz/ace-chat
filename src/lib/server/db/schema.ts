@@ -2,6 +2,7 @@ import { relations, sql } from 'drizzle-orm';
 import {
 	boolean,
 	integer,
+	jsonb,
 	pgEnum,
 	pgTable,
 	text,
@@ -105,6 +106,8 @@ export const message = pgTable('message', {
 	role: messageRoleEnum('role').notNull(),
 	content: text('content').notNull(),
 	model: text('model'),
+	reasoning: text('reasoning'), // AI model reasoning before main response
+	sources: jsonb('sources').$type<{ title: string; url: string }[]>(), // Sources from AI models
 	isStreaming: boolean('is_streaming').default(false),
 	hasWebSearch: boolean('has_web_search').default(false),
 	hasAttachments: boolean('has_attachments').default(false),

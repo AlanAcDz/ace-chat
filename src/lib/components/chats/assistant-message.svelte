@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { code } from '@cartamd/plugin-code';
-	import { Check, Copy, GitBranch, RefreshCcw } from '@lucide/svelte';
+	import { Check, ChevronRight, Copy, GitBranch, RefreshCcw } from '@lucide/svelte';
 	import { createMutation, useQueryClient } from '@tanstack/svelte-query';
 	import { Carta, Markdown } from 'carta-md';
 	import DOMPurify from 'isomorphic-dompurify';
@@ -11,6 +11,7 @@
 	import { goto } from '$app/navigation';
 	import { m } from '$lib/paraglide/messages.js';
 	import { Button } from '../ui/button';
+	import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
 
 	import 'carta-md/default.css'; /* Default theme */
 	import '@cartamd/plugin-code/default.css';
@@ -19,6 +20,8 @@
 		msg: Message & {
 			attachments?: Attachment[];
 			model: string;
+			reasoning?: string;
+			sources?: { title: string; url: string }[];
 		};
 		chatId: string;
 		onRetry?: () => void;
@@ -28,6 +31,8 @@
 	let { msg, chatId, onRetry, isSharedView = false }: Props = $props();
 
 	let isCopied = $state(false);
+	let reasoningOpen = $state(false);
+	let sourcesOpen = $state(false);
 
 	const queryClient = useQueryClient();
 
@@ -75,6 +80,25 @@
 			.map((part: any) => part.data) || []
 	);
 
+	// Extract sources from both database and message parts
+	let allSources = $derived(() => {
+		const sourcesFromDb = msg.sources || [];
+		const sourcesFromParts: { title: string; url: string }[] = [];
+
+		if (msg.parts) {
+			for (const part of msg.parts) {
+				if (part.type === 'source' && 'source' in part && part.source?.sourceType === 'url') {
+					sourcesFromParts.push({
+						title: part.source.title || '',
+						url: part.source.url || '',
+					});
+				}
+			}
+		}
+
+		return [...sourcesFromDb, ...sourcesFromParts];
+	});
+
 	const carta = new Carta({
 		sanitizer: DOMPurify.sanitize,
 		extensions: [code()],
@@ -94,6 +118,25 @@
 </script>
 
 <div class="group/assistant-message flex flex-col items-start justify-start px-2">
+	<!-- Reasoning Section (if available) -->
+	{#if msg.reasoning}
+		<Collapsible bind:open={reasoningOpen} class="w-full">
+			<CollapsibleTrigger class="flex items-center gap-1 text-xs">
+				<ChevronRight
+					class="h-4 w-4 transition-transform duration-200 {reasoningOpen ? 'rotate-90' : ''}" />
+				<span>{m.assistant_message_reasoning()}</span>
+			</CollapsibleTrigger>
+			<CollapsibleContent class="mt-2 max-w-xl rounded-lg bg-secondary/50 px-4 py-px">
+				<div class="prose prose-sm dark:prose-invert">
+					{#key msg.reasoning}
+						<Markdown {carta} value={msg.reasoning} />
+					{/key}
+				</div>
+			</CollapsibleContent>
+		</Collapsible>
+	{/if}
+
+	<!-- Main Message Content -->
 	{#key msg.content}
 		<div class="prose prose-sm dark:prose-invert">
 			<Markdown {carta} value={msg.content} />
@@ -135,6 +178,32 @@
 			{/each}
 		</div>
 	{/if}
+
+	<!-- Sources Section (if available) -->
+	{#if allSources().length > 0}
+		<Collapsible bind:open={sourcesOpen} class="mb-4 w-full">
+			<CollapsibleTrigger class="flex items-center gap-1 text-xs">
+				<ChevronRight
+					class="h-4 w-4 transition-transform duration-200 {sourcesOpen ? 'rotate-90' : ''}" />
+				<span>{m.assistant_message_sources()} ({allSources().length})</span>
+			</CollapsibleTrigger>
+			<CollapsibleContent class="mt-2 space-y-2">
+				{#each allSources() as source, index (index)}
+					<div class="max-w-sm rounded-lg bg-secondary/50 p-2">
+						<a
+							href={source.url}
+							target="_blank"
+							rel="noopener noreferrer"
+							class="block text-xs font-medium">
+							{source.title || source.url}
+						</a>
+					</div>
+				{/each}
+			</CollapsibleContent>
+		</Collapsible>
+	{/if}
+
+	<!-- Action Buttons -->
 	<div
 		class="flex items-center gap-2 opacity-0 transition-opacity group-hover/assistant-message:opacity-100">
 		{#if onRetry}

@@ -50,6 +50,13 @@
       "when": 1749939512811,
       "tag": "0006_slimy_frog_thor",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1750106409545,
+      "tag": "0007_easy_jane_foster",
+      "breakpoints": true
     }
   ]
 }

@@ -246,6 +246,8 @@
   "assistant_message_branch_success": "Chat ramificado exitosamente",
   "assistant_message_generated_image": "Imagen generada {index}",
   "assistant_message_branch_tooltip": "Ramificar chat desde este mensaje",
+  "assistant_message_reasoning": "Razonamiento",
+  "assistant_message_sources": "Fuentes",
   "attachments_loader_processing": "Procesando...",
   "grants_users_view_description": "Puede ver la lista de todos los usuarios del sistema.",
   "grants_users_create_description": "Puede crear nuevos usuarios.",

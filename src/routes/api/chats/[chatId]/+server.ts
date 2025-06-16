@@ -1,3 +1,6 @@
+import type { AnthropicProviderOptions } from '@ai-sdk/anthropic';
+import type { GoogleGenerativeAIProviderOptions } from '@ai-sdk/google';
+import type { OpenAIResponsesProviderOptions } from '@ai-sdk/openai';
 import { error, json } from '@sveltejs/kit';
 import { createOpenAI } from '@ai-sdk/openai';
 import { createIdGenerator, streamText } from 'ai';
@@ -56,7 +59,6 @@ export const POST: RequestHandler = async ({ request }) => {
 
 		// Get model configuration or check if it's a local model
 		const modelConfig = AI_MODELS.find((model) => model.key === modelKey);
-		let isLocalModel = false;
 
 		if (!modelConfig) {
 			// Check if it's a valid local model
@@ -64,12 +66,12 @@ export const POST: RequestHandler = async ({ request }) => {
 			if (!localModelInfo?.available) {
 				throw new Error(m.api_error_invalid_model());
 			}
-			isLocalModel = true;
 		}
 
 		const needsOpenAISearch = isSearchEnabled && modelConfig?.provider === 'openai';
 		const supportsImageGeneration =
 			modelConfig?.capabilities.some((cap) => cap === 'image') || false;
+		const supportsThinking = modelConfig?.capabilities.some((cap) => cap === 'thinking') || false;
 
 		// Check if user is requesting image generation
 		const lastUserMessage = messages.findLast((msg) => msg.role === 'user');
@@ -102,17 +104,35 @@ export const POST: RequestHandler = async ({ request }) => {
 				prefix: 'msg',
 				size: 16,
 			}),
-			// Add Google image generation support only if user requests it (only for non-local models)
-			...(!isLocalModel &&
-				supportsImageGeneration &&
-				modelConfig?.provider === 'google' &&
-				userWantsImageGeneration && {
-					providerOptions: {
-						google: {
-							responseModalities: ['TEXT', 'IMAGE'],
-						},
-					},
+			providerOptions: {
+				// Add Google image generation support only if user requests it (only for non-local models)
+				...(modelConfig?.provider === 'google' && {
+					google: {
+						...(supportsThinking && {
+							thinkingConfig: {
+								includeThoughts: true,
+								thinkingBudget: 2048,
+							},
+						}),
+						responseModalities:
+							supportsImageGeneration && userWantsImageGeneration ? ['TEXT', 'IMAGE'] : ['TEXT'],
+					} satisfies GoogleGenerativeAIProviderOptions,
 				}),
+				...(modelConfig?.provider === 'openai' && {
+					openai: {
+						...(supportsThinking && {
+							reasoningEffort: 'low',
+						}),
+					} satisfies OpenAIResponsesProviderOptions,
+				}),
+				...(modelConfig?.provider === 'anthropic' && {
+					anthropic: {
+						...(supportsThinking && {
+							thinking: { type: 'enabled', budgetTokens: 2048 },
+						}),
+					} satisfies AnthropicProviderOptions,
+				}),
+			},
 			// Add OpenAI search tools
 			...(openAISearchTools && {
 				tools: openAISearchTools,
@@ -121,12 +141,22 @@ export const POST: RequestHandler = async ({ request }) => {
 			onError: (error) => {
 				console.error('AI request error:', error);
 			},
-			async onFinish({ text, files }) {
+			async onFinish({ text, files, reasoning, sources }) {
+				console.log('reasoning', reasoning);
+				console.log('sources', sources);
 				const savedMessage = await saveMessage({
 					chatId: id,
 					role: 'assistant',
 					content: text,
 					model: modelKey,
+					reasoning: reasoning || null,
+					sources:
+						sources
+							?.filter((source) => source.sourceType === 'url')
+							.map((source) => ({
+								title: source.title || '',
+								url: source.url || '',
+							})) || null,
 				});
 
 				// Process and save generated files as attachments
@@ -138,7 +168,10 @@ export const POST: RequestHandler = async ({ request }) => {
 
 		result.consumeStream();
 
-		return result.toDataStreamResponse();
+		return result.toDataStreamResponse({
+			sendReasoning: true,
+			sendSources: true,
+		});
 	} catch (error) {
 		console.error('AI request error:', error);
 		return json(

@@ -32,7 +32,10 @@
 	const chat = $derived(
 		new Chat({
 			id: data.chat.id,
-			initialMessages: data.chat.messages,
+			initialMessages: data.chat.messages.map((message) => ({
+				...message,
+				reasoning: message.reasoning || undefined,
+			})),
 			sendExtraMessageFields: true,
 			api: `/api/chats/${data.chat.id}`,
 			generateId: createIdGenerator({
@@ -42,7 +45,8 @@
 			onResponse: () => {
 				startAutoScrolling();
 			},
-			onFinish: () => {
+			onFinish: (response) => {
+				console.log('response', response);
 				stopAutoScrolling();
 				// Final scroll to ensure we're at the bottom
 				scrollToBottom();
