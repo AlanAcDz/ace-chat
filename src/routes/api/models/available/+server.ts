@@ -16,14 +16,14 @@ export const GET: RequestHandler = async () => {
 		const hasOpenRouter = availableProviders.includes('openrouter');
 
 		// Filter static models to only include those with available providers
-		// If OpenRouter is available, it can provide models for any provider
+		// If OpenRouter is available, it can provide models for any provider that are OpenRouter compatible
 		const availableStaticModels = AI_MODELS.filter((model) => {
 			// If we have a direct provider key, include the model
 			if (availableProviders.includes(model.provider)) {
 				return true;
 			}
-			// If we have OpenRouter, it can provide access to OpenAI, Anthropic, and Google models
-			if (hasOpenRouter && ['openai', 'anthropic', 'google'].includes(model.provider)) {
+			// If we have OpenRouter, only include models that are OpenRouter compatible
+			if (hasOpenRouter && model.openRouterCompatible) {
 				return true;
 			}
 			return false;

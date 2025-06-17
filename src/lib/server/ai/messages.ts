@@ -315,7 +315,7 @@ export async function createAIModelInstance(
 	// If no provider-specific key, try to get OpenRouter key as fallback
 	if (!userApiKey) {
 		userApiKey = await getUserApiKey(userId, 'openrouter');
-		if (userApiKey) {
+		if (userApiKey && modelConfig.openRouterCompatible) {
 			// Use OpenRouter for this model
 			if (!userApiKey.encryptedKey) {
 				throw new Error('OpenRouter API key not found');
@@ -325,14 +325,7 @@ export async function createAIModelInstance(
 			});
 
 			// Map provider to OpenRouter model format
-			let openrouterModelKey =
-				modelConfig.key === 'gemini-2.0-flash-exp'
-					? `${provider}/${modelConfig.key}:free`
-					: `${provider}/${modelConfig.key}`;
-
-			if (modelConfig.key === 'claude-4-sonnet') {
-				openrouterModelKey = `${modelConfig.key}-20250522`;
-			}
+			let openrouterModelKey = `${provider}/${modelConfig.openRouterKey}`;
 
 			if (modelConfig.capabilities.some((cap) => cap === 'tools') && isSearchEnabled) {
 				openrouterModelKey += ':online';
@@ -360,7 +353,7 @@ export async function createAIModelInstance(
 
 		// For OpenAI models, web search is handled via tools in the streamText call
 		// rather than model configuration, so we return the basic model
-		return openai(modelConfig.key);
+		return openai.responses(modelConfig.key);
 	} else if (provider === 'anthropic') {
 		if (!userApiKey.encryptedKey) {
 			throw new Error('Anthropic API key not found');
@@ -368,9 +361,7 @@ export async function createAIModelInstance(
 		const anthropic = createAnthropic({
 			apiKey: userApiKey.encryptedKey,
 		});
-		const modelKey =
-			modelConfig.key === 'claude-4-sonnet' ? `${modelConfig.key}-20250514` : modelConfig.key;
-		return anthropic(modelKey);
+		return anthropic(modelConfig.key);
 	} else if (provider === 'google') {
 		if (!userApiKey.encryptedKey) {
 			throw new Error('Google API key not found');

@@ -130,7 +130,7 @@
 					{:else}
 						<Bot class={cn('shrink-0', size === 'sm' ? 'h-3 w-3' : 'h-4 w-4')} />
 					{/if}
-					<span class="truncate text-xs">
+					<span class="max-w-[75px] truncate text-xs sm:max-w-[125px] lg:max-w-full">
 						{selectedModel()?.label || m.model_picker_placeholder()}
 					</span>
 				</div>

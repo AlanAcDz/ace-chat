@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { Chat } from '@ai-sdk/svelte';
 	import { AlertCircleIcon, RefreshCcw } from '@lucide/svelte';
-	import { createMutation } from '@tanstack/svelte-query';
+	import { createMutation, useQueryClient } from '@tanstack/svelte-query';
 	import { createIdGenerator } from 'ai';
 	import { toast } from 'svelte-sonner';
 
@@ -26,6 +26,7 @@
 
 	// Get chat settings from context
 	const chatSettings = getChatSettingsContext();
+	const queryClient = useQueryClient();
 
 	let isAutoScrolling = $state(false);
 	let scrollInterval: ReturnType<typeof setInterval> | null = $state(null);
@@ -50,6 +51,8 @@
 				stopAutoScrolling();
 				// Final scroll to ensure we're at the bottom
 				scrollToBottom();
+				queryClient.invalidateQueries({ queryKey: ['chats'] });
+				chatSettings.resetSearchAfterChat();
 			},
 			onError: (error) => {
 				console.error('Error sending message:', error);
@@ -263,7 +266,7 @@
 </script>
 
 <svelte:head>
-	<title>{data.chat.title} | Ace Chat</title>
+	<title>{data.chat.title} | AceChat</title>
 </svelte:head>
 
 <!-- Messages Container -->

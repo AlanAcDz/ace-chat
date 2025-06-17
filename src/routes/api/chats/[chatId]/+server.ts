@@ -18,6 +18,7 @@ import {
 	transformMessagesWithAttachments,
 } from '$lib/server/ai/messages';
 import { requireLogin } from '$lib/server/auth';
+import { getUserApiKey } from '$lib/server/data/api-keys';
 import { processGeneratedFiles } from '$lib/server/data/attachments';
 import { deleteChat } from '$lib/server/data/chats';
 import { saveMessage } from '$lib/server/data/messages';
@@ -83,7 +84,6 @@ export const POST: RequestHandler = async ({ request }) => {
 		// Get OpenAI tools if search is enabled for OpenAI models
 		let openAISearchTools = null;
 		if (needsOpenAISearch) {
-			const { getUserApiKey } = await import('$lib/server/data/api-keys');
 			const userApiKey = await getUserApiKey(sessionUser.id, 'openai');
 
 			if (userApiKey?.encryptedKey) {
@@ -92,7 +92,7 @@ export const POST: RequestHandler = async ({ request }) => {
 				});
 				openAISearchTools = {
 					web_search_preview: openai.tools.webSearchPreview({
-						searchContextSize: 'high',
+						searchContextSize: 'medium',
 					}),
 				};
 			}
@@ -124,6 +124,7 @@ export const POST: RequestHandler = async ({ request }) => {
 					openai: {
 						...(supportsThinking && {
 							reasoningEffort: 'low',
+							reasoningSummary: 'detailed',
 						}),
 					} satisfies OpenAIResponsesProviderOptions,
 				}),

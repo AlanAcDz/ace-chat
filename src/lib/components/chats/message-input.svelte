@@ -60,8 +60,6 @@
 			const data = (await response.json()) as ModelsResponse;
 			return data;
 		},
-		staleTime: 5 * 60 * 1000, // 5 minutes
-		gcTime: 10 * 60 * 1000, // 10 minutes
 	});
 
 	// Combine static and local models
@@ -75,7 +73,7 @@
 	const selectedModelHasTools = $derived(() => {
 		const models = allModels();
 		const currentModel = models.find((model) => model.key === selectedModel);
-		return currentModel?.capabilities?.includes('tools') || false;
+		return currentModel?.capabilities?.some((cap) => cap === 'tools') || false;
 	});
 
 	async function handleSubmit() {
@@ -175,19 +173,19 @@
 						<Globe class="h-3 w-3" />
 						<span class="hidden sm:block">{m.message_input_search()}</span>
 					</Button>
-
-					<!-- Attach Button -->
-					<Button
-						variant="outline"
-						size="sm"
-						disabled={isSubmitting}
-						onclick={() => fileAttachmentsHandler.handleAttachClick()}
-						aria-label={m.message_input_attach_aria()}
-						class="text-xs">
-						<Paperclip class="h-3 w-3" />
-						<span class="hidden sm:block">{m.message_input_attach()}</span>
-					</Button>
 				{/if}
+
+				<!-- Attach Button -->
+				<Button
+					variant="outline"
+					size="sm"
+					disabled={isSubmitting}
+					onclick={() => fileAttachmentsHandler.handleAttachClick()}
+					aria-label={m.message_input_attach_aria()}
+					class="text-xs">
+					<Paperclip class="h-3 w-3" />
+					<span class="hidden sm:block">{m.message_input_attach()}</span>
+				</Button>
 			</div>
 
 			<!-- Submit Button -->

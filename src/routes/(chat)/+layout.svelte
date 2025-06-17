@@ -31,7 +31,7 @@
 			<div class="flex items-center gap-0.5 rounded bg-secondary/50 p-0.5 backdrop-blur-sm">
 				<Sidebar.Trigger class="size-8" />
 				{#if isInChatPage}
-					<Button href="/" variant="ghost" size="icon" class="size-8">
+					<Button href="/" variant="ghost" size="icon" class="size-8 md:hidden">
 						<PlusIcon class="size-4" />
 					</Button>
 				{/if}

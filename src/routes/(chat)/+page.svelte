@@ -60,9 +60,6 @@
 		}
 
 		$createChatMutation.mutate(formData);
-
-		// Reset search after creating chat (optional behavior)
-		chatSettings.resetSearchAfterChat();
 	}
 
 	async function handleSampleQuestion(question: string) {
