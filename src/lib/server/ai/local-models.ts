@@ -68,8 +68,8 @@ export async function fetchLMStudioModels(baseUrl: string): Promise<LocalModel[]
 				capabilities: ['text'], // Default capabilities for LM Studio models
 			})) || []
 		);
-	} catch (error) {
-		console.warn('Error fetching LM Studio models:', error);
+	} catch {
+		console.warn('Error fetching LM Studio models, make sure the server is running');
 		return [];
 	}
 }
@@ -103,8 +103,8 @@ export async function fetchOllamaModels(baseUrl: string): Promise<LocalModel[]> 
 				capabilities: ['text'], // Default capabilities for Ollama models
 			})) || []
 		);
-	} catch (error) {
-		console.warn('Error fetching Ollama models:', error);
+	} catch {
+		console.warn('Error fetching Ollama models, make sure the server is running');
 		return [];
 	}
 }

@@ -22,19 +22,19 @@ The primary goal is to create a **fully self-hostable** version of the chat appl
 -   **Database:** PostgreSQL with Drizzle ORM
 -   **Authentication:** Lucia Auth
 -   **AI Integration:** AI SDK (Vercel AI SDK)
--   **Pub/Sub**: Redis
 -   **Deployment:** Docker & Docker Compose
 
 ## Core Features
 
-- Chat with Various LLMs: Support for multiple language models and providers (OpenAI, Anthropic, Google, LM Studio)
+- Chat with Various LLMs: Support for multiple language models and providers (OpenAI, Anthropic, Google, LM Studio, Ollama, OpenRouter)
 - Bring Your Own Key Support: Users should use their own API keys
 - Authentication & Sync: User authentication with chat history synchronization
 - Attachment Support: Allow users to upload files (images and pdfs)
-- Image Generation Support: AI-powered image generation capabilities
+- Image Generation Support: AI-powered image generation capabilities for select models
 - Syntax Highlighting: Beautiful code formatting and highlighting
-- Resumable Streams: Continue generation after page refresh
+- Resumable Streams: Continue generation after page refresh (to do later)
 - Chat Branching: Create alternative conversation paths
+- Chat Retries and edits: Users can retry assistant messages or edit their own messages
 - Chat Sharing: Share conversations with others (would apply for same network only)
 - Web Search: Integrate real-time web search
 - User management: The main user of the app should be able to create other users for same network use
