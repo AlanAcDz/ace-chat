@@ -41,7 +41,8 @@
 	<!-- Footer -->
 	<footer class="border-t py-6 text-center text-sm text-muted-foreground">
 		<div class="container mx-auto px-4">
-			{m.share_layout_footer()}
+			<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+			{@html m.share_layout_footer()}
 		</div>
 	</footer>
 </div>

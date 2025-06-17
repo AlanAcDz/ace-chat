@@ -39,7 +39,8 @@
 						{chat.title}
 					</CardTitle>
 					<CardDescription>
-						{m.shared_chat_shared_by({ author: author.name || author.username })}
+						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+						{@html m.shared_chat_shared_by({ author: author.name || author.username })}
 					</CardDescription>
 				</div>
 				<Badge variant="secondary" class="shrink-0">{m.shared_chat_badge()}</Badge>
@@ -56,6 +57,7 @@
 						...msg,
 						parts: [],
 						hasAttachments: msg.hasAttachments || (msg.attachments && msg.attachments.length > 0),
+						reasoning: msg.reasoning || undefined,
 					}} />
 			{:else if msg.role === 'assistant'}
 				<AssistantMessage
@@ -63,6 +65,8 @@
 						...msg,
 						parts: [],
 						model: msg.model || 'unknown',
+						reasoning: msg.reasoning || undefined,
+						sources: msg.sources || undefined,
 					}}
 					chatId={chat.id}
 					isSharedView={true} />
