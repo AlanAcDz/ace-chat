@@ -41,31 +41,71 @@ export async function POST({ params }: { params: { chatId: string } }) {
 
 		const firstUserMessage = chatData.messages[0];
 
-		// Use a cheap model for title generation (prefer Gemini Flash or GPT-4o Mini)
-		const titleModel =
-			AI_MODELS.find((model) => model.key === 'gemini-2.0-flash-exp') ||
-			AI_MODELS.find((model) => model.key === 'gpt-4o-mini') ||
-			AI_MODELS[0];
+		// Try to generate title with fallback models
+		let generatedTitle: string | undefined;
 
-		// Create AI model instance
-		const aiModel = await createAIModelInstance(titleModel.key, sessionUser.id, false);
+		// Define preferred models in order of preference
+		const preferredModels = ['gemini-2.0-flash-exp', 'gpt-4o-mini'];
 
-		// Generate title using AI
-		const { text: generatedTitle } = await generateText({
-			model: aiModel,
-			messages: [
-				{
-					role: 'system',
-					content: m.api_title_generation_prompt(),
-				},
-				{
-					role: 'user',
-					content: firstUserMessage.content,
-				},
-			],
-			maxTokens: 50,
-			temperature: 0.3,
-		});
+		for (const modelKey of preferredModels) {
+			const titleModel = AI_MODELS.find((model) => model.key === modelKey);
+
+			if (!titleModel) {
+				continue; // Skip if model not found
+			}
+
+			try {
+				// Create AI model instance
+				const aiModel = await createAIModelInstance(titleModel.key, sessionUser.id, false);
+
+				// Generate title using AI
+				const { text } = await generateText({
+					model: aiModel,
+					messages: [
+						{
+							role: 'system',
+							content: m.api_title_generation_prompt(),
+						},
+						{
+							role: 'user',
+							content: firstUserMessage.content,
+						},
+					],
+					maxTokens: 50,
+					temperature: 0.3,
+				});
+
+				generatedTitle = text;
+				break; // Success, exit the loop
+			} catch (modelError) {
+				console.warn(`Failed to generate title with ${modelKey}:`, modelError);
+				// Continue to next model
+			}
+		}
+
+		// If all preferred models failed, try with fallback
+		if (!generatedTitle) {
+			const fallbackModel = AI_MODELS[0];
+			const aiModel = await createAIModelInstance(fallbackModel.key, sessionUser.id, false);
+
+			const { text } = await generateText({
+				model: aiModel,
+				messages: [
+					{
+						role: 'system',
+						content: m.api_title_generation_prompt(),
+					},
+					{
+						role: 'user',
+						content: firstUserMessage.content,
+					},
+				],
+				maxTokens: 50,
+				temperature: 0.3,
+			});
+
+			generatedTitle = text;
+		}
 
 		// Clean and limit the title
 		const cleanTitle = generatedTitle
