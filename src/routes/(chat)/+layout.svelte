@@ -30,9 +30,11 @@
 		<header class="sticky top-0 z-10 flex items-center justify-between gap-2 px-4 py-2">
 			<div class="flex items-center gap-0.5 rounded bg-secondary/50 p-0.5 backdrop-blur-sm">
 				<Sidebar.Trigger class="size-8" />
-				<Button href="/" variant="ghost" size="icon" class="size-8">
-					<PlusIcon class="size-4" />
-				</Button>
+				{#if isInChatPage}
+					<Button href="/" variant="ghost" size="icon" class="size-8">
+						<PlusIcon class="size-4" />
+					</Button>
+				{/if}
 			</div>
 			<div class="flex items-center gap-0.5 rounded bg-secondary/50 p-0.5 backdrop-blur-sm">
 				{#if isInChatPage && chatId}

@@ -23,6 +23,8 @@
 
 	let { user }: Props = $props();
 
+	let sidebar = Sidebar.useSidebar();
+
 	// Search state
 	let searchQuery = $state('');
 
@@ -134,7 +136,12 @@
 		</div>
 
 		<!-- New Chat Button -->
-		<Button href="/" variant="outline" size="sm" class="w-full gap-2">
+		<Button
+			href="/"
+			variant="outline"
+			size="sm"
+			class="w-full gap-2"
+			onclick={() => sidebar.setOpenMobile(false)}>
 			<MessageCirclePlus class="h-4 w-4" />
 			<span>{m.sidebar_new_chat()}</span>
 		</Button>
@@ -181,13 +188,14 @@
 												<a
 													{...props}
 													href="/chats/{chat.id}"
-													class={cn(props.class as string, 'group/link relative truncate')}>
+													class={cn(props.class as string, 'group/link relative truncate')}
+													onclick={() => sidebar.setOpenMobile(false)}>
 													{#if chat.isBranched}
 														<div title={m.sidebar_chat_branched_title()}>
 															<GitBranch class="h-3 w-3 shrink-0 text-current" />
 														</div>
 													{/if}
-													<span class="truncate text-xs">{chat.title}</span>
+													<span class="truncate">{chat.title}</span>
 													<div
 														class="absolute inset-y-0 right-0 flex translate-x-full items-center justify-end transition-transform group-hover/link:translate-x-0">
 														<span

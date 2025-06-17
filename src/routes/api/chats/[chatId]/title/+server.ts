@@ -43,8 +43,8 @@ export async function POST({ params }: { params: { chatId: string } }) {
 
 		// Use a cheap model for title generation (prefer Gemini Flash or GPT-4o Mini)
 		const titleModel =
-			AI_MODELS.find((m) => m.key === 'gemini-2.0-flash-exp') ||
-			AI_MODELS.find((m) => m.key === 'gpt-4o-mini') ||
+			AI_MODELS.find((model) => model.key === 'gemini-2.0-flash-exp') ||
+			AI_MODELS.find((model) => model.key === 'gpt-4o-mini') ||
 			AI_MODELS[0];
 
 		// Create AI model instance

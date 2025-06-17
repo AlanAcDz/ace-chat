@@ -224,6 +224,7 @@
   "chat_error_send_message": "Error sending message",
   "chat_error_generate_title": "Error generating title",
   "chat_new_chat_default_title": "New chat",
+  "chat_error_retry": "Retry",
   "attachments_delete_success": "File deleted successfully",
   "attachments_delete_single_error": "Error deleting file",
   "share_layout_title": "Shared Chat | AceChat",

@@ -86,7 +86,7 @@
 			</div>
 		{:else}
 			<!-- View Mode -->
-			<div class="prose prose-sm max-w-none break-words dark:prose-invert">
+			<div class="prose max-w-none break-words dark:prose-invert">
 				<p class="whitespace-pre-wrap">{msg.content}</p>
 			</div>
 

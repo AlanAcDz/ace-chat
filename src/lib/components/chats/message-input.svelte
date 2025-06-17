@@ -142,8 +142,10 @@
 
 		<!-- Textarea -->
 		<div class="px-4 py-3">
+			<!-- svelte-ignore a11y_autofocus -->
 			<textarea
 				bind:value={message}
+				autofocus
 				onkeydown={handleKeydown}
 				placeholder={m.message_input_placeholder()}
 				disabled={isSubmitting}

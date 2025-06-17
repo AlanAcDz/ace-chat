@@ -44,7 +44,6 @@ export async function getUserChat(chatId: string, userId: string) {
 				with: {
 					attachments: true,
 				},
-				where: not(eq(message.role, 'system')),
 				orderBy: [asc(message.createdAt)],
 			},
 		},

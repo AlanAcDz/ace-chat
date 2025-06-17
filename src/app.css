@@ -168,8 +168,6 @@
 }
 
 pre.shiki {
-	@apply !bg-accent/10;
-	border-radius: var(--radius-md);
 	overflow-x: auto;
 	word-break: break-word;
 	white-space: pre-wrap;

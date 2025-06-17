@@ -7,6 +7,7 @@
 	import { goto } from '$app/navigation';
 	import MessageInput from '$lib/components/chats/message-input.svelte';
 	import { Alert, AlertDescription, AlertTitle } from '$lib/components/ui/alert';
+	import { Button } from '$lib/components/ui/button';
 	import { Skeleton } from '$lib/components/ui/skeleton';
 	import { getChatSettingsContext } from '$lib/contexts/chat-settings.svelte';
 	import { m } from '$lib/paraglide/messages.js';
@@ -63,6 +64,15 @@
 		// Reset search after creating chat (optional behavior)
 		chatSettings.resetSearchAfterChat();
 	}
+
+	async function handleSampleQuestion(question: string) {
+		const formData = new FormData();
+		formData.append('message', question);
+		formData.append('model', chatSettings.selectedModel);
+		formData.append('isSearchEnabled', String(chatSettings.isSearchEnabled));
+
+		$createChatMutation.mutate(formData);
+	}
 </script>
 
 <!-- Header Section -->
@@ -88,23 +98,31 @@
 		</Alert>
 	{:else}
 		<!-- Sample Questions (placeholder for future implementation) -->
-		<div class="grid max-w-2xl grid-cols-1 gap-3 md:grid-cols-2">
-			<div
-				class="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
+		<div class="grid max-w-2xl grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2">
+			<Button
+				variant="secondary"
+				size="lg"
+				onclick={() => handleSampleQuestion(m.chat_sample_questions_ai_how_works())}>
 				{m.chat_sample_questions_ai_how_works()}
-			</div>
-			<div
-				class="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
+			</Button>
+			<Button
+				variant="secondary"
+				size="lg"
+				onclick={() => handleSampleQuestion(m.chat_sample_questions_black_holes_real())}>
 				{m.chat_sample_questions_black_holes_real()}
-			</div>
-			<div
-				class="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
+			</Button>
+			<Button
+				variant="secondary"
+				size="lg"
+				onclick={() => handleSampleQuestion(m.chat_sample_questions_rs_in_strawberry())}>
 				{m.chat_sample_questions_rs_in_strawberry()}
-			</div>
-			<div
-				class="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
+			</Button>
+			<Button
+				variant="secondary"
+				size="lg"
+				onclick={() => handleSampleQuestion(m.chat_sample_questions_meaning_of_life())}>
 				{m.chat_sample_questions_meaning_of_life()}
-			</div>
+			</Button>
 		</div>
 	{/if}
 </div>

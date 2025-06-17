@@ -4,6 +4,7 @@
 	import { createMutation, useQueryClient } from '@tanstack/svelte-query';
 	import { Carta, Markdown } from 'carta-md';
 	import DOMPurify from 'isomorphic-dompurify';
+	import { mode } from 'mode-watcher';
 	import { toast } from 'svelte-sonner';
 
 	import type { Attachment } from '$lib/server/db/schema';
@@ -12,9 +13,6 @@
 	import { m } from '$lib/paraglide/messages.js';
 	import { Button } from '../ui/button';
 	import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
-
-	import 'carta-md/default.css'; /* Default theme */
-	import '@cartamd/plugin-code/default.css';
 
 	interface Props {
 		msg: Message & {
@@ -99,10 +97,19 @@
 		return [...sourcesFromDb, ...sourcesFromParts];
 	});
 
-	const carta = new Carta({
-		sanitizer: DOMPurify.sanitize,
-		extensions: [code()],
-	});
+	const carta = $derived(
+		new Carta({
+			sanitizer: DOMPurify.sanitize,
+			extensions: [
+				code({
+					theme: mode.current === 'dark' ? 'catppuccin-frappe' : 'catppuccin-latte',
+				}),
+			],
+			shikiOptions: {
+				themes: ['catppuccin-frappe', 'catppuccin-latte'],
+			},
+		})
+	);
 
 	async function copyMessage() {
 		try {
@@ -128,7 +135,7 @@
 			</CollapsibleTrigger>
 			<CollapsibleContent class="mt-2 max-w-xl rounded-lg bg-secondary/50 px-4 py-px">
 				<div class="prose prose-sm dark:prose-invert">
-					{#key msg.reasoning}
+					{#key msg.reasoning + mode.current}
 						<Markdown {carta} value={msg.reasoning} />
 					{/key}
 				</div>
@@ -137,8 +144,8 @@
 	{/if}
 
 	<!-- Main Message Content -->
-	{#key msg.content}
-		<div class="prose prose-sm dark:prose-invert">
+	{#key msg.content + mode.current}
+		<div class="prose dark:prose-invert">
 			<Markdown {carta} value={msg.content} />
 		</div>
 	{/key}

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { Chat } from '@ai-sdk/svelte';
-	import { AlertCircleIcon } from '@lucide/svelte';
+	import { AlertCircleIcon, RefreshCcw } from '@lucide/svelte';
 	import { createMutation } from '@tanstack/svelte-query';
 	import { createIdGenerator } from 'ai';
 	import { toast } from 'svelte-sonner';
@@ -14,6 +14,7 @@
 	import MessageInput from '$lib/components/chats/message-input.svelte';
 	import UserMessage from '$lib/components/chats/user-message.svelte';
 	import { Alert, AlertDescription, AlertTitle } from '$lib/components/ui/alert';
+	import { Button } from '$lib/components/ui/button';
 	import { getChatSettingsContext } from '$lib/contexts/chat-settings.svelte';
 	import { m } from '$lib/paraglide/messages.js';
 
@@ -45,8 +46,7 @@
 			onResponse: () => {
 				startAutoScrolling();
 			},
-			onFinish: (response) => {
-				console.log('response', response);
+			onFinish: () => {
 				stopAutoScrolling();
 				// Final scroll to ensure we're at the bottom
 				scrollToBottom();
@@ -101,7 +101,6 @@
 			return response.json();
 		},
 		onSuccess: () => {
-			toast.success(m.message_edit_delete_success());
 			data.queryClient.invalidateQueries({ queryKey: ['chats'] });
 			// Trigger AI response generation after successful deletion
 			getAIResponse();
@@ -131,7 +130,6 @@
 			return response.json();
 		},
 		onSuccess: () => {
-			toast.success(m.message_edit_success());
 			data.queryClient.invalidateQueries({ queryKey: ['chats'] });
 			// Trigger AI response generation after successful edit
 			getAIResponse();
@@ -282,6 +280,18 @@
 		<AlertTitle>{m.chat_error_title()}</AlertTitle>
 		<AlertDescription>
 			{chat.error.message || m.chat_error_unknown()}
+			<Button
+				variant="ghost"
+				onclick={() =>
+					chat.reload({
+						body: {
+							model: chatSettings.selectedModel,
+							isSearchEnabled: chatSettings.isSearchEnabled,
+						},
+					})}>
+				<RefreshCcw class="h-4 w-4" />
+				{m.chat_error_retry()}
+			</Button>
 		</AlertDescription>
 	</Alert>
 {/if}
