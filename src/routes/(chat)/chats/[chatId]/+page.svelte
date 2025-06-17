@@ -84,19 +84,13 @@
 
 	// Retry message mutation
 	const retryMessageMutation = createMutation({
-		mutationFn: async ({
-			messageId,
-			tempMessageId,
-		}: {
-			messageId: string;
-			tempMessageId?: string;
-		}) => {
+		mutationFn: async (messageIndex: number) => {
 			const response = await fetch(`/api/chats/${data.chat.id}/messages`, {
 				method: 'DELETE',
 				headers: {
 					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({ messageId, tempMessageId }),
+				body: JSON.stringify({ messageIndex }),
 			});
 
 			if (!response.ok) {
@@ -189,19 +183,12 @@
 	}
 
 	function handleRetry(messageIndex: number) {
-		// Get the message at the specified index
-		const targetMessage = chat.messages[messageIndex];
-		if (!targetMessage) return;
-
 		// Update the messages state to remove messages from the selected index onwards
 		const messagesToKeep = chat.messages.slice(0, messageIndex);
 		chat.messages = messagesToKeep;
 
-		// Delete messages from the database using message ID
-		$retryMessageMutation.mutate({
-			messageId: targetMessage.id,
-			tempMessageId: targetMessage.id, // Use the same ID as fallback since AI SDK might use temporary IDs
-		});
+		// Delete messages from the database using message index
+		$retryMessageMutation.mutate(messageIndex);
 	}
 
 	function handleEdit(messageIndex: number, content: string) {

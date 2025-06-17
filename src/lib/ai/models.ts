@@ -30,9 +30,9 @@ export const AI_MODELS = [
 		capabilities: ['text', 'tools', 'thinking'],
 	},
 	{
-		label: 'Claude 4 Sonnet',
+		label: 'Claude Sonnet 4',
 		provider: 'anthropic',
-		key: 'claude-4-sonnet-20250514',
+		key: 'claude-4-sonnet-20250522',
 		capabilities: ['text', 'tools', 'thinking'],
 	},
 	{

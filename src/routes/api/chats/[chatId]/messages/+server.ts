@@ -65,16 +65,14 @@ export const DELETE: RequestHandler = async ({ params, request }) => {
 	const user = requireLogin();
 	const { chatId } = params;
 
-	// Parse request body to get the messageId to delete from
-	let messageId: string;
-	let tempMessageId: string | undefined;
+	// Parse request body to get the messageIndex to delete from
+	let deleteFromMessageIndex: number;
 	try {
 		const body = await request.json();
-		messageId = body.messageId;
-		tempMessageId = body.tempMessageId;
+		deleteFromMessageIndex = body.messageIndex;
 
-		if (typeof messageId !== 'string' || messageId.trim() === '') {
-			error(400, 'Valid message ID is required');
+		if (typeof deleteFromMessageIndex !== 'number' || deleteFromMessageIndex < 0) {
+			error(400, m.message_edit_valid_index_required());
 		}
 	} catch {
 		error(400, m.api_error_invalid_json());
@@ -86,17 +84,16 @@ export const DELETE: RequestHandler = async ({ params, request }) => {
 	// Get all messages in the chat
 	const allMessages = await getChatMessages(chatId);
 
-	// Find the target message by ID (check both real ID and temp ID)
-	const targetMessage = allMessages.find(
-		(msg) => msg.id === messageId || (tempMessageId && msg.id === tempMessageId)
-	);
-
-	if (!targetMessage) {
-		error(404, 'Message not found');
+	// Validate message index
+	if (deleteFromMessageIndex >= allMessages.length) {
+		error(404, m.message_edit_index_out_of_range());
 	}
 
-	// Get all messages that will be deleted (from target onwards, including target)
-	const messagesToDelete = allMessages.filter((msg) => msg.createdAt >= targetMessage.createdAt);
+	// Get the target message by index
+	const targetMessage = allMessages[deleteFromMessageIndex];
+
+	// Get all messages that will be deleted (from target onwards)
+	const messagesToDelete = allMessages.slice(deleteFromMessageIndex);
 	const messageIdsToDelete = messagesToDelete.map((msg) => msg.id);
 
 	// Get all attachments for messages that will be deleted

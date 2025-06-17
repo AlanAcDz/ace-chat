@@ -325,11 +325,22 @@ export async function createAIModelInstance(
 			});
 
 			// Map provider to OpenRouter model format
-			const openrouterModelKey =
+			let openrouterModelKey =
 				modelConfig.key === 'gemini-2.0-flash-exp'
 					? `${provider}/${modelConfig.key}:free`
 					: `${provider}/${modelConfig.key}`;
-			return openrouter.chat(openrouterModelKey);
+
+			if (modelConfig.capabilities.some((cap) => cap === 'tools') && isSearchEnabled) {
+				openrouterModelKey += ':online';
+			}
+
+			return openrouter.chat(openrouterModelKey, {
+				...(modelConfig.capabilities.some((cap) => cap === 'thinking') && {
+					reasoning: {
+						effort: 'low',
+					},
+				}),
+			});
 		}
 		throw new Error(`API key for ${provider} not found`);
 	}
