@@ -84,13 +84,19 @@
 
 	// Retry message mutation
 	const retryMessageMutation = createMutation({
-		mutationFn: async (messageIndex: number) => {
+		mutationFn: async ({
+			messageId,
+			tempMessageId,
+		}: {
+			messageId: string;
+			tempMessageId?: string;
+		}) => {
 			const response = await fetch(`/api/chats/${data.chat.id}/messages`, {
 				method: 'DELETE',
 				headers: {
 					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({ messageIndex }),
+				body: JSON.stringify({ messageId, tempMessageId }),
 			});
 
 			if (!response.ok) {
@@ -113,13 +119,21 @@
 
 	// Edit message mutation
 	const editMessageMutation = createMutation({
-		mutationFn: async ({ messageIndex, content }: { messageIndex: number; content: string }) => {
+		mutationFn: async ({
+			messageId,
+			tempMessageId,
+			content,
+		}: {
+			messageId: string;
+			tempMessageId?: string;
+			content: string;
+		}) => {
 			const response = await fetch(`/api/chats/${data.chat.id}/messages`, {
 				method: 'PUT',
 				headers: {
 					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({ messageIndex, content }),
+				body: JSON.stringify({ messageId, tempMessageId, content }),
 			});
 
 			if (!response.ok) {
@@ -175,15 +189,26 @@
 	}
 
 	function handleRetry(messageIndex: number) {
+		// Get the message at the specified index
+		const targetMessage = chat.messages[messageIndex];
+		if (!targetMessage) return;
+
 		// Update the messages state to remove messages from the selected index onwards
 		const messagesToKeep = chat.messages.slice(0, messageIndex);
 		chat.messages = messagesToKeep;
 
-		// Delete messages from the database using message position
-		$retryMessageMutation.mutate(messageIndex);
+		// Delete messages from the database using message ID
+		$retryMessageMutation.mutate({
+			messageId: targetMessage.id,
+			tempMessageId: targetMessage.id, // Use the same ID as fallback since AI SDK might use temporary IDs
+		});
 	}
 
 	function handleEdit(messageIndex: number, content: string) {
+		// Get the message at the specified index
+		const targetMessage = chat.messages[messageIndex];
+		if (!targetMessage) return;
+
 		// Update the message content locally first
 		const updatedMessages = [...chat.messages];
 		updatedMessages[messageIndex] = { ...updatedMessages[messageIndex], content };
@@ -193,7 +218,11 @@
 		chat.messages = messagesToKeep;
 
 		// Update the message in the database and delete subsequent messages
-		$editMessageMutation.mutate({ messageIndex, content });
+		$editMessageMutation.mutate({
+			messageId: targetMessage.id,
+			tempMessageId: targetMessage.id, // Use the same ID as fallback since AI SDK might use temporary IDs
+			content,
+		});
 	}
 
 	function getAIResponse() {

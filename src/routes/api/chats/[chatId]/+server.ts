@@ -142,8 +142,6 @@ export const POST: RequestHandler = async ({ request }) => {
 				console.error('AI request error:', error);
 			},
 			async onFinish({ text, files, reasoning, sources }) {
-				console.log('reasoning', reasoning);
-				console.log('sources', sources);
 				const savedMessage = await saveMessage({
 					chatId: id,
 					role: 'assistant',

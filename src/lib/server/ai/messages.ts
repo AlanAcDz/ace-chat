@@ -4,6 +4,7 @@ import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { createOpenAI } from '@ai-sdk/openai';
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
 import { createOpenRouter } from '@openrouter/ai-sdk-provider';
+import { and, eq } from 'drizzle-orm';
 import { createOllama } from 'ollama-ai-provider';
 import { z } from 'zod';
 
@@ -12,6 +13,8 @@ import { AI_MODELS } from '$lib/ai/models';
 import { checkLocalModelAvailability } from '$lib/server/ai/local-models';
 import { getUserApiKey } from '$lib/server/data/api-keys';
 import { addMessageToChat } from '$lib/server/data/chats';
+import { db } from '$lib/server/db';
+import { message } from '$lib/server/db/schema';
 import { getFullFilePath } from '$lib/server/storage';
 
 // Zod schema for request validation
@@ -229,6 +232,19 @@ export async function saveUserMessageIfNeeded(
 ) {
 	const lastMessage = messages[messages.length - 1];
 	if (lastMessage && lastMessage.role === 'user' && !lastMessage.chatId) {
+		// Check if this message already exists in the database
+		// This prevents duplicates when editing messages and triggering new AI responses
+		if (lastMessage.id) {
+			const existingMessage = await db.query.message.findFirst({
+				where: and(eq(message.chatId, chatId), eq(message.temporaryId, lastMessage.id)),
+			});
+
+			// If message already exists, don't save it again
+			if (existingMessage) {
+				return;
+			}
+		}
+
 		// Extract files from experimental_attachments if they exist
 		const files: File[] = [];
 		if (
