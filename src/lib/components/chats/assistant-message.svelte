@@ -155,7 +155,7 @@
 
 	<!-- Display images from parts (generated images) -->
 	{#if imageParts.length > 0}
-		<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+		<div class="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
 			{#each imageParts as imageData, index (index)}
 				<div class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
 					<img
@@ -170,7 +170,7 @@
 
 	<!-- Display images from attachments (database) -->
 	{#if imageAttachments.length > 0}
-		<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+		<div class="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
 			{#each imageAttachments as attachment (attachment.id)}
 				<div class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
 					<img

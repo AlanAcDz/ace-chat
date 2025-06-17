@@ -330,6 +330,10 @@ export async function createAIModelInstance(
 					? `${provider}/${modelConfig.key}:free`
 					: `${provider}/${modelConfig.key}`;
 
+			if (modelConfig.key === 'claude-4-sonnet') {
+				openrouterModelKey = `${modelConfig.key}-20250522`;
+			}
+
 			if (modelConfig.capabilities.some((cap) => cap === 'tools') && isSearchEnabled) {
 				openrouterModelKey += ':online';
 			}
@@ -364,7 +368,9 @@ export async function createAIModelInstance(
 		const anthropic = createAnthropic({
 			apiKey: userApiKey.encryptedKey,
 		});
-		return anthropic(modelConfig.key);
+		const modelKey =
+			modelConfig.key === 'claude-4-sonnet' ? `${modelConfig.key}-20250514` : modelConfig.key;
+		return anthropic(modelKey);
 	} else if (provider === 'google') {
 		if (!userApiKey.encryptedKey) {
 			throw new Error('Google API key not found');

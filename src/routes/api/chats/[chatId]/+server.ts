@@ -78,6 +78,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		const userWantsImageGeneration = lastUserMessage
 			? detectImageGenerationRequest(lastUserMessage.content)
 			: false;
+		const shouldGenerateImage = supportsImageGeneration && userWantsImageGeneration;
 
 		// Get OpenAI tools if search is enabled for OpenAI models
 		let openAISearchTools = null;
@@ -99,7 +100,9 @@ export const POST: RequestHandler = async ({ request }) => {
 
 		const result = streamText({
 			model: aiModel,
-			messages: transformedMessages,
+			messages: shouldGenerateImage
+				? transformedMessages.filter((msg) => msg.role !== 'system')
+				: transformedMessages,
 			experimental_generateMessageId: createIdGenerator({
 				prefix: 'msg',
 				size: 16,
@@ -114,8 +117,7 @@ export const POST: RequestHandler = async ({ request }) => {
 								thinkingBudget: 2048,
 							},
 						}),
-						responseModalities:
-							supportsImageGeneration && userWantsImageGeneration ? ['TEXT', 'IMAGE'] : ['TEXT'],
+						responseModalities: shouldGenerateImage ? ['TEXT', 'IMAGE'] : ['TEXT'],
 					} satisfies GoogleGenerativeAIProviderOptions,
 				}),
 				...(modelConfig?.provider === 'openai' && {
