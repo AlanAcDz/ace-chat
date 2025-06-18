@@ -90,19 +90,6 @@
 				<p class="font-medium">{m.auth_signup_invite_active({ username: data.invite.username })}</p>
 			</AlertDescription>
 		</Alert>
-	{:else if data.isFirstUser}
-		<!-- First User Message -->
-		<Alert class="mb-4 border-green-200 bg-green-50">
-			<Mail class="h-4 w-4 text-green-600" />
-			<AlertDescription class="text-green-800">
-				<div class="space-y-2">
-					<p class="font-medium">{m.auth_signup_first_user_title()}</p>
-					<p class="text-sm">
-						{m.auth_signup_first_user_description()}
-					</p>
-				</div>
-			</AlertDescription>
-		</Alert>
 	{/if}
 
 	<form method="POST" use:enhance class="space-y-4">
@@ -180,13 +167,15 @@
 	</form>
 </Card.Content>
 
-<Card.Footer>
-	<div class="w-full text-center">
-		<p class="text-sm text-muted-foreground">
-			{m.auth_signup_have_account()}
-			<a href="/login" class="ml-1 font-medium text-primary underline-offset-4 hover:underline">
-				{m.auth_signup_login_link()}
-			</a>
-		</p>
-	</div>
-</Card.Footer>
+{#if !data.isFirstUser}
+	<Card.Footer>
+		<div class="w-full text-center">
+			<p class="text-sm text-muted-foreground">
+				{m.auth_signup_have_account()}
+				<a href="/login" class="ml-1 font-medium text-primary underline-offset-4 hover:underline">
+					{m.auth_signup_login_link()}
+				</a>
+			</p>
+		</div>
+	</Card.Footer>
+{/if}

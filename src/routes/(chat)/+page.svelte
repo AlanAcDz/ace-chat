@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { AlertCircleIcon } from '@lucide/svelte';
+	import { AlertCircleIcon, KeyIcon } from '@lucide/svelte';
 	import { createMutation } from '@tanstack/svelte-query';
 	import { toast } from 'svelte-sonner';
 
@@ -8,6 +8,14 @@
 	import MessageInput from '$lib/components/chats/message-input.svelte';
 	import { Alert, AlertDescription, AlertTitle } from '$lib/components/ui/alert';
 	import { Button } from '$lib/components/ui/button';
+	import {
+		Dialog,
+		DialogContent,
+		DialogDescription,
+		DialogFooter,
+		DialogHeader,
+		DialogTitle,
+	} from '$lib/components/ui/dialog';
 	import { Skeleton } from '$lib/components/ui/skeleton';
 	import { getChatSettingsContext } from '$lib/contexts/chat-settings.svelte';
 	import { m } from '$lib/paraglide/messages.js';
@@ -23,6 +31,9 @@
 
 	// Get chat settings from context
 	const chatSettings = getChatSettingsContext();
+
+	// State for API keys modal
+	let showApiKeysModal = $state(!data.hasApiKeys);
 
 	// Create mutation for creating new chats
 	const createChatMutation = createMutation({
@@ -131,3 +142,23 @@
 	isSearchEnabled={chatSettings.isSearchEnabled}
 	onModelChange={chatSettings.setModel}
 	onSearchToggle={chatSettings.toggleSearch} />
+
+<!-- API Keys Required Modal -->
+<Dialog bind:open={showApiKeysModal}>
+	<DialogContent class="max-w-md">
+		<DialogHeader>
+			<DialogTitle class="flex items-center gap-2">
+				<KeyIcon class="h-5 w-5" />
+				{m.api_keys_required_title()}
+			</DialogTitle>
+			<DialogDescription>
+				{m.api_keys_required_description()}
+			</DialogDescription>
+		</DialogHeader>
+		<DialogFooter class="flex gap-2 sm:gap-2">
+			<Button onclick={() => goto('/settings/api-keys')}>
+				{m.api_keys_required_go_to_settings()}
+			</Button>
+		</DialogFooter>
+	</DialogContent>
+</Dialog>

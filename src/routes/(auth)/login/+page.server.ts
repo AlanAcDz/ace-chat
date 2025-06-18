@@ -7,12 +7,19 @@ import { zod } from 'sveltekit-superforms/adapters';
 import type { Actions, PageServerLoad } from './$types';
 import { m } from '$lib/paraglide/messages.js';
 import * as auth from '$lib/server/auth';
+import { getUserCount } from '$lib/server/data/users';
 import { db } from '$lib/server/db';
 import * as table from '$lib/server/db/schema';
 import { loginSchema } from './schema';
 
 export const load = (async () => {
 	auth.requirePublic();
+
+	// Check if this is the first user (no users exist)
+	const userCount = await getUserCount();
+	if (userCount === 0) {
+		return redirect(302, '/signup');
+	}
 
 	return {
 		form: await superValidate(zod(loginSchema)),
