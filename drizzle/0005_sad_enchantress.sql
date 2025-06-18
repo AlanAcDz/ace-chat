@@ -1,1 +1,0 @@
-ALTER TABLE "chat" ADD COLUMN "is_branched" boolean DEFAULT false NOT NULL;

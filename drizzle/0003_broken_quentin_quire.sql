@@ -1,1 +1,0 @@
-ALTER TABLE "message" ADD COLUMN "has_attachments" boolean DEFAULT false;
