@@ -1,15 +1,5 @@
 # Dependencies
 node_modules/
-bun.lock
-
-# Build output
-.svelte-kit/
-build/
-
-# Environment files
-.env
-.env.local
-.env.*.local
 
 # Logs
 logs/
@@ -17,12 +7,6 @@ logs/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-
-# Runtime data
-pids/
-*.pid
-*.seed
-*.pid.lock
 
 # Coverage directory used by tools like istanbul
 coverage/
@@ -51,19 +35,5 @@ temp/
 ehthumbs.db
 Thumbs.db
 
-# Documentation
-README.md
-*.md
-
-# Docker files
-Dockerfile
-.dockerignore
-docker-compose.yml
-
 # Uploads (will be created at runtime)
 uploads/
-
-# Development files
-.prettierrc
-.prettierignore
-eslint.config.js 
