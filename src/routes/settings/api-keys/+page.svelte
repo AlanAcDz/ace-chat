@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { ActionResult } from '@sveltejs/kit';
-	import { Server, Zap } from '@lucide/svelte';
 	import { useQueryClient } from '@tanstack/svelte-query';
 	import { toast } from 'svelte-sonner';
 
@@ -11,6 +10,8 @@
 	import { AI_MODELS } from '$lib/ai/models';
 	import AnthropicIcon from '$lib/components/icons/anthropic-icon.svelte';
 	import GoogleIcon from '$lib/components/icons/google-icon.svelte';
+	import LmstudioIcon from '$lib/components/icons/lmstudio-icon.svelte';
+	import OllamaIcon from '$lib/components/icons/ollama-icon.svelte';
 	import OpenaiIcon from '$lib/components/icons/openai-icon.svelte';
 	import OpenrouterIcon from '$lib/components/icons/openrouter-icon.svelte';
 	import { Badge } from '$lib/components/ui/badge';
@@ -113,14 +114,14 @@
 			name: m.settings_api_keys_lmstudio(),
 			placeholder: 'http://localhost:1234/v1',
 			description: m.settings_api_keys_lmstudio_description(),
-			icon: Server,
+			icon: LmstudioIcon,
 		},
 		{
 			key: 'ollama',
 			name: m.settings_api_keys_ollama(),
 			placeholder: 'http://localhost:11434',
 			description: m.settings_api_keys_ollama_description(),
-			icon: Zap,
+			icon: OllamaIcon,
 		},
 	];
 
