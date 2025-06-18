@@ -82,9 +82,33 @@ The recommended way to run AceChat is with Docker. It's fast, easy, and isolates
   docker compose logs -f app
   ```
 
+### 🌐 Accessing AceChat from Anywhere with Tailscale
+
+Want to use your self-hosted chat from outside your home network? [Tailscale](https://tailscale.com/) creates a secure, private network between your devices, making it easy to access AceChat from anywhere.
+
+1.  **Install Tailscale on Your Server**: Follow the [Tailscale installation guide](https://tailscale.com/download) for your server's operating system (e.g., Linux, macOS, Windows).
+
+2.  **Start Tailscale**: After installing, authenticate and start the Tailscale service on your server.
+
+    ```bash
+    sudo tailscale up
+    ```
+
+3.  **Install Tailscale on Your Other Devices**: Install the Tailscale app on your other devices (laptop, phone, etc.) and log in using the same account.
+
+4.  **Find Your Server's Tailscale IP**: In your server's terminal, run the following command to see its Tailscale IP address.
+
+    ```bash
+    tailscale ip -4
+    ```
+
+    It will look something like `100.x.x.x`.
+
+5.  **Connect from Anywhere**: Open a browser on your phone or laptop and navigate to `http://<YOUR_SERVER_TAILSCALE_IP>:3000` (or your custom port). You now have secure access to your private AI chat from anywhere in the world!
+
 ---
 
-## 💻 Local Development
+## �� Local Development
 
 If you want to contribute to the project or run it directly on your machine.
 
