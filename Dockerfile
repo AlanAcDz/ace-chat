@@ -49,6 +49,7 @@ EXPOSE 3000
 # Set environment variables
 ENV NODE_ENV=production
 ENV UPLOAD_DIR=/app/uploads
+ENV BODY_SIZE_LIMIT=5M
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
